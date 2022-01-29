@@ -1,0 +1,17 @@
+---
+###############################################################################
+# Plex Update
+###############################################################################
+# Install plex update cron to keep plex up to latest plex-pass version.
+#
+# Reference:
+# * https://github.com/mrworf/plexupdate
+# * https://github.com/linuxserver/docker-plex/blob/master/root/etc/cont-init.d/60-plex-update
+
+- name: 'update | set cron update options'
+  ansible.builtin.template:
+    src:   'plexupdate.j2'
+    dest:  '/etc/cron.daily/plexupdate'
+    owner: 'root'
+    group: 'root'
+    mode:  0755

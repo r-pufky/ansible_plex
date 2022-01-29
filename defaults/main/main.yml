@@ -1,0 +1,91 @@
+---
+###############################################################################
+# Plex Role Configuration
+###############################################################################
+# User that plex will run under. Assumes externally managed.
+plex_user:  'media'
+plex_group: 'media'
+
+# Create 'media' user if not detected? See: vars/main.yml.
+plex_create_user: false
+
+# Sepcific architecture for platform: i686, i386
+plex_arch: 'amd64'
+
+# Generic architecture for platform: x86_32
+plex_arch_generic: 'x86_64'
+
+# Amount of memory to use for transcoding (mounted as /tmp via tmpfs).
+# Ensure enough memory on system.
+plex_transcode_memory: '4G'
+
+# Locally mounted location of plex library. Default:
+#   /var/lib/plexmediaserver/Library/Application Support/Plex Media Server
+# If specified, the role will create a symlink from plex_library to the default
+# location.
+plex_library: ''
+
+###############################################################################
+# Plex preferences.xml configuration
+###############################################################################
+# Be sure to use vault to encrypt sensitive tokens & identifiers.
+# Plex XML treats everything as strings.
+
+plex_machine_identifier:                    ''
+plex_processed_machine_identifier:          ''
+plex_accepted_eula:                         '1'
+plex_online_mail:                           'example@example.com'
+plex_online_token:                          ''
+plex_online_username:                       'example-user'
+plex_publish_server_on_plex_online_key:     '1'
+plex_first_run:                             '0'
+plex_last_automatic_mapped_port:            '0'
+plex_friend_name:                           'example-server'
+plex_collect_usage_data:                    '0'
+plex_log_debug:                             '0'
+plex_manual_port_mapping_mode:              '1'
+plex_fs_event_library_partial_scan_enabled: '1'
+plex_fs_event_library_updates_enabled:      '1'
+plex_scheduled_library_update_interval:     '86400'
+plex_scheduled_library_updates_enabled:     '1'
+plex_auto_empty_trash:                      '1'
+plex_manual_port_mapping_port:              '32400'
+plex_aperture_sharing_enabled:              '0'
+plex_iphoto_sharing_enabled:                '0'
+plex_itunes_sharing_enabled:                '0'
+plex_enable_media_link_dts_downmixing:      '1'
+plex_dlna_enabled:                          '0'
+plex_dlna_report_timeline:                  '0'
+plex_on_deck_window:                        '16'
+plex_anonymous_machine_identifier:          ''
+plex_gracenote_user:                        ''
+plex_certificate_version:                   '2'
+plex_secure_connections:                    '0'
+plex_cinema_trailers_from_theater:          '0'
+plex_butler_update_channel:                 '8'
+plex_metrics_epoch:                         '1'
+plex_cinema_trailers_from_library:          '1'
+plex_language_in_cloud:                     '1'
+plex_pub_sub_server_ping:                   '48'
+plex_pub_sub_server:                        '184.105.148.115'
+plex_transcoder_temp_directory:             '/tmp'
+plex_agent_auto_enabled_com_plexapp_agents_lastfm_artists_com_plexapp_agents_vevo:        '1'
+plex_agent_auto_enabled_com_plexapp_agents_lastfm_albums_com_plexapp_agents_lyricfind:    '1'
+plex_agent_auto_enabled_com_plexapp_agents_plexmusic_albums_com_plexapp_agents_lyricfind: '1'
+plex_cloud_sync_needs_update:               '0'
+plex_log_verbose:                           '0'
+plex_oldest_previous_version:               'legacy'
+plex_wan_total_max_upload_rate:             '20000'
+plex_wan_per_stream_max_upload_rate:        '8000'
+plex_pub_sub_server_region:                 'sjc'
+plex_online_home:                           '1'
+plex_generate_chapter_thumb_behavior:       'asap'
+plex_send_crash_reports:                    '0'
+plex_gdm_enabled:                           '0'
+plex_allow_media_deletion:                  '0'
+plex_hardware_accelerated_codecs:           '0'
+plex_scanner_low_priority:                  '1'
+plex_certificate_uuid:                      ''
+plex_dvr_incremental_epg_loader:            '0'
+plex_transcoder_quality:                    '0'
+plex_enable_ipv6:                           '0'

@@ -1,0 +1,7 @@
+---
+collections:
+  # https://docs.ansible.com/ansible/latest/collections/ansible/posix/index.html
+  # mount
+  - ansible.posix
+
+roles: []

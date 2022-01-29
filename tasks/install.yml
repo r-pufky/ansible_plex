@@ -1,0 +1,166 @@
+---
+###############################################################################
+# Plex Install
+###############################################################################
+# The configuration file is only written if plex is not previously installed.
+#
+# Plex public version is installed first, then upgraded to plexpass version if
+# entitled.
+#
+# Reference:
+# * https://support.plex.tv/articles/235974187-enable-repository-updating-for-supported-linux-server-distributions/
+# * https://r-pufky.github.io/docs/services/plex/setup.html#ports
+# * https://github.com/linuxserver/docker-plex/blob/master/Dockerfile
+# * https://github.com/NasKar2/freenas-iocage-plex/blob/master/plexinstallplex.sh
+# * https://github.com/linuxserver/docker-plex/blob/master/root/etc/cont-init.d/60-plex-update
+# * https://passbe.com/2020/02/19/gpu-nvidia-passthrough-on-proxmox-lxc-container/
+
+- ansible.builtin.import_tasks: manage_users.yml
+
+- name: 'install | set plex default location'
+  ansible.builtin.set_fact:
+    _plex_dir:         '/var/lib/plexmediaserver/Library/Application Support'
+    _plex_library_dir: '/var/lib/plexmediaserver/Library/Application Support/Plex Media Server'
+
+- name: 'install | create in-memory /tmp for transcoding'
+  ansible.posix.mount:
+    path:   '{{ plex_transcoder_temp_directory|default("/tmp") }}'
+    src:    'tmpfs'
+    fstype: 'tmpfs'
+    opts:   'defaults,size={{ plex_transcode_memory }}'
+    state:  'mounted'
+
+- name: 'install | ensure GPG is installed'
+  ansible.builtin.apt:
+    name:  '{{ plex_default_packages }}'
+    state: 'latest'
+    update_cache: true
+
+- name: 'install | gather installed packages'
+  ansible.builtin.package_facts:
+    manager: 'auto'
+
+- name: 'install | determine if plex is installed'
+  ansible.builtin.set_fact:
+    _plex_installed: "{% if 'plexmediaserver' in ansible_facts.packages %}true{% else %}false{% endif %}"
+
+- name: 'install | add plex repo key'
+  ansible.builtin.apt_key:
+    url:   'https://downloads.plex.tv/plex-keys/PlexSign.key'
+    state: 'present'
+
+- name: 'install | add plex repo'
+  ansible.builtin.apt_repository:
+    repo:     'deb https://downloads.plex.tv/repo/deb/ public main'
+    filename: 'plex'
+    state:    'present'
+    update_cache: true
+
+- name: 'install | create plex service override directory'
+  ansible.builtin.file:
+    path:  '/etc/systemd/system/plexmediaserver.service.d'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode:  0755
+
+- name: 'install | override plex service user/group'
+  ansible.builtin.template:
+    src:   'override.conf.j2'
+    dest:  '/etc/systemd/system/plexmediaserver.service.d/override.conf'
+    owner: 'root'
+    group: 'root'
+    mode:  0644
+  notify: 'reload plex'
+
+- name: 'install | install plex'
+  ansible.builtin.apt:
+    name:  'plexmediaserver'
+    state: 'latest'
+    update_cache: true
+  notify: 'restart plex'
+
+# If plexpass is invalid or not set, will return the current public version.
+- name: 'install | get plexpass entitlements'
+  ansible.builtin.uri:
+    url:    'https://plex.tv/downloads/details/5?distro=debian&build=linux-{{ plex_arch_generic }}&channel=8&X-Plex-Token={{ plex_online_token }}'
+    method: 'GET'
+    return_content: true
+  register: _plex_entitlement
+  no_log: true # lifetime api access token
+
+- name: 'install | determine plexpass version'
+  ansible.builtin.set_fact:
+    _plex_pass_version: "{{ (_plex_entitlement.content | regex_findall('version=\"([\\w\\.-]+)\"'))[1] }}"
+
+- name: 'install | check installed packages'
+  ansible.builtin.package_facts:
+    manager: 'auto'
+
+- name: 'install | determine installed version'
+  ansible.builtin.set_fact:
+    _plex_installed_version: "{{ ansible_facts.packages['plexmediaserver'][0].version }}"
+
+- name: 'install | upgrade to plexpass version'
+  ansible.builtin.apt:
+    deb: 'https://downloads.plex.tv/plex-media-server-new/{{ _plex_pass_version }}/debian/plexmediaserver_{{ _plex_pass_version }}_{{ plex_arch }}.deb'
+  when: _plex_installed_version != _plex_pass_version
+  notify: 'restart plex'
+
+- name: 'install | cleanup auto-created plex apt source'
+  ansible.builtin.file:
+    path:  '/etc/apt/sources.list.d/plexmediaserver.list'
+    state: 'absent'
+
+- name: 'install | set plex service directory user permissions'
+  ansible.builtin.file:
+    path:  '{{ item }}'
+    state: 'directory'
+    owner: '{{ plex_user }}'
+    group: '{{ plex_group }}'
+    mode:  0755
+  loop:
+    - '/var/lib/plexmediaserver'
+    - '/var/lib/plexmediaserver/Library'
+    - '{{ _plex_dir }}'
+
+- name: 'install | symlink plex library to installation'
+  ansible.builtin.file:
+    src:   '{{ plex_library }}'
+    path:  '{{ _plex_library_dir }}'
+    state: 'link'
+    force: true
+    owner: '{{ plex_user }}'
+    group: '{{ plex_group }}'
+    mode:  0755
+  when: plex_library|length > 0
+
+- name: 'install | set plex configuration only on new installation'
+  block:
+    - name: 'install | stop plex'
+      ansible.builtin.service:
+        name:  'plexmediaserver'
+        state: 'stopped'
+
+    - name: 'install | set configuration'
+      ansible.builtin.template:
+        src:   'Preferences.xml.j2'
+        dest:  '{{ _plex_library_dir }}/Preferences.xml'
+        owner: '{{ plex_user }}'
+        group: '{{ plex_group }}'
+        mode:  0644
+
+    - name: 'install | start plex'
+      ansible.builtin.service:
+        name:  'plexmediaserver'
+        state: 'started'
+
+  when: not _plex_installed
+
+- name: 'install | restart plex service daily'
+  ansible.builtin.cron:
+    name:         'restart plex service daily'
+    special_time: 'daily'
+    user:         'root'
+    job:          'service plexmediaserver restart'
+    state:        'present'

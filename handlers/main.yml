@@ -1,0 +1,14 @@
+---
+###############################################################################
+# Plex Handlers
+###############################################################################
+
+- name: 'restart plex'
+  ansible.builtin.systemd:
+    name:    'plexmediaserver'
+    enabled: true
+    state:   'restarted'
+
+- name: 'reload plex'
+  ansible.builtin.systemd:
+    daemon_reload: true

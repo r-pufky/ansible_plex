@@ -1,0 +1,37 @@
+---
+###############################################################################
+# Default Plex Package Dependencies
+###############################################################################
+# Default required packages for plex install.
+
+plex_default_packages:
+  - 'gnupg2'
+
+###############################################################################
+# Default Plex User Group
+###############################################################################
+# Default group settings if an plex user is force created.
+
+plex_default_group:
+  name: 'media'
+  gid:  5555
+
+###############################################################################
+# Default Plex User Account
+###############################################################################
+# Default user settings if an plex user is force created.
+#
+# Logins are disabled.
+
+plex_default_user:
+  name:            'media'
+  group:           'media'
+  uid:             5555
+  shell:           '/usr/sbin/nologin'
+  home:            '/nonexistent'
+  create_home:     false
+  password:        '!'
+  password_lock:   true
+  update_password: 'always'
+  expires:         -1
+  system:          true
