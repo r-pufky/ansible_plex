@@ -89,3 +89,7 @@ plex_certificate_uuid:                      ''
 plex_dvr_incremental_epg_loader:            '0'
 plex_transcoder_quality:                    '0'
 plex_enable_ipv6:                           '0'
+plex_lan_networks_bandwidth:                ''
+plex_allowed_networks:                      [] # list of networks: ip, cidr
+plex_transcoder_h264_backgroundPreset:      'slow'
+plex_push_notifications_enabled:            '0'
