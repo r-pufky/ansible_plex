@@ -1,0 +1,53 @@
+---
+###############################################################################
+# Settings > General
+###############################################################################
+
+# Server Friendly name.
+#
+# Values:
+#   '': use computer hostname
+#    *: use custom name
+#
+# Default: ''.
+plex_friendly_name: ''
+
+# Send crash reports to Plex? Default: False.
+plex_send_crash_reports: false
+
+# Enable Push Notifications?
+#
+# Allow this server to send push notifications to mobile devices. Push
+# notifications are delivered using Plex services. They're associated with your
+# account, and some of them may contain information about the contents of your
+# library.
+#
+# Default: False.
+plex_push_notifications_enabled: false
+
+# Enable Plex Media Server debug logging?
+#
+# Debug logging enables additional detail in the log files and is helpful in
+# diagnosing problems.
+#
+# Default: False.
+plex_log_debug: false
+
+# Enable Plex Media Server verbose logging?
+#
+# Verbose logging is only useful to debug specific issues and should only be
+# enabled if requested by support staff.
+#
+# Default: False.
+plex_log_verbose: false
+
+# Server update channel.
+#
+# Does not circumvent entitlement (PlexPass) early previews.
+#
+# Values:
+#   0: stable (public)
+#   8: beta
+#
+# Default: 0.
+plex_butler_update_channel: 0

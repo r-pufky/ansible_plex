@@ -1,0 +1,113 @@
+---
+# yamllint disable rule:line-length
+- name: 'Auto disabled | verify | plex services'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Auto disabled | verify | plex services | gather service status'
+      ansible.builtin.service_facts:
+
+    - name: 'Auto disabled | verify | plex services | query plexmediaserver.service.d/override.conf'
+      ansible.builtin.copy:
+        src: 'files/override.conf'
+        dest: '/etc/systemd/system/plexmediaserver.service.d/override.conf'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+      check_mode: true
+      diff: true
+      register: _test_plex_override
+
+    - name: 'Auto disabled | verify | plex services | assert expected override'
+      ansible.builtin.assert:
+        that:
+          - not _test_plex_override.changed
+        fail_msg: '/etc/systemd/system/plexmediaserver.service.d/override.conf is not in expected format: {{ _test_plex_override.diff }}.'
+
+    # Just confirm services, timers are working/active (r_pufky.srv.systemd)
+    - name: 'Auto disabled | verify | plex services | assert plexmediaserver.service active'
+      ansible.builtin.assert:
+        that:
+          - '"plexmediaserver.service" in ansible_facts.services'
+        fail_msg: 'plexmediaserver.service should be enabled.'
+
+    - name: 'Auto disabled | verify | plex services | assert plex-update.service absent'
+      ansible.builtin.assert:
+        that:
+          - '"plex-update.service" not in ansible_facts.services'
+        fail_msg: 'plex-update.service should be removed.'
+
+    - name: 'Auto disabled | verify | plex services | query plex-update.timer absent'
+      ansible.builtin.file:
+        path: '/etc/systemd/system/plex-update.timer'
+        state: 'absent'
+      check_mode: true
+      diff: true
+      register: _test_plex_timer_status
+
+    - name: 'Auto disabled | verify | plex services | assert plex-update.timer absent'
+      ansible.builtin.assert:
+        that:
+          - not _test_plex_timer_status.changed
+        fail_msg: 'plex-update.timer should be removed.'
+
+    - name: 'Auto disabled | verify | plex services | query plexupdate script'
+      ansible.builtin.file:
+        path: '/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/plexupdate'
+        state: 'absent'
+      check_mode: true
+      diff: true
+      register: _test_plex_script_status
+
+    - name: 'Auto disabled | verify | plex services | assert plex-update.timer absent'
+      ansible.builtin.assert:
+        that:
+          - not _test_plex_script_status.changed
+        fail_msg: 'plexupdate script should be removed.'
+
+- name: 'Auto disabled | verify | plex user added'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Auto disabled | verify | plex user added | query user plex'
+      ansible.builtin.getent:
+        database: 'passwd'
+        key: 'plex'
+      register: _test_plex_user
+
+    - name: 'Auto disabled | verify | plex user added | assert user plex exists'
+      ansible.builtin.assert:
+        that:
+          - '"plex" in ansible_facts.getent_passwd'
+        fail_msg: 'plex user should exist {{ ansible_facts.getent_passwd }}.'
+
+- name: 'Auto disabled | verify | plex settings'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Auto disabled | verify | query current plex configuration'
+      community.general.xml:
+        path: '/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Preferences.xml'
+        content: 'attribute'
+        xpath: '/Preferences'
+      register: _plex_xml_raw
+
+    - name: 'Auto disabled | verify | parse current plex configuration'
+      ansible.builtin.set_fact:
+        _plex_xml: '{{ _plex_xml_raw.matches[0].Preferences }}'
+
+    - name: 'Auto disabled | verify | DB auto grow size'
+      ansible.builtin.assert:
+        that:
+          - _plex_xml.DatabaseCacheSize == '40'
+        fail_msg: >
+          DatabaseCacheSize should be exactly 40
+          ({{ _plex_xml.DatabaseCacheSize }}).
+
+    - name: 'Auto disabled | verify | auto-generated preference overwritten'
+      ansible.builtin.assert:
+        that:
+          - _plex_xml.HardwareDevicePath == '10de:1eb1:10de:12a0@0000:42:00.0'
+        fail_msg: >
+          HardwareDevicePath should have pre-configured value
+          ({{ _plex_xml.HardwareDevicePath }}).

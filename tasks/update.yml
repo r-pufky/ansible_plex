@@ -1,4 +1,5 @@
 ---
+# yamllint disable rule:line-length
 ###############################################################################
 # Plex Update
 ###############################################################################
@@ -8,10 +9,67 @@
 # * https://github.com/mrworf/plexupdate
 # * https://github.com/linuxserver/docker-plex/blob/master/root/etc/cont-init.d/60-plex-update
 
-- name: 'update | set cron update options'
-  ansible.builtin.template:
-    src:   'plexupdate.j2'
-    dest:  '/etc/cron.daily/plexupdate'
-    owner: 'root'
-    group: 'root'
-    mode:  0755
+- name: 'Update | enable'
+  when: plex_service_auto_update_enable
+  block:
+    - name: 'Update | enable | auto-update script'
+      ansible.builtin.template:
+        src: 'plexupdate.j2'
+        dest: '{{ _plex_library_dir }}/plexupdate'
+        owner: 'root'
+        group: 'root'
+        mode: '0750'
+
+    - name: 'Update | enable | systemd'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.systemd'
+      vars:
+        systemd_services:
+          - name: 'plex-update'
+            state: 'present'
+            override: false
+            unit:
+              description: 'Automatically update Plex Media Server.'
+              requires: ['plex-update.timer']
+            service:
+              type: 'oneshot'
+              exec_start: ['"{{ _plex_library_dir }}/plexupdate"']
+              success_exit_status: ['0', '1']
+            exec:
+              user: 'root'
+              group: 'root'
+            install:
+              wanted_by: ['multi-user.target']
+        systemd_timers:
+          - name: 'plex-update'
+            state: 'present'
+            override: false
+            unit:
+              description: 'plex-update.service timer'
+              requires: ['plex-update.service']
+            timer:
+              unit: 'plex-update.service'
+              on_calendar: ['*-*-* 04:00:00']
+            install:
+              wanted_by: ['timers.target']
+
+- name: 'Update | disable'
+  when: not plex_service_auto_update_enable
+  block:
+    - name: 'Update | disable | auto-update script'
+      ansible.builtin.file:
+        path: '{{ _plex_library_dir }}/plexupdate'
+        state: 'absent'
+
+    - name: 'Update | disable | systemd'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.systemd'
+      vars:
+        systemd_services:
+          - name: 'plex-update'
+            state: 'absent'
+            override: false
+        systemd_timers:
+          - name: 'plex-update'
+            state: 'absent'
+            override: false

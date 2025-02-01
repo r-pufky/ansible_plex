@@ -1,0 +1,122 @@
+---
+# yamllint disable rule:line-length
+- name: 'Default | verify | plex services'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Default | verify | plex services | gather service status'
+      ansible.builtin.service_facts:
+
+    - name: 'Default | verify | plex services | query plexmediaserver.service.d/override.conf'
+      ansible.builtin.copy:
+        src: 'files/override.conf'
+        dest: '/etc/systemd/system/plexmediaserver.service.d/override.conf'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+      check_mode: true
+      diff: true
+      register: _test_plex_override
+
+    - name: 'Default | verify | plex services | assert expected override'
+      ansible.builtin.assert:
+        that:
+          - not _test_plex_override.changed
+        fail_msg: '/etc/systemd/system/plexmediaserver.service.d/override.conf is not in expected format: {{ _test_plex_override.diff }}.'
+
+    # Just confirm services, timers are working/active (r_pufky.srv.systemd)
+    - name: 'Default | verify | plex services | assert plexmediaserver.service active'
+      ansible.builtin.assert:
+        that:
+          - '"plexmediaserver.service" in ansible_facts.services'
+        fail_msg: 'plexmediaserver.service should be enabled.'
+
+    - name: 'Default | verify | plex services | assert plex-update.service active'
+      ansible.builtin.assert:
+        that:
+          - '"plex-update.service" in ansible_facts.services'
+        fail_msg: 'plex-update.service should be enabled.'
+
+    - name: 'Default | verify | plex services | gather plex-update.timer status'
+      ansible.builtin.command: 'systemctl status plex-update.timer'
+      register: _test_plex_timer_status
+      changed_when: false
+
+    - name: 'Default | verify | plex services | query plex-update.timer'
+      ansible.builtin.copy:
+        src: 'files/plex-update.timer'
+        dest: '/etc/systemd/system/plex-update.timer'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+      check_mode: true
+      diff: true
+      register: _test_plex_timer_service
+
+    - name: 'Default | verify | plex services | assert plex-update.timer active'
+      ansible.builtin.assert:
+        that:
+          - _test_plex_timer_status.rc == 0
+          - '"Active: active" in _test_plex_timer_status.stdout'
+        fail_msg: 'plex-update.timer should be enabled.'
+
+    - name: 'Default | verify | plex services | assert expected plex-update.timer'
+      ansible.builtin.assert:
+        that:
+          - not _test_plex_timer_service.changed
+        fail_msg: '/etc/systemd/system/test.timer is not in expected format: {{ _test_plex_timer_service.diff }}.'
+
+- name: 'Default | verify | plex user removed'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Default | verify | plex user removed | query user plex'
+      ansible.builtin.getent:
+        database: 'passwd'
+        key: 'plex'
+      failed_when: false
+      register: _test_plex_user
+
+    - name: 'Default | verify | plex user removed | assert user plex removed'
+      ansible.builtin.assert:
+        that:
+          - '"key could not be found" in _test_plex_user.msg'
+        fail_msg: 'plex user should be removed.'
+
+- name: 'Default | verify | plex settings'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Default | verify | query current plex configuration'
+      community.general.xml:
+        path: '/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Preferences.xml'
+        content: 'attribute'
+        xpath: '/Preferences'
+      register: _plex_xml_raw
+
+    - name: 'Default | verify | parse current plex configuration'
+      ansible.builtin.set_fact:
+        _plex_xml: '{{ _plex_xml_raw.matches[0].Preferences }}'
+
+    - name: 'Default | verify | DB auto grow size'
+      ansible.builtin.assert:
+        that:
+          - _plex_xml.DatabaseCacheSize == '44'
+        fail_msg: >
+          DatabaseCacheSize should auto grow to 44
+          ({{ _plex_xml.DatabaseCacheSize }}).
+
+    - name: 'Default | verify | auto-generated preference passed through'
+      ansible.builtin.assert:
+        that:
+          - _plex_xml.MachineIdentifier != ''
+        fail_msg: 'MachineIdentifier should have an auto-generated value ("")'
+
+    # stateful will override the user configured value
+    - name: 'Default | verify | stateful preference passed through'
+      ansible.builtin.assert:
+        that:
+          - _plex_xml.AcceptedEULA == '1'
+        fail_msg: >
+          AcceptedEULA should be a stateful value (1)
+          ({{ _plex_xml.AcceptedEULA }}).

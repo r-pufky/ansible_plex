@@ -1,95 +1,203 @@
 ---
+# yamllint disable rule:line-length
 ###############################################################################
-# Plex Role Configuration
+# Plex Service Configuration
 ###############################################################################
-# User that plex will run under. Assumes externally managed.
-plex_user:  'media'
+
+# Maximum number of plugins to run at once. Default: 6.
+plex_service_max_plugin_processes: 6
+
+# Maximum plex process CPU stack size (bytes). Default: 3000.
+plex_service_max_stack_size: 3000
+
+# Plex metadata storage location.
+#
+# Default: '/var/lib/plexmediaserver/Library/Application Support'.
+plex_service_application_support_dir: '/var/lib/plexmediaserver/Library/Application Support'
+
+# Enable syslog instead of logging to 'Plex Media Server.log'. Default: True.
+plex_service_use_syslog_enable: true
+
+# Specific platform architecture.
+#
+# Values:
+#    i386: 32bit x86 (compatibility)
+#    i686: 32bit x86 (modern)
+#   amd64: 64bit x86 (default)
+#
+# Default: 'amd64'.
+plex_service_arch: 'amd64'
+
+# Generic platform architecture.
+#
+# Values:
+#   x86_32: 32bit x86
+#   x86_64: 64bit x86 (default)
+#
+# Default: 'x86_64'.
+plex_service_arch_generic: 'x86_64'
+
+# Mount plex_transcoder_temp_directory in RAM via tmpfs.
+#
+# Mounted overtop existing directory if enabled.
+#
+# Values:
+#    #: Max size in bytes. 0 removes limit. Uses fstab size suffixes: k, m, g,
+#       Ki, Mi, Gi, etc. A '%' will limit size to a percentage of physical RAM.
+#   '': disable
+#
+# plex_service_transcode_memory: '4G'
+#
+# Default: '' (disabled).
+plex_service_transcode_memory: ''
+
+# Purge Plex package user?
+#
+# Plex debian package will always install a 'plex' user regardless of how the
+# service is configured. Enabling this option will check for and remove that
+# user on role application if plex_user is NOT 'plex'.
+#
+# This does NOT prevent automatic plex upgrades from re-creating this user.
+#
+# Default: True.
+plex_service_purge_package_user_enable: true
+
+# Keep auto-generated Plex values?
+#
+# Some options, like UUID's, are auto-generated on initial Plex install and are
+# unknown during initial configuration; enabling this will keep those values
+# instead of over-writing them; effectively allowing for managed configurations
+# on brand new one-off installs. Affected options are explicitly stated or can
+# be found in plex_role_auto_options.
+#
+# Values:
+#   True: auto-generated Plex values are kept regardless of defaults (plex_)
+#         value.
+#  False: over-write auto-generated Plex values with corresponding defaults
+#         (plex_) value.
+#
+# Default: True.
+plex_service_keep_auto_generated_values: true
+
+# Enable automatic updates?
+#
+# Installs systemd.timer that automatically checks for and installs Plex
+# updates every day at 0400 using the current entitlement token.
+#
+# Default: True.
+plex_service_auto_update_enable: true
+
+# Automatically adjust DB cache size?
+#
+# Increase plex_database_cache_size to actual DB size + 10%. Minimum value
+# will never be below plex_database_cache_size.
+#
+# Default: True.
+plex_service_auto_grow_db_cache_size_enable: true
+
+###############################################################################
+# Plex User
+###############################################################################
+
+# User that Plex will run under.
+#
+# Enable plex_create_user if this account is not externally managed.
+#
+# Default: 'media'.
+plex_user: 'media'
+
+# Group that Plex will run under.
+#
+# Enable plex_create_user if this group is not externally managed.
+#
+# Default: 'media'.
 plex_group: 'media'
 
-# Create 'media' user if not detected? See: vars/main.yml.
+# Create plex_user, plex_group if not detected?
+#
+# Applied via r_pufky.srv.users, see vars/main.yml for default user attributes.
+#
+# Default: False.
 plex_create_user: false
 
-# Sepcific architecture for platform: i686, i386
-plex_arch: 'amd64'
-
-# Generic architecture for platform: x86_32
-plex_arch_generic: 'x86_64'
-
-# Amount of memory to use for transcoding (mounted as /tmp via tmpfs).
-# Ensure enough memory on system.
-plex_transcode_memory: '4G'
-
-# Locally mounted location of plex library. Default:
-#   /var/lib/plexmediaserver/Library/Application Support/Plex Media Server
-# If specified, the role will create a symlink from plex_library to the default
-# location.
-plex_library: ''
-
 ###############################################################################
-# Plex preferences.xml configuration
+# Miscellaneous Section
 ###############################################################################
+# Configuration options here are not found directly in the server UI. These are
+# generally updated automatically during Plex usage, but may be set after the
+# initial Plex configuration if desired (e.g. for UUID's this will persist your
+# instance without re-authentication across reinstalls, or for user auth
+# tokens).
+#
+# Access token and configured preferences settings are located in
+# plex_service_application_support_dir/Plex Media Server/Preferences.xml.
+#
 # Be sure to use vault to encrypt sensitive tokens & identifiers.
-# Plex XML treats everything as strings.
 
-plex_machine_identifier:                    ''
-plex_processed_machine_identifier:          ''
-plex_accepted_eula:                         '1'
-plex_online_mail:                           'example@example.com'
-plex_online_token:                          ''
-plex_online_username:                       'example-user'
-plex_publish_server_on_plex_online_key:     '1'
-plex_first_run:                             '0'
-plex_last_automatic_mapped_port:            '0'
-plex_friend_name:                           'example-server'
-plex_collect_usage_data:                    '0'
-plex_log_debug:                             '0'
-plex_manual_port_mapping_mode:              '1'
-plex_fs_event_library_partial_scan_enabled: '1'
-plex_fs_event_library_updates_enabled:      '1'
-plex_scheduled_library_update_interval:     '86400'
-plex_scheduled_library_updates_enabled:     '1'
-plex_auto_empty_trash:                      '1'
-plex_manual_port_mapping_port:              '32400'
-plex_aperture_sharing_enabled:              '0'
-plex_iphoto_sharing_enabled:                '0'
-plex_itunes_sharing_enabled:                '0'
-plex_enable_media_link_dts_downmixing:      '1'
-plex_dlna_enabled:                          '0'
-plex_dlna_report_timeline:                  '0'
-plex_on_deck_window:                        '16'
-plex_anonymous_machine_identifier:          ''
-plex_gracenote_user:                        ''
-plex_certificate_version:                   '2'
-plex_secure_connections:                    '0'
-plex_cinema_trailers_from_theater:          '0'
-plex_butler_update_channel:                 '8'
-plex_metrics_epoch:                         '1'
-plex_cinema_trailers_from_library:          '1'
-plex_language_in_cloud:                     '1'
-plex_pub_sub_server_ping:                   '48'
-plex_pub_sub_server:                        '184.105.148.115'
-plex_transcoder_temp_directory:             '/tmp'
-plex_agent_auto_enabled_com_plexapp_agents_lastfm_artists_com_plexapp_agents_vevo:        '1'
-plex_agent_auto_enabled_com_plexapp_agents_lastfm_albums_com_plexapp_agents_lyricfind:    '1'
-plex_agent_auto_enabled_com_plexapp_agents_plexmusic_albums_com_plexapp_agents_lyricfind: '1'
-plex_cloud_sync_needs_update:               '0'
-plex_log_verbose:                           '0'
-plex_oldest_previous_version:               'legacy'
-plex_wan_total_max_upload_rate:             '20000'
-plex_wan_per_stream_max_upload_rate:        '8000'
-plex_pub_sub_server_region:                 'sjc'
-plex_online_home:                           '1'
-plex_generate_chapter_thumb_behavior:       'asap'
-plex_send_crash_reports:                    '0'
-plex_gdm_enabled:                           '0'
-plex_allow_media_deletion:                  '0'
-plex_hardware_accelerated_codecs:           '0'
-plex_scanner_low_priority:                  '1'
-plex_certificate_uuid:                      ''
-plex_dvr_incremental_epg_loader:            '0'
-plex_transcoder_quality:                    '0'
-plex_enable_ipv6:                           '0'
-plex_lan_networks_bandwidth:                ''
-plex_allowed_networks:                      [] # list of networks: ip, cidr
-plex_transcoder_h264_backgroundPreset:      'slow'
-plex_push_notifications_enabled:            '0'
+# Plex username. Default: ''.
+plex_online_username: ''
+
+# Plex user email. Default: ''.
+plex_online_mail: ''
+
+# Plex user access token.
+#
+# Obtain your token via the reference below.
+#
+# Alternatively, the initial manual setup process to be run locally. Use a SSH
+# tunnel to access the server-side configuration page; if it cannot be accessed
+# locally.
+#
+# ssh -L 32400:localhost:32400 {plex_host}
+#
+# Connect to http://localhost:32400/web and run through configuration steps:
+# 1. Select media libraries to use.
+# 1. Sign-in on server (upper right --> sign-in)
+# 1. Select server and claim (claim now --> claim server)
+# 1. Once claimed, the access token and configured preferences are located in
+#    `Preferences.xml` per [Plex Preferences](#plex-preferences).
+#
+# Default: ''.
+#
+# Reference:
+# * https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
+plex_online_token: ''
+
+# Use this server as user home (default) server? Default: True.
+plex_online_home: true
+
+# Machine UUID to identify machine hardware.
+#
+# Special Case:
+#   * honors plex_keep_auto_generated_values_enable
+#
+# Values:
+#   {UUIDv4}: UUIDv4a, generated random data
+#         '': '' or auto-generated Plex value (default)
+#
+# Default: ''.
+plex_machine_identifier: ''
+
+# Plex Client ID used to claim plex server.
+#
+# Special Case:
+#   * honors plex_keep_auto_generated_values_enable
+#
+# Values:
+#   {SHA1}: SHA1 generated hash of plex_machine_identifier
+#       '': '' or auto-generated Plex value (default)
+#
+# Default: ''.
+plex_processed_machine_identifier: ''
+
+# Anonymous UUID to identify plex server.
+#
+# Special Case:
+#   * honors plex_keep_auto_generated_values_enable
+#
+# Values:
+#   {UUIDv4}: UUIDv4a, generated random data
+#         '': '' or auto-generated Plex value (default)
+#
+# Default: ''.
+plex_anonymous_machine_identifier: ''

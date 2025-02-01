@@ -1,0 +1,10 @@
+---
+###############################################################################
+# Settings > Agents (Legacy) (Deprecated)
+###############################################################################
+# All legacy agent settings are stored the plex DB. There are no configurable
+# service options.
+#
+# These settings only apply to legacy metadata agents. To change metadata
+# settings, you can visit the Libraries page, edit a specific library, and
+# navigate to the Advanced pane.

@@ -1,0 +1,9 @@
+---
+- name: 'Entitlement test | converge'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Entitlement test | converge | apply r_pufky.srv.plex'
+      when: plex_online_token is defined
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.plex'

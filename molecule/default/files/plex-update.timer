@@ -1,0 +1,10 @@
+[Unit]
+Description=plex-update.service timer
+Requires=plex-update.service
+
+[Timer]
+OnCalendar=*-*-* 04:00:00
+Unit=plex-update.service
+
+[Install]
+WantedBy=timers.target

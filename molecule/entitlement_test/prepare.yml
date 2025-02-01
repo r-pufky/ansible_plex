@@ -1,0 +1,15 @@
+---
+# yamllint disable rule:line-length
+- name: 'Entitlement test | prepare'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Entitlement test | prepare | TESTING NOT ENABLED'
+      when: plex_online_token is not defined
+      ansible.builtin.fail:
+        msg: |
+          TEST WILL NOT EXECUTE UNLESS IT IS EXPLICITLY ENABLED.
+
+          Set plex_online_token with a PlexPass entitlement.
+
+            molecule test -s entitlement_test -- -v -e 'plex_online_token={TOKEN}'

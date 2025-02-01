@@ -1,0 +1,10 @@
+---
+- name: 'Entitlement test | verify'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Entitlement test | verify | assert role success'
+      ansible.builtin.assert:
+        that:
+          - 0 == 0
+        fail_msg: 'Role should execute without any errors.'

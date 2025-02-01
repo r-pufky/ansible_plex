@@ -1,0 +1,142 @@
+---
+###############################################################################
+# Settings > Transcoder
+###############################################################################
+
+# Transcoder quality.
+#
+# Quality profile used by the transcoder.
+#
+# Values:
+#   0: automatic (default)
+#   1: prefer higher speed encoding
+#   2: prefer higher quality encoding
+#   3: make my CPU hurt
+#
+# Default: 0.
+plex_transcoder_quality: 0
+
+# Transcoder temporary directory.
+#
+# Directory to use when transcoding for temporary files.
+#
+# Default: '/tmp'.
+plex_transcoder_temp_directory: '/tmp'
+
+# Transcoder default throttle buffer (seconds).
+#
+# Number of seconds to buffer before throttling the transcoder.
+#
+# Default: 60.
+plex_transcoder_throttle_buffer: 60
+
+# Background transcoding x264 preset.
+#
+# The x264 preset value used for background transcoding (Sync and Media
+# Optimizer). Slower values will result in better video quality and smaller
+# file sizes, but will take significantly longer to complete processing.
+#
+# Values:
+#   ultrafast: ultra fast (default)
+#   superfast: super fast
+#    veryfast: very fast (default)
+#      faster: faster
+#        fast: fast
+#      medium: medium
+#        slow: slow
+#      slower: slower
+#    veryslow: very slow
+#
+# Default: 'ultrafast'.
+plex_transcoder_h264_background_preset: 'veryfast'
+
+# Enable HDR tone mapping?
+#
+# Transcoded HDR content will appear highly dimmed and desaturated with this
+# disabled. Additional driver components may be needed to support hardware
+# transcoding with this feature enabled; see our support articles for further
+# details.
+#
+# Default: True.
+plex_transcoder_tone_mapping: true
+
+# Tonemapping Algorithm.
+#
+# Algorithm to use when performing HDR tone mapping.
+#
+# Values:
+#     linear: linear
+#      gamma: gamma
+#       clip: clip
+#   reinhard: reinhard
+#      hable: hable (default)
+#     mobius: mobius
+#
+# Default: 'hable'.
+plex_transcoder_tone_mapping_algorithm: 'hable'
+
+# Disable video stream transcoding?
+#
+# Disable transcoding of the video stream in transcoder operations. With this
+# set, the transcoder may still transcode audio as well as remux video.
+#
+# Default: False.
+plex_transcoder_can_only_remux_video: false
+
+# Use hardware acceleration when available?
+#
+# Plex Media Server will attempt to use hardware-accelerated video codecs when
+# encoding and decoding video. Hardware acceleration can make transcoding
+# faster and allow more simultaneous video transcodes, but it can also reduce
+# video quality and compatibility.
+#
+# Default: True.
+plex_hardware_accelerated_codecs: true
+
+# Use hardware-accelerated video encoding?
+#
+# If hardware acceleration is enabled, this controls whether it's used for
+# encoding, in addition to decoding.
+#
+# Default: True.
+plex_hardware_accelerated_encoders: true
+
+# Enable HEVC video Encoding (experimental)?
+#
+# Enable transcoding using the HEVC codec if it is supported by the client.
+#
+# Default: False.
+plex_transcoder_hevc_encoding: false
+
+# Enable HEVC Optimization (experimental)?
+#
+# If available, enable use of HEVC while optimizing your media.
+#
+# Default: False.
+plex_transcoder_hevc_optimize: false
+
+# Hardware transcoding device.
+#
+# The GPU or other hardware device that will be used for transcoding. Path is
+# automatically generated when device is set in WebUI.
+#
+# Special Case:
+#   * honors plex_keep_auto_generated_values_enable
+#
+# Values:
+#   {PCI_ID}@{DEVICE_ID}: hardware address '10de:1eb1:10de:12a0@0000:42:00.0'
+#                     '': auto device or auto-generated Plex value (default)
+#
+# Default: ''.
+plex_hardware_device_path: ''
+
+# Maximum simultaneous video transcodes.
+#
+# Limit the number of simultaneous video transcode streams server can utilize.
+#
+# Values:
+#      0: unlimited connections (default)
+#   1-20: max number of connections
+#
+# Default: 0.
+plex_transcode_count_limit: 0

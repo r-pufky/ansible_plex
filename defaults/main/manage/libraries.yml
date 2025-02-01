@@ -1,0 +1,13 @@
+---
+###############################################################################
+# Manage > Libraries
+###############################################################################
+
+# Merge Recently Added items?
+#
+# Recently Added items from the same media type will be combined together on
+# Home for libraries Recommended to Home. Only content from libraries pinned to
+# the app sidebar will appear in Merged Recently Added recommendations.
+#
+# Default: False.
+plex_merged_recently_added: true

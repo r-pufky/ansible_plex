@@ -1,7 +1,8 @@
 ---
+# yamllint disable rule:line-length
 collections:
-  # https://docs.ansible.com/ansible/latest/collections/ansible/posix/index.html
-  # mount
-  - ansible.posix
+  - 'ansible.posix'  # https://docs.ansible.com/ansible/latest/collections/ansible/posix/index.html
+  - 'community.general'  # https://docs.ansible.com/ansible/latest/collections/ansible/posix/index.html
+  - 'r_pufky.srv'  # https://github.com/r-pufky/ansible_collection_srv
 
 roles: []

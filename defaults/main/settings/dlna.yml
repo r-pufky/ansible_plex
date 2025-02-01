@@ -1,0 +1,97 @@
+---
+###############################################################################
+# Settings > DLNA
+###############################################################################
+
+# Enable the DLNA server?
+#
+# This allows the server to stream media to DLNA (Digital Living Network
+# Alliance) devices.
+#
+# Default: False.
+plex_dlna_enabled: false
+
+# DLNA client preferences.
+#
+# These should generally not be altered.
+#
+# Default: ''.
+plex_dlna_client_preferences: ''
+
+# DLNA server timeline reporting?
+#
+# Enable the DLNA server to report timelines for video play activity.
+#
+# Default: True.
+plex_dlna_report_timeline: true
+
+# DLNA default protocol info.
+#
+# Protocol info string used in GetProtocolInfo responses by the DLNA server.
+#
+# Default:
+#   - 'http-get:*:video/mpeg:*'
+#   - 'http-get:*:video/mp4:*'
+#   - 'http-get:*:video/vnd.dlna.mpeg-tts:*'
+#   - 'http-get:*:video/avi:*'
+#   - 'http-get:*:video/x-matroska:*'
+#   - 'http-get:*:video/x-ms-wmv:*'
+#   - 'http-get:*:video/wtv:*'
+#   - 'http-get:*:audio/mpeg:*'
+#   - 'http-get:*:audio/mp3:*'
+#   - 'http-get:*:audio/mp4:*'
+#   - 'http-get:*:audio/x-ms-wma*'
+#   - 'http-get:*:audio/wav:*'
+#   - 'http-get:*:audio/L16:*'
+#   - 'http-get:*image/jpeg:*'
+#   - 'http-get:*image/png:*'
+#   - 'http-get:*image/gif:*'
+#   - 'http-get:*image/tiff:*'
+plex_dlna_default_protocol_info:
+  - 'http-get:*:video/mpeg:*'
+  - 'http-get:*:video/mp4:*'
+  - 'http-get:*:video/vnd.dlna.mpeg-tts:*'
+  - 'http-get:*:video/avi:*'
+  - 'http-get:*:video/x-matroska:*'
+  - 'http-get:*:video/x-ms-wmv:*'
+  - 'http-get:*:video/wtv:*'
+  - 'http-get:*:audio/mpeg:*'
+  - 'http-get:*:audio/mp3:*'
+  - 'http-get:*:audio/mp4:*'
+  - 'http-get:*:audio/x-ms-wma*'
+  - 'http-get:*:audio/wav:*'
+  - 'http-get:*:audio/L16:*'
+  - 'http-get:*image/jpeg:*'
+  - 'http-get:*image/png:*'
+  - 'http-get:*image/gif:*'
+  - 'http-get:*image/tiff:*'
+
+# DLNA media renderer discovery interval (seconds).
+#
+# Number of seconds between DLNA media renderer discovery requests.
+#
+# Default: 60.
+plex_dlna_device_discovery_interval: 60
+
+# DLNA server announcement lease time (seconds).
+#
+# Duration in seconds of DLNA Server SSDP announcement lease time.
+#
+# Default: 1800.
+plex_dlna_announcement_lease_time: 1800
+
+# DLNA server description icons.
+#
+# Icons offered by DLNA server when devices request server description.
+#
+# plex_dlna_description_icons:
+#     dict - format and size icon specifications
+#   formats: list of str - supported picture formats
+#   sizes: list of str - supported picture resolutions
+#
+# Default:
+#   formats: ['png', 'jpeg']
+#   sizes:   ['260x260', '120x120', '48x48']
+plex_dlna_description_icons:
+  formats: ['png', 'jpeg']
+  sizes: ['260x260', '120x120', '48x48']

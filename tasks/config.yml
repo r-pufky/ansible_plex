@@ -1,0 +1,80 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# Configure Plex Install
+###############################################################################
+# Cleanup Plex package install, query auto-generated Plex configuration
+# settings and inject them into the plex configuration if the role values are
+# not set, as well as stateful options.
+#
+# Plex does not consistently apply casing to XML settings, so we have to
+# explicitly map those settings to the equivalent role settings. Overlay these
+# with values read from Preferences.xml if auto-generated values are kept; as
+# well as any stateful options.
+#
+# Plex writes current configuration on shutdown and reads only once at startup.
+# Saving in the WebUI will write the current running config to disk.
+#
+# New Preferences.xml options must be manually added to the template.
+#
+# Args:
+#   _plex_library_dir: str - plex media location.
+#   _plex_config: dict - user plex preference options to render (XML).
+
+- name: 'Config | purge plex package user'
+  when: plex_service_purge_package_user_enable and plex_user != 'plex'
+  ansible.builtin.include_role:
+    name: 'r_pufky.srv.users'
+  vars:
+    users_accounts_users_absent: ['plex']
+
+- name: 'Config | remove non DEB822 auto-created plex apt source'
+  ansible.builtin.file:
+    path: '/etc/apt/sources.list.d/plexmediaserver.list'
+    state: 'absent'
+
+- name: 'Config | stop plex'
+  ansible.builtin.service:
+    name: 'plexmediaserver'
+    state: 'stopped'
+
+- name: 'Config | query current plex configuration'
+  community.general.xml:
+    path: '{{ _plex_library_dir }}/Preferences.xml'
+    content: 'attribute'
+    xpath: '/Preferences'
+  register: _plex_xml_raw
+  no_log: true  # lifetime API access token, machine identifiers
+
+- name: 'Config | parse current plex configuration'
+  ansible.builtin.set_fact:
+    _plex_xml: '{{ _plex_xml_raw.matches[0].Preferences }}'
+  no_log: true  # lifetime API access token, machine identifiers
+
+- name: 'Config | keep auto-generated options'
+  when: plex_service_keep_auto_generated_values
+  ansible.builtin.set_fact:
+    _plex_config: '{{ _plex_config | combine({item: _plex_xml[item]}, recursive=true) if item in _plex_xml else _plex_config }}'
+  loop: '{{ plex_role_auto_options }}'
+  no_log: true  # lifetime API access token, machine identifiers
+
+- name: 'Config | keep stateful options'
+  ansible.builtin.set_fact:
+    _plex_config: '{{ _plex_config | combine({item: _plex_xml[item]}, recursive=true) if item in _plex_xml else _plex_config }}'
+  loop: '{{ plex_role_stateful_options }}'
+
+# Writing the configuration back requires to_json, ansible.utils.to_xml, and
+# xmltodict python3 package installed on both controller and node. Just use a
+# template instead.
+- name: 'Config | set plex configuration'
+  ansible.builtin.template:
+    src: 'Preferences.xml.j2'
+    dest: '{{ _plex_library_dir }}/Preferences.xml'
+    owner: '{{ plex_user }}'
+    group: '{{ plex_group }}'
+    mode: '0644'
+
+- name: 'Config | start plex'
+  ansible.builtin.service:
+    name: 'plexmediaserver'
+    state: 'started'

@@ -1,37 +1,72 @@
 ---
 ###############################################################################
-# Default Plex Package Dependencies
+# Plex Role Options
 ###############################################################################
-# Default required packages for plex install.
 
-plex_default_packages:
-  - 'gnupg2'
+# Last time Plex options were validated against a default configuration.
+plex_role_validate_date: '2024-06-14'
+plex_role_validate_release: 'bookworm'
+plex_role_validate_version: '1.41.4.9399'
 
-###############################################################################
-# Default Plex User Group
-###############################################################################
-# Default group settings if an plex user is force created.
+plex_role_packages:
+  - 'plexmediaserver'
+  - 'python3-lxml'  # XML parsing for Preferences.xml
+  - 'curl'  # plexupdate script
 
-plex_default_group:
-  name: 'media'
-  gid:  5555
-
-###############################################################################
-# Default Plex User Account
-###############################################################################
-# Default user settings if an plex user is force created.
+# Obtained from manual package install and checking plexmediaserver.list.
 #
-# Logins are disabled.
+# Reference:
+# * https://support.plex.tv/articles/200288586-installation/
+plex_role_apt_sources:
+  - name: 'plexmediaserver'
+    types:
+      - 'deb'
+    uris: 'https://downloads.plex.tv/repo/deb'
+    suites:
+      - 'public'
+    components:
+      - 'main'
+    signed_by: 'https://downloads.plex.tv/plex-keys/PlexSign.key'
 
-plex_default_user:
-  name:            'media'
-  group:           'media'
-  uid:             5555
-  shell:           '/usr/sbin/nologin'
-  home:            '/nonexistent'
-  create_home:     false
-  password:        '!'
-  password_lock:   true
+# Auto-created default user
+plex_role_group:
+  name: 'media'
+  gid: 5555
+
+plex_role_user:
+  name: 'media'
+  group: 'media'
+  uid: 5555
+  shell: '/usr/sbin/nologin'
+  home: '/nonexistent'
+  create_home: false
+  password: '!'
+  password_lock: true
   update_password: 'always'
-  expires:         -1
-  system:          true
+  expires: -1
+  system: true
+
+# Auto-generated options for plex_service_keep_auto_generated_values.
+plex_role_auto_options:
+  - 'MachineIdentifier'
+  - 'ProcessedMachineIdentifier'
+  - 'AnonymousMachineIdentifier'
+  - 'HardwareDevicePath'
+
+# Stateful options that should never be configured.
+plex_role_stateful_options:
+  - 'AcceptedEULA'
+  - 'CertificateUUID'
+  - 'CertificateVersion'
+  - 'collectUsageData'
+  - 'GlobalMusicVideoPathMigrated'
+  - 'LanguageInCloud'
+  - 'LastAutomaticMappedPort'
+  - 'MetricsEpoch'
+  - 'OldestPreviousVersion'
+  - 'PubSubServer'
+  - 'PubsubServerPing'
+  - 'PubSubServerRegion'
+
+# Location of plex DB
+plex_role_db_dir: 'Plug-in Support/Databases/com.plexapp.plugins.library.db'

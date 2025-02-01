@@ -1,0 +1,61 @@
+---
+# Confirm:
+# * service 'auto' options are disabled correctly
+# * 'plex' user is kept
+# * plexmediaserver service active
+# * plex-update services are removed
+# * plexupdate script removed
+# * DB cache auto grow is NOT applied
+# * auto-generated variables are NOT the same as default values
+#   (except plex_hardware_device_path)
+dependency:
+  name: 'galaxy'
+driver:
+  name: 'podman'
+provisioner:
+  name: 'ansible'
+  config_options:
+    defaults:
+      interpreter_python: 'auto_silent'
+      callback_whitelist: 'profile_tasks, timer, yaml'
+    ssh_connection:
+      pipelining: false
+  inventory:
+    group_vars:
+      all:
+        plex_create_user: false
+        plex_user: 'plex'
+        plex_group: 'plex'
+        plex_service_purge_package_user_enable: false
+        plex_service_keep_auto_generated_values: false
+        plex_hardware_device_path: '10de:1eb1:10de:12a0@0000:42:00.0'
+        plex_service_auto_update_enable: false
+        plex_service_auto_grow_db_cache_size_enable: false
+platforms:
+  - name: 'plex-debian-12-auto_disabled'
+    image: 'ghcr.io/hifis-net/debian-systemd:12'
+    systemd: 'always'
+    volumes:
+      - '/sys/fs/cgroup:/sys/fs/cgroup:ro'
+    command: '/lib/systemd/systemd'
+    pre_build_image: true
+verifier:
+  name: 'ansible'
+lint: |
+  set -e
+  yamllint .
+  ansible-lint .
+scenario:
+  test_sequence:
+    # - 'dependency'
+    # - 'cleanup'
+    - 'destroy'
+    - 'syntax'
+    - 'create'
+    - 'prepare'
+    - 'converge'
+    # - 'idempotence'  # Files created, extracted, created, deleted.
+    # - 'side_effect'
+    - 'verify'
+    # - 'cleanup'
+    - 'destroy'
