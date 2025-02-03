@@ -18,8 +18,8 @@
 # New Preferences.xml options must be manually added to the template.
 #
 # Args:
-#   _plex_library_dir: str - plex media location.
-#   _plex_config: dict - user plex preference options to render (XML).
+#   _plex_library_dir: str - plex media location
+#   _plex_config: dict - user plex preference options to render (XML)
 
 - name: 'Config | purge plex package user'
   when: plex_service_purge_package_user_enable and plex_user != 'plex'

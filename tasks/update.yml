@@ -27,7 +27,7 @@
         systemd_services:
           - name: 'plex-update'
             state: 'present'
-            override: false
+            drop_in: false
             unit:
               description: 'Automatically update Plex Media Server.'
               requires: ['plex-update.timer']
@@ -43,7 +43,7 @@
         systemd_timers:
           - name: 'plex-update'
             state: 'present'
-            override: false
+            drop_in: false
             unit:
               description: 'plex-update.service timer'
               requires: ['plex-update.service']
@@ -68,8 +68,8 @@
         systemd_services:
           - name: 'plex-update'
             state: 'absent'
-            override: false
+            drop_in: false
         systemd_timers:
           - name: 'plex-update'
             state: 'absent'
-            override: false
+            drop_in: false

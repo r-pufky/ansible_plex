@@ -17,7 +17,7 @@
 #
 # plex_preference_extensions:
 #     dict - additional XML settings
-#   {Key}: str - XML value
+#   {KEY}: str - XML value
 #
 # plex_preference_extensions:
 #   SomeNewPlexPreferenceOption: '1'

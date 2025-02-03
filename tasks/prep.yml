@@ -7,8 +7,8 @@
 # options.
 #
 # /etc/default/plexmediaserver no longer honored on installation. Explicitly
-# set systemd override.conf before service exists. The installation script
-# checks for the existence of this and uses those values while installing.
+# set systemd drop-in before service exists. The installation script checks for
+# the existence of this and uses those values while installing.
 #
 # Plex installation will create a 'plex' user regardless of what the service is
 # configured to run as.
@@ -19,8 +19,8 @@
 # Prepare system for pre-configured package install.
 #
 # Generates:
-#   _plex_library_dir: str - plex media location.
-#   _plex_config: dict - user plex preference options to render (XML).
+#   _plex_library_dir: str - plex media location
+#   _plex_config: dict - user plex preference options to render (XML)
 
 - name: 'Prep | calculate variables'
   ansible.builtin.set_fact:
@@ -56,7 +56,7 @@
     debian_tmp_ram: '{{ plex_service_transcode_memory }}'
 
 # Plex service potentially not installed yet, do not reload.
-- name: 'Install | set plex service defaults override.conf'
+- name: 'Install | set plex service drop-in'
   ansible.builtin.include_role:
     name: 'r_pufky.srv.systemd'
   vars:
@@ -64,7 +64,7 @@
     systemd_services:
       - name: 'plexmediaserver'
         state: 'present'
-        override: true
+        drop_in: true
         service: {}
         exec:
           environment:

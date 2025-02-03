@@ -18,7 +18,7 @@
       diff: true
       register: _test_plex_override
 
-    - name: 'Default | verify | plex services | assert expected override'
+    - name: 'Default | verify | plex services | assert expected drop-in'
       ansible.builtin.assert:
         that:
           - not _test_plex_override.changed
