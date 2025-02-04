@@ -85,15 +85,22 @@
           user: '{{ plex_user }}'
           group: '{{ plex_group }}'
 
-- name: 'Config | query plex DB size'
-  ansible.builtin.stat:
-    path: '{{ _plex_library_dir }}/{{ plex_role_db_dir }}'
-  register: _plex_db
-
-- name: 'Config | set auto grow DB cache size'
+- name: 'Config | grow DB cache'
   when: plex_service_auto_grow_db_cache_size_enable
-  ansible.builtin.set_fact:
-    plex_database_cache_size: '{{ plex_database_cache_size if (not _plex_db.stat.exists or _plex_db.stat.size * 1048576 < plex_database_cache_size) else (plex_database_cache_size * 1.1) | int }}'
+  block:
+    - name: 'Config | grow DB cache | query size'
+      ansible.builtin.stat:
+        path: '{{ _plex_library_dir }}/{{ plex_role_db_dir }}'
+      register: _plex_db
+
+    # cache_size in MB, stat.size in KB
+    - name: 'Config | grow DB cache | calculate grow size'
+      ansible.builtin.set_fact:
+        _plex_db_grow_size: '{{ (plex_database_cache_size * 0.1) | int if not _plex_db.stat.exists else ([_plex_db.stat.size, 4194304] | max / 1048576 * 1.1) | int }}'
+
+    - name: 'Config | set auto grow DB cache size'
+      ansible.builtin.set_fact:
+        _plex_database_cache_size: '{{ plex_database_cache_size | int + _plex_db_grow_size | int }}'
 
 # Plex does not consistently apply casing to XML settings are are frequently
 # mis-spelled or inconsistently spelled; so we have to explicitly map those
@@ -147,7 +154,7 @@
       LoudnessAnalysisBehavior: '{{ plex_loudness_analysis_behavior | default("scheduled") }}',
       MusicAnalysisBehavior: '{{ plex_music_analysis_behavior | default("scheduled") }}',
       LocationVisibility: '{{ plex_location_visibility | default(1) }}',
-      DatabaseCacheSize: '{{ plex_database_cache_size | default(40) }}',
+      DatabaseCacheSize: '{{ _plex_database_cache_size if _plex_database_cache_size is defined else plex_database_cache_size | default(40) }}',
       # Settings > Network
       EnableIPv6: '{{ plex_enable_ipv6 | default(true) | bool | int }}',
       secureConnections: '{{ plex_secure_connections | default(false) | bool | int }}',

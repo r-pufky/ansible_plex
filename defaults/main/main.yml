@@ -89,8 +89,8 @@ plex_service_auto_update_enable: true
 
 # Automatically adjust DB cache size?
 #
-# Increase plex_database_cache_size to actual DB size + 10%. Minimum value
-# will never be below plex_database_cache_size.
+# Increase plex_database_cache_size to actual DB size + 10%. Minimum value will
+# never be below plex_database_cache_size.
 #
 # Default: True.
 plex_service_auto_grow_db_cache_size_enable: true
@@ -117,8 +117,8 @@ plex_group: 'media'
 #
 # Applied via r_pufky.srv.users, see vars/main.yml for default user attributes.
 #
-# Default: False.
-plex_create_user: false
+# Default: True.
+plex_create_user: true
 
 ###############################################################################
 # Miscellaneous Section

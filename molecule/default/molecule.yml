@@ -2,7 +2,7 @@
 # Confirm:
 # * plexmediaserver, plex-update services are active (configs loaded
 #   successfully)
-# * DB cache auto grow is applied
+# * DB cache auto grow is applied (44)
 # * auto-generated variables are NOT the same as default values
 #   (except plex_hardware_device_path)
 # * stateful options are NOT the same as default values
@@ -19,11 +19,6 @@ provisioner:
       callback_whitelist: 'profile_tasks, timer, yaml'
     ssh_connection:
       pipelining: false
-  inventory:
-    group_vars:
-      all:
-        plex_create_user: true
-        plex_accepted_eula: false
 platforms:
   - name: 'plex-debian-12-default'
     image: 'ghcr.io/hifis-net/debian-systemd:12'

@@ -32,6 +32,6 @@
 # Entitlements must be manually installed.
 - name: 'Entitlements | upgrade to plexpass version'
   when: _plex_installed_version != _plex_pass_version
+  notify: 'Handlers | restart plex'
   ansible.builtin.apt:
     deb: 'https://downloads.plex.tv/plex-media-server-new/{{ _plex_pass_version }}/debian/plexmediaserver_{{ _plex_pass_version }}_{{ plex_service_arch }}.deb'
-  notify: 'Handlers | restart plex'

@@ -6,3 +6,9 @@
     - name: 'Default | converge | apply r_pufky.srv.plex'
       ansible.builtin.include_role:
         name: 'r_pufky.srv.plex'
+
+    - name: 'Default | converge | apply r_pufky.srv.plex (stateful)'
+      ansible.builtin.include_role:
+        name: 'r_pufky.srv.plex'
+      vars:
+        plex_accepted_eula: false

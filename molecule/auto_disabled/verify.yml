@@ -29,7 +29,8 @@
       ansible.builtin.assert:
         that:
           - '"plexmediaserver.service" in ansible_facts.services'
-        fail_msg: 'plexmediaserver.service should be enabled.'
+          - 'ansible_facts["services"]["plexmediaserver.service"]["state"] == "running"'
+        fail_msg: 'plexmediaserver.service should be enabled and running.'
 
     - name: 'Auto disabled | verify | plex services | assert plex-update.service absent'
       ansible.builtin.assert:

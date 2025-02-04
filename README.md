@@ -76,15 +76,12 @@ plex_hardware_device_path: '..."
 
 This will enable idempotent role application on different machines.
 
-## Plex Preferences
-
 ## Example Playbook
 host_vars/plex.example.com/vars/plex.yml
 ``` yaml
 plex_online_username: 'example'
 plex_online_mail: 'example@example.com'
 plex_online_token: '{{ vault_plex_online_token }}'
-plex_create_user: true
 plex_service_keep_auto_generated_values: false
 plex_machine_identifier: '{{ vault_plex_machine_identifier }}'
 plex_processed_machine_identifier: '{{ vault_plex_processed_machine_identifier }}'

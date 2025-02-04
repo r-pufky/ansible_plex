@@ -29,7 +29,8 @@
       ansible.builtin.assert:
         that:
           - '"plexmediaserver.service" in ansible_facts.services'
-        fail_msg: 'plexmediaserver.service should be enabled.'
+          - 'ansible_facts["services"]["plexmediaserver.service"]["state"] == "running"'
+        fail_msg: 'plexmediaserver.service should be enabled and running.'
 
     - name: 'Default | verify | plex services | assert plex-update.service active'
       ansible.builtin.assert:
@@ -103,7 +104,7 @@
         that:
           - _plex_xml.DatabaseCacheSize == '44'
         fail_msg: >
-          DatabaseCacheSize should auto grow to 44
+          DatabaseCacheSize should grow to 44
           ({{ _plex_xml.DatabaseCacheSize }}).
 
     - name: 'Default | verify | auto-generated preference passed through'
