@@ -16,8 +16,8 @@
 # https://github.com/r-pufky/ansible_plex/issues
 #
 # plex_preference_extensions:
-#     dict - additional XML settings
-#   {KEY}: str - XML value
+#     dict - additional XML settings.
+#   {KEY}: str - XML value.
 #
 # plex_preference_extensions:
 #   SomeNewPlexPreferenceOption: '1'

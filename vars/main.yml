@@ -8,15 +8,22 @@ plex_role_validate_date: '2024-06-14'
 plex_role_validate_release: 'bookworm'
 plex_role_validate_version: '1.41.4.9399'
 
-plex_role_packages:
-  - 'plexmediaserver'
-  - 'python3-lxml'  # XML parsing for Preferences.xml
-  - 'curl'  # plexupdate script
+# Location of plex DB.
+plex_role_db_dir: 'Plug-in Support/Databases/com.plexapp.plugins.library.db'
 
+###############################################################################
+# APT Packages
+###############################################################################
 # Obtained from manual package install and checking plexmediaserver.list.
 #
 # Reference:
 # * https://support.plex.tv/articles/200288586-installation/
+
+plex_role_packages:
+  - 'plexmediaserver'
+  - 'python3-lxml'  # XML parsing for Preferences.xml.
+  - 'curl'  # plexupdate script.
+
 plex_role_apt_sources:
   - name: 'plexmediaserver'
     types:
@@ -28,7 +35,10 @@ plex_role_apt_sources:
       - 'main'
     signed_by: 'https://downloads.plex.tv/plex-keys/PlexSign.key'
 
-# Auto-created default user
+###############################################################################
+# Default Plex User/Group
+###############################################################################
+
 plex_role_group:
   name: 'media'
   gid: 5555
@@ -45,6 +55,10 @@ plex_role_user:
   update_password: 'always'
   expires: -1
   system: true
+
+###############################################################################
+# Preference.xml Options
+###############################################################################
 
 # Auto-generated options for plex_service_keep_auto_generated_values.
 plex_role_auto_options:
@@ -67,6 +81,3 @@ plex_role_stateful_options:
   - 'PubSubServer'
   - 'PubsubServerPing'
   - 'PubSubServerRegion'
-
-# Location of plex DB
-plex_role_db_dir: 'Plug-in Support/Databases/com.plexapp.plugins.library.db'

@@ -102,7 +102,7 @@
       ansible.builtin.set_fact:
         _plex_database_cache_size: '{{ plex_database_cache_size | int + _plex_db_grow_size | int }}'
 
-# Plex does not consistently apply casing to XML settings are are frequently
+# Plex does not consistently apply casing to XML settings and are frequently
 # mis-spelled or inconsistently spelled; so we have to explicitly map those
 # settings to the equivalent role settings. Overlay these with values read from
 # Preferences.xml if auto-generated values are kept; as well as any stateful

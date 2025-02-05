@@ -57,7 +57,7 @@ plex_cinema_trailers_preroll_id: []
 #    True: all videos will be played sequentially
 #   False: a single pre-roll video will be chosen randomly from the list
 #
-# Default: false
+# Default: False.
 plex_cinema_trailers_preroll_play_all: true
 
 # Global music videos path. Default: ''.
