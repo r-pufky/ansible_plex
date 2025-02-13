@@ -10,8 +10,8 @@
 # set systemd drop-in before service exists. The installation script checks for
 # the existence of this and uses those values while installing.
 #
-# Plex installation will create a 'plex' user regardless of what the service is
-# configured to run as.
+# Do not remove the default (plex) user as this will put APT in a broken
+# state. Instead ensure the account is fully locked.
 #
 # See preinst and /usr/lib/plexmediaserver/lib/plexmediaserver.default in deb
 # package.

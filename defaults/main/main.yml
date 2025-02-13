@@ -51,17 +51,6 @@ plex_service_arch_generic: 'x86_64'
 # Default: '' (disabled).
 plex_service_transcode_memory: ''
 
-# Purge Plex package user?
-#
-# Plex debian package will always install a 'plex' user regardless of how the
-# service is configured. Enabling this option will check for and remove that
-# user on role application if plex_user is NOT 'plex'.
-#
-# This does NOT prevent automatic plex upgrades from re-creating this user.
-#
-# Default: True.
-plex_service_purge_package_user_enable: true
-
 # Keep auto-generated Plex values?
 #
 # Some options, like UUID's, are auto-generated on initial Plex install and are

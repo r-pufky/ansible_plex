@@ -67,23 +67,6 @@
           - not _test_plex_timer_service.changed
         fail_msg: '/etc/systemd/system/test.timer is not in expected format: {{ _test_plex_timer_service.diff }}.'
 
-- name: 'Default | verify | plex user removed'
-  hosts: 'all'
-  gather_facts: false
-  tasks:
-    - name: 'Default | verify | plex user removed | query user plex'
-      ansible.builtin.getent:
-        database: 'passwd'
-        key: 'plex'
-      failed_when: false
-      register: _test_plex_user
-
-    - name: 'Default | verify | plex user removed | assert user plex removed'
-      ansible.builtin.assert:
-        that:
-          - '"key could not be found" in _test_plex_user.msg'
-        fail_msg: 'plex user should be removed.'
-
 - name: 'Default | verify | plex settings'
   hosts: 'all'
   gather_facts: false

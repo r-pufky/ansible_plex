@@ -7,6 +7,9 @@
 # settings and inject them into the plex configuration if the role values are
 # not set, as well as stateful options.
 #
+# Do not remove the default (plex) user as this will put APT in a broken
+# state. Instead ensure the account is fully locked.
+#
 # Plex does not consistently apply casing to XML settings, so we have to
 # explicitly map those settings to the equivalent role settings. Overlay these
 # with values read from Preferences.xml if auto-generated values are kept; as
@@ -21,12 +24,12 @@
 #   _plex_library_dir: str - plex media location
 #   _plex_config: dict - user plex preference options to render (XML)
 
-- name: 'Config | purge plex package user'
-  when: plex_service_purge_package_user_enable and plex_user != 'plex'
-  ansible.builtin.include_role:
-    name: 'r_pufky.srv.users'
-  vars:
-    users_accounts_users_absent: ['plex']
+- name: 'Config | lock Plex package user'
+  when: plex_user != 'plex'
+  ansible.builtin.user:
+    name: 'plex'
+    password: '!'
+    password_lock: true
 
 - name: 'Config | remove non DEB822 auto-created plex apt source'
   ansible.builtin.file:
