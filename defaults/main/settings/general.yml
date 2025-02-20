@@ -6,8 +6,8 @@
 # Server Friendly name.
 #
 # Values:
-#   '': use computer hostname
-#    *: use custom name
+#   '': Use computer hostname.
+#    *: Use custom name.
 #
 # Default: ''.
 plex_friendly_name: ''
@@ -46,8 +46,8 @@ plex_log_verbose: false
 # Does not circumvent entitlement (PlexPass) early previews.
 #
 # Values:
-#   0: stable (public)
-#   8: beta
+#   0: Stable (public).
+#   8: Beta.
 #
 # Default: 0.
 plex_butler_update_channel: 0

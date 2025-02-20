@@ -30,7 +30,7 @@ plex_accepted_eula: true
 # Do **NOT** use your own Let's Encrypt material.
 #
 # Values:
-#   {UUIDv4}: UUIDv4a, generated random data
+#   {UUIDv4}: UUIDv4a, generated random data.
 #
 # Default: ''.
 #
@@ -41,9 +41,9 @@ plex_certificate_uuid: ''
 # Let's Encrypt certificate version.
 #
 # Values:
-#   1: TLSv1.1
-#   2: TLSv1.2
-#   3: TLSv1.3
+#   1: TLSv1.1.
+#   2: TLSv1.2.
+#   3: TLSv1.3.
 #
 # Default: 3 (TLSv1.3).
 #
@@ -72,8 +72,8 @@ plex_collect_usage_data: false
 # plex_oldest_previous_version=legacy.
 #
 # Values:
-#   False: force Plex to migrate music video paths on next start
-#    True: paths already migrated or auto-generated Plex value (default)
+#   False: Force Plex to migrate music video paths on next start.
+#    True: Paths already migrated or auto-generated Plex value (default).
 #
 # Default: True.
 plex_global_music_video_path_migrated: true
@@ -97,8 +97,8 @@ plex_last_automatic_mapped_port: 0
 # 2038. This should always be true unless plex_oldest_previous_version=legacy.
 #
 # Values:
-#   False: use unix timestamp
-#    True: use 2038 safe epochs or auto-generated Plex value (default)
+#   False: Use unix timestamp.
+#    True: Use 2038 safe epochs or auto-generated Plex value (default).
 #
 # Default: True.
 #
@@ -109,12 +109,12 @@ plex_metrics_epoch: true
 # Version is set on initial Plex installation.
 #
 # Special Case:
-#   * honors plex_keep_auto_generated_values_enable
+#   * Honors plex_keep_auto_generated_values_enable.
 #
 # Values:
-#      legacy: legacy plex install (1st gen plex >10 years ago)
-#   {VERSION}: last installed plex version (e.g. '1.28.2.6106-44a5bbd28')
-#          '': '' or auto-generated Plex value (default)
+#      legacy: Legacy plex install (1st gen plex >10 years ago).
+#   {VERSION}: Last installed plex version (e.g. '1.28.2.6106-44a5bbd28').
+#          '': '' or auto-generated Plex value (default).
 #
 # Default: ''.
 plex_oldest_previous_version: ''

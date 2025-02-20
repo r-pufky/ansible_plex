@@ -9,7 +9,7 @@
 # The time at which the server starts running background maintenance tasks.
 #
 # Special Case:
-#   0: midnight
+#   0: Midnight.
 #
 # Default: 2.
 plex_butler_start_hour: 2
@@ -19,7 +19,7 @@ plex_butler_start_hour: 2
 # The time at which the background maintenance tasks stop running.
 #
 # Special Case:
-#   0: midnight
+#   0: Midnight.
 #
 # Default: 5.
 plex_butler_end_hour: 5

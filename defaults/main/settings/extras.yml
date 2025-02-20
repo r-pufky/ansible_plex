@@ -6,8 +6,8 @@
 # Choose Cinema Trailers from?
 #
 # Values:
-#   False: all movies
-#    True: only unwatched movies (default)
+#   False: all movies.
+#    True: only unwatched movies (default).
 #
 # Default: True.
 plex_cinema_trailers_type: true
@@ -38,8 +38,7 @@ plex_cinema_trailers_include_english: true
 
 # Movie pre-roll videos.
 #
-# List of absolute paths to videos for pre-roll before playing a movie. See
-# plex_cinema_trailers_random_enable for , and ;
+# List of absolute paths to videos for pre-roll before playing a movie.
 #
 # plex_cinema_trailers_preroll_id:
 #   - '/media/preroll/advert1.mp4'
@@ -50,12 +49,11 @@ plex_cinema_trailers_preroll_id: []
 
 # Enable single random pre-roll video instead of all?
 #
-# This affects plex_cinema_trailers_preroll_id for how videos are combined; it
-# is not found in the WebUI (, and ; joins).
+# Selected from plex_cinema_trailers_preroll_id.
 #
 # Values:
-#    True: all videos will be played sequentially
-#   False: a single pre-roll video will be chosen randomly from the list
+#    True: all videos will be played sequentially.
+#   False: a single pre-roll video will be chosen randomly from the list.
 #
 # Default: False.
 plex_cinema_trailers_preroll_play_all: true

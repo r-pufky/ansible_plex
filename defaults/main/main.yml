@@ -13,7 +13,18 @@ plex_service_max_stack_size: 3000
 # Plex metadata storage location.
 #
 # Default: '/var/lib/plexmediaserver/Library/Application Support'.
+#
+# Reference:
+# * https://community.synology.com/enu/forum/17/post/115743
 plex_service_application_support_dir: '/var/lib/plexmediaserver/Library/Application Support'
+
+# Recursively set metadata permissions?
+#
+# Plex installations with large media and metadata caches will be excessively
+# slow.
+#
+# Default: False.
+plex_service_permissions_recursive_enable: false
 
 # Enable syslog instead of logging to 'Plex Media Server.log'. Default: True.
 plex_service_use_syslog_enable: true
@@ -21,9 +32,9 @@ plex_service_use_syslog_enable: true
 # Specific platform architecture.
 #
 # Values:
-#    i386: 32bit x86 (compatibility)
-#    i686: 32bit x86 (modern)
-#   amd64: 64bit x86 (default)
+#    i386: 32bit x86 (compatibility).
+#    i686: 32bit x86 (modern).
+#   amd64: 64bit x86 (default).
 #
 # Default: 'amd64'.
 plex_service_arch: 'amd64'
@@ -31,8 +42,8 @@ plex_service_arch: 'amd64'
 # Generic platform architecture.
 #
 # Values:
-#   x86_32: 32bit x86
-#   x86_64: 64bit x86 (default)
+#   x86_32: 32bit x86.
+#   x86_64: 64bit x86 (default).
 #
 # Default: 'x86_64'.
 plex_service_arch_generic: 'x86_64'
@@ -44,7 +55,7 @@ plex_service_arch_generic: 'x86_64'
 # Values:
 #    #: Max size in bytes. 0 removes limit. Uses fstab size suffixes: k, m, g,
 #       Ki, Mi, Gi, etc. A '%' will limit size to a percentage of physical RAM.
-#   '': disable
+#   '': Disable.
 #
 # plex_service_transcode_memory: '4G'
 #
@@ -60,9 +71,9 @@ plex_service_transcode_memory: ''
 # be found in plex_role_auto_options.
 #
 # Values:
-#   True: auto-generated Plex values are kept regardless of defaults (plex_)
+#   True: Auto generated Plex values are kept regardless of defaults (plex_)
 #         value.
-#  False: over-write auto-generated Plex values with corresponding defaults
+#  False: Overwrite auto generated Plex values with corresponding defaults
 #         (plex_) value.
 #
 # Default: True.
@@ -141,8 +152,8 @@ plex_online_mail: ''
 #
 # Connect to http://localhost:32400/web and run through configuration steps:
 # 1. Select media libraries to use.
-# 1. Sign-in on server (upper right --> sign-in)
-# 1. Select server and claim (claim now --> claim server)
+# 1. Sign-in on server (upper right --> sign-in).
+# 1. Select server and claim (claim now --> claim server).
 # 1. Once claimed, the access token and configured preferences are located in
 #    `Preferences.xml` per [Plex Preferences](#plex-preferences).
 #
@@ -158,11 +169,11 @@ plex_online_home: true
 # Machine UUID to identify machine hardware.
 #
 # Special Case:
-#   * honors plex_keep_auto_generated_values_enable
+#   * Honors plex_keep_auto_generated_values_enable.
 #
 # Values:
-#   {UUIDv4}: UUIDv4a, generated random data
-#         '': '' or auto-generated Plex value (default)
+#   {UUIDv4}: UUIDv4a, generated random data.
+#         '': '' or auto-generated Plex value (default).
 #
 # Default: ''.
 plex_machine_identifier: ''
@@ -170,11 +181,11 @@ plex_machine_identifier: ''
 # Plex Client ID used to claim plex server.
 #
 # Special Case:
-#   * honors plex_keep_auto_generated_values_enable
+#   * Honors plex_keep_auto_generated_values_enable.
 #
 # Values:
-#   {SHA1}: SHA1 generated hash of plex_machine_identifier
-#       '': '' or auto-generated Plex value (default)
+#   {SHA1}: SHA1 generated hash of plex_machine_identifier.
+#       '': '' or auto-generated Plex value (default).
 #
 # Default: ''.
 plex_processed_machine_identifier: ''
@@ -182,11 +193,11 @@ plex_processed_machine_identifier: ''
 # Anonymous UUID to identify plex server.
 #
 # Special Case:
-#   * honors plex_keep_auto_generated_values_enable
+#   * Honors plex_keep_auto_generated_values_enable.
 #
 # Values:
-#   {UUIDv4}: UUIDv4a, generated random data
-#         '': '' or auto-generated Plex value (default)
+#   {UUIDv4}: UUIDv4a, generated random data.
+#         '': '' or auto-generated Plex value (default).
 #
 # Default: ''.
 plex_anonymous_machine_identifier: ''

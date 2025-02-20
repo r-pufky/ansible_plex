@@ -43,7 +43,7 @@
     owner: '{{ plex_user }}'
     group: '{{ plex_group }}'
     mode: '0755'
-    recurse: true
+    recurse: '{{ plex_service_permissions_recursive_enable }}'
     state: 'directory'
 
 - name: 'Prep | create in-memory /tmp for transcoding'

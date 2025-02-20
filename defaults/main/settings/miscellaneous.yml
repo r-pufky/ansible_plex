@@ -5,54 +5,18 @@
 
 # Oldest previously installed plex version.
 #
-# Version is set on initial Plex installation.
+# Version is set on initial Plex installation and recorded in Plex DB.
 #
 # Special Case:
-#   * honors plex_keep_auto_generated_values_enable
+#   * honors plex_keep_auto_generated_values_enable.
 #
 # Values:
-#      legacy: legacy plex install (1st gen plex >10 years ago)
-#   {VERSION}: last installed plex version (e.g. '1.28.2.6106-44a5bbd28')
-#          '': '' or auto-generated Plex value (default)
+#      legacy: Legacy plex install (1st gen plex >10 years ago).
+#   {VERSION}: Last installed plex version (e.g. '1.28.2.6106-44a5bbd28').
+#          '': '' or auto-generated Plex value (default).
 #
 # Default: ''.
 plex_oldest_previous_version: ''
-
-# Machine UUID to identify machine hardware.
-#
-# Special Case:
-#   * honors plex_keep_auto_generated_values_enable
-#
-# Values:
-#   {UUIDv4}: UUIDv4a, generated random data
-#         '': '' or auto-generated Plex value (default)
-#
-# Default: ''.
-plex_machine_identifier: ''
-
-# Plex Client ID used to claim plex server.
-#
-# Special Case:
-#   * honors plex_keep_auto_generated_values_enable
-#
-# Values:
-#   {SHA1}: SHA1 generated hash of plex_machine_identifier
-#       '': '' or auto-generated Plex value (default)
-#
-# Default: ''.
-plex_processed_machine_identifier: ''
-
-# Anonymous UUID to identify plex server.
-#
-# Special Case:
-#   * honors plex_keep_auto_generated_values_enable
-#
-# Values:
-#   {UUIDv4}: UUIDv4a, generated random data
-#         '': '' or auto-generated Plex value (default)
-#
-# Default: ''.
-plex_anonymous_machine_identifier: ''
 
 # Plex username. Default: ''.
 plex_online_username: ''

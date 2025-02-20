@@ -13,8 +13,8 @@ plex_enable_ipv6: true
 # connections will not be able to connect at all.
 #
 # Values:
-#    True: required
-#   False: preferred (default)
+#    True: Required.
+#   False: Preferred (default).
 #
 # Default: False.
 plex_secure_connections: false
@@ -43,8 +43,8 @@ plex_custom_certificate_domain: ''
 # The network interface local clients will use to connect.
 #
 # Values:
-#   {ADAPTER}: Use specified location interface (e.g. enp4s0, etc)
-#          '': any network connection (default)
+#   {ADAPTER}: Use specified location interface (e.g. enp4s0, etc).
+#          '': Any network connection (default).
 #
 # Default: '' (any network connection).
 plex_preferred_network_interface: ''
@@ -71,8 +71,8 @@ plex_gdm_enabled: true
 # local network.
 #
 # Values:
-#      0: unlimited connections (default)
-#   1-20: max number of connections
+#      0: Unlimited connections (default).
+#   1-20: Max number of connections.
 #
 # Default: 0.
 plex_wan_per_user_stream_count: 0
@@ -87,8 +87,8 @@ plex_wan_per_user_stream_count: 0
 # network.
 #
 # Values:
-#   {CIDR}: CIDR notation
-#     {IP}: IPv4 or IPv6
+#   {CIDR}: CIDR notation.
+#     {IP}: IPv4 or IPv6.
 #
 # plex_lan_networks_bandwidth:
 #   - '10.2.2.0/24'
@@ -105,7 +105,7 @@ plex_lan_networks_bandwidth: []
 # excluded.
 #
 # Special Case:
-#   0: no limit
+#   0: No limit.
 #
 # Default: 0.
 plex_minutes_allowed_paused: 0
@@ -150,8 +150,8 @@ plex_custom_connections: []
 # and network.
 #
 # Values:
-#   {CIDR}: CIDR notation
-#     {IP}: IPv4 or IPv6
+#   {CIDR}: CIDR notation.
+#     {IP}: IPv4 or IPv6.
 #
 # plex_lan_networks_bandwidth:
 #   - '10.2.2.0/24'

@@ -8,10 +8,10 @@
 # Quality profile used by the transcoder.
 #
 # Values:
-#   0: automatic (default)
-#   1: prefer higher speed encoding
-#   2: prefer higher quality encoding
-#   3: make my CPU hurt
+#   0: Automatic (default).
+#   1: Prefer higher speed encoding.
+#   2: Prefer higher quality encoding.
+#   3: Make my CPU hurt.
 #
 # Default: 0.
 plex_transcoder_quality: 0
@@ -25,7 +25,9 @@ plex_transcoder_temp_directory: '/tmp'
 
 # Transcoder default throttle buffer (seconds).
 #
-# Number of seconds to buffer before throttling the transcoder.
+# Number of seconds to buffer before throttling the transcoder. Playback will
+# not start (even with direct streaming) until buffer is full - if playback
+# takes a long time to start, reduce this value.
 #
 # Default: 60.
 plex_transcoder_throttle_buffer: 60
@@ -37,15 +39,15 @@ plex_transcoder_throttle_buffer: 60
 # file sizes, but will take significantly longer to complete processing.
 #
 # Values:
-#   ultrafast: ultra fast (default)
-#   superfast: super fast
-#    veryfast: very fast (default)
-#      faster: faster
-#        fast: fast
-#      medium: medium
-#        slow: slow
-#      slower: slower
-#    veryslow: very slow
+#   ultrafast: Ultra fast (default).
+#   superfast: Super fast.
+#    veryfast: Very fast (default).
+#      faster: Faster.
+#        fast: Fast.
+#      medium: Medium.
+#        slow: Slow.
+#      slower: Slower.
+#    veryslow: Very slow.
 #
 # Default: 'ultrafast'.
 plex_transcoder_h264_background_preset: 'veryfast'
@@ -65,12 +67,12 @@ plex_transcoder_tone_mapping: true
 # Algorithm to use when performing HDR tone mapping.
 #
 # Values:
-#     linear: linear
-#      gamma: gamma
-#       clip: clip
-#   reinhard: reinhard
-#      hable: hable (default)
-#     mobius: mobius
+#     linear: Linear.
+#      gamma: Gamma.
+#       clip: Clip.
+#   reinhard: Reinhard.
+#      hable: Hable (default).
+#     mobius: Mobius.
 #
 # Default: 'hable'.
 plex_transcoder_tone_mapping_algorithm: 'hable'
@@ -121,7 +123,7 @@ plex_transcoder_hevc_optimize: false
 # automatically generated when device is set in WebUI.
 #
 # Special Case:
-#   * honors plex_keep_auto_generated_values_enable
+#   * Honors plex_keep_auto_generated_values_enable.
 #
 # Values:
 #   {PCI_ID}@{DEVICE_ID}: hardware address '10de:1eb1:10de:12a0@0000:42:00.0'
@@ -135,8 +137,8 @@ plex_hardware_device_path: ''
 # Limit the number of simultaneous video transcode streams server can utilize.
 #
 # Values:
-#      0: unlimited connections (default)
-#   1-20: max number of connections
+#      0: Unlimited connections (default).
+#   1-20: Max number of connections.
 #
 # Default: 0.
 plex_transcode_count_limit: 0

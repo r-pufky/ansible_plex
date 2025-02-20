@@ -33,13 +33,13 @@ plex_scheduled_library_updates_enabled: false
 # Library scan interval (seconds).
 #
 # Values:
-#     900: every 15 minutes
-#    1800: every 30 minutes
-#    3600: hourly
-#    7200: every 2 hours
-#   21600: every 6 hours
-#   43200: every 12 hours
-#   86400: daily (default)
+#     900: Every 15 minutes.
+#    1800: Every 30 minutes.
+#    3600: Hourly.
+#    7200: Every 2 hours.
+#   21600: Every 6 hours.
+#   43200: Every 12 hours.
+#   86400: Daily (default).
 #
 # Default: 86400.
 plex_scheduled_library_update_interval: 86400
@@ -84,12 +84,12 @@ plex_on_deck_include_premieres: true
 # be marked as played.
 #
 # Values:
-#   70: 70% complete
-#   75: 75% complete
-#   80: 80% complete
-#   85: 85% complete
-#   90: 90% complete
-#   95: 95% complete (default)
+#   70: 70% complete.
+#   75: 75% complete.
+#   80: 80% complete.
+#   85: 85% complete.
+#   90: 90% complete.
+#   95: 95% complete (default).
 #
 # Default: 95.
 plex_library_video_played_threshold: 95
@@ -101,10 +101,10 @@ plex_library_video_played_threshold: 95
 # available.
 #
 # Values:
-#   0: at selected threshold percentage (default)
-#   1: at final credits marker position
-#   2: at first credits marker position
-#   3: earliest between threshold percent and first credits marker (default)
+#   0: At selected threshold percentage.
+#   1: At final credits marker position.
+#   2: At first credits marker position.
+#   3: Earliest between threshold percent and first credits marker (default).
 #
 # Default: 3
 plex_library_video_played_at_behaviour: 3
@@ -140,9 +140,9 @@ plex_scanner_low_priority: false
 # online database for future use.
 #
 # Values:
-#     any: both, try online first (default)
-#   cloud: online only (no local detection)
-#   local: local detection only
+#     any: Both, try online first (default).
+#   cloud: Online only (no local detection).
+#   local: Local detection only.
 #
 # Default: 'any'.
 plex_marker_source: 'any'
@@ -155,9 +155,9 @@ plex_marker_source: 'any'
 # generation for individual libraries in the library's advanced settings.
 #
 # Values:
-#       never: 'never' (default)
-#   scheduled: 'as a scheduled task'
-#        asap: 'as a scheduled task and when media is added'
+#       never: 'never' (default).
+#   scheduled: 'as a scheduled task'.
+#        asap: 'as a scheduled task and when media is added'.
 #
 # Default: 'never'.
 plex_generate_bif_behavior: 'never'
@@ -167,9 +167,9 @@ plex_generate_bif_behavior: 'never'
 # Detects show intros, exposing the 'Skip Intro' button in clients.
 #
 # Values:
-#       never: 'never'
-#   scheduled: 'as a scheduled task'
-#        asap: 'as a scheduled task and when media is added' (default)
+#       never: 'never'.
+#   scheduled: 'as a scheduled task'.
+#        asap: 'as a scheduled task and when media is added' (default).
 #
 # Default: 'asap'.
 plex_generate_intro_marker_behavior: 'asap'
@@ -179,9 +179,9 @@ plex_generate_intro_marker_behavior: 'asap'
 # Detects movie and episode end credits.
 #
 # Values:
-#       never: 'never'
-#   scheduled: 'as a scheduled task'
-#        asap: 'as a scheduled task and when media is added' (default)
+#       never: 'never'.
+#   scheduled: 'as a scheduled task'.
+#        asap: 'as a scheduled task and when media is added' (default).
 #
 # Default: 'asap'.
 plex_generate_credits_marker_behavior: 'asap'
@@ -191,9 +191,9 @@ plex_generate_credits_marker_behavior: 'asap'
 # Detects movie and episode ads.
 #
 # Values:
-#       never: 'never'
-#   scheduled: 'as a scheduled task' (default)
-#        asap: 'as a scheduled task and when media is added'
+#       never: 'never'.
+#   scheduled: 'as a scheduled task' (default).
+#        asap: 'as a scheduled task and when media is added'.
 #
 # Default: 'scheduled'.
 plex_generate_ad_marker_behavior: 'scheduled'
@@ -206,9 +206,9 @@ plex_generate_ad_marker_behavior: 'scheduled'
 # section.
 #
 # Values:
-#       never: 'never'
-#   scheduled: 'as a scheduled task' (default)
-#        asap: 'as a scheduled task and when media is added'
+#       never: 'never'.
+#   scheduled: 'as a scheduled task' (default).
+#        asap: 'as a scheduled task and when media is added'.
 #
 # Default: 'scheduled'.
 plex_generate_vad_behavior: 'scheduled'
@@ -219,9 +219,9 @@ plex_generate_vad_behavior: 'scheduled'
 # can take a long time to generate and consume additional disk space.
 #
 # Values:
-#       never: 'never'
-#   scheduled: 'as a scheduled task' (default)
-#        asap: 'as a scheduled task and when media is added'
+#       never: 'never'.
+#   scheduled: 'as a scheduled task' (default).
+#        asap: 'as a scheduled task and when media is added'.
 #
 # Default: 'scheduled'.
 plex_generate_chapter_thumb_behavior: 'scheduled'
@@ -233,9 +233,9 @@ plex_generate_chapter_thumb_behavior: 'scheduled'
 # tracks, and cause high CPU usage.
 #
 # Values:
-#       never: 'never'
-#   scheduled: 'as a scheduled task' (scheduled)
-#        asap: 'as a scheduled task and when media is added'
+#       never: 'never'.
+#   scheduled: 'as a scheduled task' (scheduled).
+#        asap: 'as a scheduled task and when media is added'.
 #
 # Default: 'scheduled'.
 plex_loudness_analysis_behavior: 'scheduled'
@@ -246,9 +246,9 @@ plex_loudness_analysis_behavior: 'scheduled'
 # long time to complete when analyzing many tracks, and cause high CPU usage.
 #
 # Values:
-#       never: 'never'
-#   scheduled: 'as a scheduled task' (default)
-#        asap: 'as a scheduled task and when media is added'
+#       never: 'never'.
+#   scheduled: 'as a scheduled task' (default).
+#        asap: 'as a scheduled task and when media is added'.
 #
 # Default: 'scheduled'.
 plex_music_analysis_behavior: 'scheduled'
@@ -260,8 +260,8 @@ plex_music_analysis_behavior: 'scheduled'
 # visibility of these.
 #
 # Values:
-#   1: admin only (default)
-#   2: everyone
+#   1: Admin only (default).
+#   2: Everyone.
 #
 # Default: 1.
 plex_location_visibility: 1
@@ -274,7 +274,7 @@ plex_location_visibility: 1
 #
 # Special Case:
 #   * becomes minimum DB cache size when
-#     plex_service_auto_grow_db_cache_size_enable=true
+#     plex_service_auto_grow_db_cache_size_enable=true.
 #
 # Default: 40.
 #

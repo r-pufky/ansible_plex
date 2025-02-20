@@ -16,8 +16,8 @@
       ansible.builtin.template:
         src: 'plexupdate.j2'
         dest: '{{ _plex_library_dir }}/plexupdate'
-        owner: 'root'
-        group: 'root'
+        owner: '{{ plex_user }}'
+        group: '{{ plex_group }}'
         mode: '0750'
 
     - name: 'Update | enable | systemd'

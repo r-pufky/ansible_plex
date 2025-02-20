@@ -85,9 +85,9 @@ plex_dlna_announcement_lease_time: 1800
 # Icons offered by DLNA server when devices request server description.
 #
 # plex_dlna_description_icons:
-#     dict - format and size icon specifications
-#   formats: list of str - supported picture formats
-#   sizes: list of str - supported picture resolutions
+#     dict - format and size icon specifications.
+#   formats: list of str - supported picture formats.
+#   sizes: list of str - supported picture resolutions.
 #
 # Default:
 #   formats: ['png', 'jpeg']

@@ -47,7 +47,7 @@
     content: 'attribute'
     xpath: '/Preferences'
   register: _plex_xml_raw
-  no_log: true  # lifetime API access token, machine identifiers
+  # no_log: true  # lifetime API access token, machine identifiers
 
 - name: 'Config | parse current plex configuration'
   ansible.builtin.set_fact:
