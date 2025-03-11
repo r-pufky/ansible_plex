@@ -59,12 +59,15 @@
   ansible.builtin.set_fact:
     _plex_config: '{{ _plex_config | combine({item: _plex_xml[item]}, recursive=true) if item in _plex_xml else _plex_config }}'
   loop: '{{ plex_role_auto_options }}'
-  no_log: true  # lifetime API access token, machine identifiers
+  loop_control:
+    label: '{{ item }}'  # only display option, not value.
 
 - name: 'Config | keep stateful options'
   ansible.builtin.set_fact:
     _plex_config: '{{ _plex_config | combine({item: _plex_xml[item]}, recursive=true) if item in _plex_xml else _plex_config }}'
   loop: '{{ plex_role_stateful_options }}'
+  loop_control:
+    label: '{{ item }}'  # only display option, not value.
 
 # Writing the configuration back requires to_json, ansible.utils.to_xml, and
 # xmltodict python3 package installed on both controller and node. Just use a
