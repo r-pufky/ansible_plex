@@ -48,20 +48,6 @@ plex_service_arch: 'amd64'
 # Default: 'x86_64'.
 plex_service_arch_generic: 'x86_64'
 
-# Mount plex_transcoder_temp_directory in RAM via tmpfs.
-#
-# Mounted overtop existing directory if enabled.
-#
-# Values:
-#    #: Max size in bytes. 0 removes limit. Uses fstab size suffixes: k, m, g,
-#       Ki, Mi, Gi, etc. A '%' will limit size to a percentage of physical RAM.
-#   '': Disable.
-#
-# plex_service_transcode_memory: '4G'
-#
-# Default: '' (disabled).
-plex_service_transcode_memory: ''
-
 # Keep auto-generated Plex values?
 #
 # Some options, like UUID's, are auto-generated on initial Plex install and are

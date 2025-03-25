@@ -46,15 +46,6 @@
     recurse: '{{ plex_service_permissions_recursive_enable }}'
     state: 'directory'
 
-- name: 'Prep | create in-memory /tmp for transcoding'
-  when: plex_service_transcode_memory | length > 0
-  ansible.builtin.include_role:
-    name: 'r_pufky.srv.debian'
-    tasks_from: 'tmp.yml'
-  vars:
-    debian_role_tmpfs: '{{ plex_transcoder_temp_directory | default("/tmp") }}'
-    debian_tmp_ram: '{{ plex_service_transcode_memory }}'
-
 # Plex service potentially not installed yet, do not reload.
 - name: 'Install | set plex service drop-in'
   ansible.builtin.include_role:
