@@ -1,9 +1,15 @@
 ---
+###############################################################################
+# Entitlement Test
+###############################################################################
 # Use a real plex entitlement token with PlexPass to verify entitlement
 # executes correctly.
 #
 #   molecule test -s entitlement_test -- -v -e 'plex_online_token={TOKEN}'
 #
+# Tests:
+# * Validate use of a real entitlement key.
+
 dependency:
   name: 'galaxy'
 driver:

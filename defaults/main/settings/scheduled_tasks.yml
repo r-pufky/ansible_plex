@@ -1,5 +1,4 @@
 ---
-# yamllint disable rule:line-length
 ###############################################################################
 # Settings > Scheduled Tasks
 ###############################################################################
@@ -30,7 +29,8 @@ plex_butler_task_backup_database: true
 # Backup directory.
 #
 # Default: '/var/lib/plex/Plex Media Server/Plug-in Support/Databases'.
-plex_butler_database_backup_path: '/var/lib/plex/Plex Media Server/Plug-in Support/Databases'
+plex_butler_database_backup_path:
+  '/var/lib/plex/Plex Media Server/Plug-in Support/Databases'
 
 # Optimize database every week? Default: True.
 plex_butler_task_optimize_database: true

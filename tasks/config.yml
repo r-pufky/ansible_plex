@@ -1,5 +1,4 @@
 ---
-# yamllint disable rule:line-length
 ###############################################################################
 # Configure Plex Install
 ###############################################################################
@@ -21,8 +20,10 @@
 # New Preferences.xml options must be manually added to the template.
 #
 # Args:
-#   _plex_library_dir: str - plex media location
-#   _plex_config: dict - user plex preference options to render (XML)
+#   _plex_uid: int - Plex user UID.
+#   _plex_gid: int - Plex user GID.
+#   _plex_library_dir: str - Plex media location.
+#   _plex_config: dict - user Plex preference options to render (XML).
 
 - name: 'Config | lock Plex package user'
   when: plex_user != 'plex'
@@ -47,7 +48,7 @@
     content: 'attribute'
     xpath: '/Preferences'
   register: _plex_xml_raw
-  # no_log: true  # lifetime API access token, machine identifiers
+  no_log: true  # lifetime API access token, machine identifiers
 
 - name: 'Config | parse current plex configuration'
   ansible.builtin.set_fact:
@@ -57,14 +58,22 @@
 - name: 'Config | keep auto-generated options'
   when: plex_service_keep_auto_generated_values
   ansible.builtin.set_fact:
-    _plex_config: '{{ _plex_config | combine({item: _plex_xml[item]}, recursive=true) if item in _plex_xml else _plex_config }}'
+    _plex_config: '{{
+        _plex_config | combine({item: _plex_xml[item]}, recursive=true)
+        if item in _plex_xml else
+        _plex_config
+      }}'
   loop: '{{ plex_role_auto_options }}'
   loop_control:
     label: '{{ item }}'  # only display option, not value.
 
 - name: 'Config | keep stateful options'
   ansible.builtin.set_fact:
-    _plex_config: '{{ _plex_config | combine({item: _plex_xml[item]}, recursive=true) if item in _plex_xml else _plex_config }}'
+    _plex_config: '{{
+        _plex_config | combine({item: _plex_xml[item]}, recursive=true)
+        if item in _plex_xml else
+        _plex_config
+      }}'
   loop: '{{ plex_role_stateful_options }}'
   loop_control:
     label: '{{ item }}'  # only display option, not value.
@@ -76,8 +85,8 @@
   ansible.builtin.template:
     src: 'Preferences.xml.j2'
     dest: '{{ _plex_library_dir }}/Preferences.xml'
-    owner: '{{ plex_user }}'
-    group: '{{ plex_group }}'
+    owner: '{{ _plex_uid }}'
+    group: '{{ _plex_gid }}'
     mode: '0644'
 
 - name: 'Config | start plex'

@@ -1,12 +1,17 @@
 ---
-# Confirm:
+###############################################################################
+# Default
+###############################################################################
+# Default configuration is deployed successfully.
+#
+# Tests:
 # * plexmediaserver, plex-update services are active (configs loaded
-#   successfully)
-# * DB cache auto grow is applied (44)
+#   successfully).
+# * DB cache auto grow is applied (44).
 # * auto-generated variables are NOT the same as default values
-#   (except plex_hardware_device_path)
-# * stateful options are NOT the same as default values
-# * 'plex' user is removed
+#   (except plex_hardware_device_path).
+# * stateful options are NOT the same as default values.
+
 dependency:
   name: 'galaxy'
 driver:

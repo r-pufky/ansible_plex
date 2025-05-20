@@ -1,5 +1,4 @@
 ---
-# yamllint disable rule:line-length
 ###############################################################################
 # Plex Entitlements (PlexPass)
 ###############################################################################
@@ -15,7 +14,12 @@
 
 - name: 'Entitlements | query plexpass entitlements'
   ansible.builtin.uri:
-    url: 'https://plex.tv/downloads/details/5?distro=debian&build=linux-{{ plex_service_arch_generic }}&channel=8&X-Plex-Token={{ plex_online_token }}'
+    url: '{{
+        "https://plex.tv/downloads/details/5?distro=debian&build=linux-" ~
+        plex_service_arch_generic ~
+        "&channel=8&X-Plex-Token=" ~
+        plex_online_token
+      }}'
     method: 'GET'
     return_content: true
   register: _plex_entitlement
@@ -23,15 +27,25 @@
 
 - name: 'Entitlements | determine plexpass version'
   ansible.builtin.set_fact:
-    _plex_pass_version: "{{ (_plex_entitlement.content | regex_findall('version=\"([\\w\\.-]+)\"'))[1] }}"
+    _plex_pass_version: "{{
+        (_plex_entitlement.content |
+         regex_findall('version=\"([\\w\\.-]+)\"'))[1]
+      }}"
 
 - name: 'Entitlements | determine installed version'
   ansible.builtin.set_fact:
-    _plex_installed_version: '{{ ansible_facts.packages["plexmediaserver"][0].version }}'
+    _plex_installed_version:
+      '{{ ansible_facts.packages["plexmediaserver"][0].version }}'
 
 # Entitlements must be manually installed.
 - name: 'Entitlements | upgrade to plexpass version'
   when: _plex_installed_version != _plex_pass_version
   notify: 'Handlers | restart plex'
   ansible.builtin.apt:
-    deb: 'https://downloads.plex.tv/plex-media-server-new/{{ _plex_pass_version }}/debian/plexmediaserver_{{ _plex_pass_version }}_{{ plex_service_arch }}.deb'
+    deb: '{{
+        "https://downloads.plex.tv/plex-media-server-new/" ~
+        _plex_pass_version ~
+        "/debian/plexmediaserver_" ~
+        _plex_pass_version ~ "_" ~
+        plex_service_arch ~ ".deb"
+      }}'

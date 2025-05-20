@@ -16,7 +16,8 @@ plex_service_max_stack_size: 3000
 #
 # Reference:
 # * https://community.synology.com/enu/forum/17/post/115743
-plex_service_application_support_dir: '/var/lib/plexmediaserver/Library/Application Support'
+plex_service_application_support_dir:
+  '/var/lib/plexmediaserver/Library/Application Support'
 
 # Recursively set metadata permissions?
 #
@@ -101,7 +102,7 @@ plex_group: 'media'
 
 # Create plex_user, plex_group if not detected?
 #
-# Applied via r_pufky.srv.users, see vars/main.yml for default user attributes.
+# Applied via r_pufky.deb.users, see vars/main.yml for default user attributes.
 #
 # Default: True.
 plex_create_user: true

@@ -1,5 +1,6 @@
 ---
 galaxy_info:
+  role_name: 'plex'
   author: 'r_pufky'
   description: 'Plex Media Server'
   company: 'N/A'

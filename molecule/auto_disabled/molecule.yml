@@ -1,13 +1,19 @@
 ---
-# Confirm:
-# * service 'auto' options are disabled correctly
-# * 'plex' user is kept
-# * plexmediaserver service active
-# * plex-update services are removed
-# * plexupdate script removed
-# * DB cache auto grow is NOT applied
-# * auto-generated variables are NOT the same as default values
-#   (except plex_hardware_device_path)
+###############################################################################
+# Auto Disabled
+###############################################################################
+# Automatically generated plex options are overridden correctly.
+#
+# Tests:
+# * Service 'auto' options are disabled correctly.
+# * plexmediaserver service active.
+# * plex-update services are removed.
+# * plexupdate script removed.
+# * DB cache auto grow is NOT applied.
+# * Auto-generated variables are NOT the same as default values
+#   (except plex_hardware_device_path).
+# * Manually generated plex user works correctly.
+
 dependency:
   name: 'galaxy'
 driver:
