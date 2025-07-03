@@ -11,7 +11,7 @@
 #   0: Midnight.
 #
 # Default: 2.
-plex_butler_start_hour: 2
+plex_cfg_butler_start_hour: 2
 
 # Time at which tasks stop running (24 hour clock).
 #
@@ -21,37 +21,37 @@ plex_butler_start_hour: 2
 #   0: Midnight.
 #
 # Default: 5.
-plex_butler_end_hour: 5
+plex_cfg_butler_end_hour: 5
 
 # Backup database every three days? Default: True.
-plex_butler_task_backup_database: true
+plex_cfg_butler_task_backup_database: true
 
 # Backup directory.
 #
 # Default: '/var/lib/plex/Plex Media Server/Plug-in Support/Databases'.
-plex_butler_database_backup_path:
+plex_cfg_butler_database_backup_path:
   '/var/lib/plex/Plex Media Server/Plug-in Support/Databases'
 
 # Optimize database every week? Default: True.
-plex_butler_task_optimize_database: true
+plex_cfg_butler_task_optimize_database: true
 
 # Remove old bundles every week? Default: True.
-plex_butler_task_clean_old_bundles: true
+plex_cfg_butler_task_clean_old_bundles: true
 
 # Remove old cache files every week? Default: True.
-plex_butler_task_clean_old_cache_files: true
+plex_cfg_butler_task_clean_old_cache_files: true
 
 # Refresh local metadata every three days? Default: True.
-plex_butler_task_refresh_local_media: true
+plex_cfg_butler_task_refresh_local_media: true
 
 # Update all libraries during maintenance? Default: False.
-plex_butler_task_refresh_libraries: false
+plex_cfg_butler_task_refresh_libraries: false
 
 # Upgrade media analysis during maintenance? Default: True.
-plex_butler_task_upgrade_media_analysis: true
+plex_cfg_butler_task_upgrade_media_analysis: true
 
 # Refresh library metadata periodically? Default: True.
-plex_butler_task_refresh_periodic_metadata: true
+plex_cfg_butler_task_refresh_periodic_metadata: true
 
 # Perform extensive media analysis during maintenance? Default: True.
-plex_butler_task_deep_media_analysis: true
+plex_cfg_butler_task_deep_media_analysis: true

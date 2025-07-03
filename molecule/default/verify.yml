@@ -1,21 +1,13 @@
 ---
-- name: 'Default | verify'
+- name: 'Verify'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Default | verify | gather service status'
+    - name: 'Verify | gather service status'
       ansible.builtin.service_facts:
 
-    # Just confirm services, timers are working/active (r_pufky.deb.systemd)
-    - name: 'Default | verify | assert plexmediaserver.service active'
-      ansible.builtin.assert:
-        quiet: true
-        that:
-          - '"plexmediaserver.service" in ansible_facts.services'
-          - 'ansible_facts["services"]["plexmediaserver.service"]["state"] == "running"'  # yamllint disable-line rule:line-length
-        fail_msg: '✘ plexmediaserver.service should be enabled and running.'
-
-    - name: 'Default | verify | assert plex-update.service active'
+    # Update service is not enforced on validate as it is toggled.
+    - name: 'Verify | assert plex-update.service active'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -38,13 +30,14 @@
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0644'
+        test_diff: true
 
-    - name: 'Default | verify | gather plex-update.timer status'
+    - name: 'Verify | gather plex-update.timer status'
       ansible.builtin.command: 'systemctl status plex-update.timer'
       register: _test_plex_timer_status
       changed_when: false
 
-    - name: 'Default | verify | assert plex-update.timer active'
+    - name: 'Verify | assert plex-update.timer active'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -52,32 +45,36 @@
           - '"Active: active" in _test_plex_timer_status.stdout'
         fail_msg: '✘ plex-update.timer should be enabled.'
 
-    - name: 'Default | verify | /etc/systemd/system/plex-update.timer'
+    - name: 'Verify | /etc/systemd/system/plex-update.timer'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'copy.yml'
       vars:
-        test_name: 'Default | verify | /etc/systemd/system/plex-update.timer'
+        test_name: 'Verify | /etc/systemd/system/plex-update.timer'
         test_src: 'files/plex-update.timer'
         test_file: '/etc/systemd/system/plex-update.timer'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0644'
+        test_diff: true
 
-    - name: 'Default | verify | query current plex configuration'
+    - name: 'Verify | query current plex configuration'
       community.general.xml:
-        path: >
-          /var/lib/plexmediaserver/Library/Application
-          Support/Plex Media Server/Preferences.xml
+        path: '{{
+            "/var/lib/plexmediaserver/Library/" ~
+            "Application Support/" ~
+            "Plex Media Server/" ~
+            "Preferences.xml"
+          }}'
         content: 'attribute'
         xpath: '/Preferences'
       register: _plex_xml_raw
 
-    - name: 'Default | verify | parse current plex configuration'
+    - name: 'Verify | parse current plex configuration'
       ansible.builtin.set_fact:
         _plex_xml: '{{ _plex_xml_raw.matches[0].Preferences }}'
 
-    - name: 'Default | verify | DB auto grow size'
+    - name: 'Verify | DB auto grow size'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -86,7 +83,7 @@
           ✘ DatabaseCacheSize should grow to 44
           ({{ _plex_xml.DatabaseCacheSize }}).
 
-    - name: 'Default | verify | auto-generated preference passed through'
+    - name: 'Verify | auto-generated preference passed through'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -95,7 +92,7 @@
           ✘ MachineIdentifier should have an auto-generated value ("")
 
     # stateful will override the user configured value
-    - name: 'Default | verify | stateful preference passed through'
+    - name: 'Verify | stateful preference passed through'
       ansible.builtin.assert:
         quiet: true
         that:

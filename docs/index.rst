@@ -24,7 +24,7 @@ Media streaming service.
     any libraries. This should be read-only.
   * ``plex_transcode_memory`` maps a portion of RAM to tmpfs for transcoding,
     ensure there is enough memory in the system.
-  * ``plex_online_token`` token is used to identify the server for your
+  * ``plex_cfg_online_token`` token is used to identify the server for your
     account. See :ref:`service-plex-defaults` for detailed information on
     obtaining token.
 

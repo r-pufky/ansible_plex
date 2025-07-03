@@ -1,0 +1,12 @@
+---
+- name: 'Prepare'
+  hosts: 'plex-debian-12-user_data'
+  gather_facts: false
+  tasks:
+    - name: 'Prepare | simulate user media restriction'
+      ansible.builtin.file:
+        path: '/var/lib/plexmediaserver/Library/Application Support'
+        owner: 5555
+        group: 5555
+        mode: '0755'
+        state: 'directory'

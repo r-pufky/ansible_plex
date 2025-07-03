@@ -9,21 +9,21 @@
 # Alliance) devices.
 #
 # Default: False.
-plex_dlna_enabled: false
+plex_cfg_dlna_enabled: false
 
 # DLNA client preferences.
 #
 # These should generally not be altered.
 #
 # Default: ''.
-plex_dlna_client_preferences: ''
+plex_cfg_dlna_client_preferences: ''
 
 # DLNA server timeline reporting?
 #
 # Enable the DLNA server to report timelines for video play activity.
 #
 # Default: True.
-plex_dlna_report_timeline: true
+plex_cfg_dlna_report_timeline: true
 
 # DLNA default protocol info.
 #
@@ -47,7 +47,7 @@ plex_dlna_report_timeline: true
 #   - 'http-get:*image/png:*'
 #   - 'http-get:*image/gif:*'
 #   - 'http-get:*image/tiff:*'
-plex_dlna_default_protocol_info:
+plex_cfg_dlna_default_protocol_info:
   - 'http-get:*:video/mpeg:*'
   - 'http-get:*:video/mp4:*'
   - 'http-get:*:video/vnd.dlna.mpeg-tts:*'
@@ -71,27 +71,27 @@ plex_dlna_default_protocol_info:
 # Number of seconds between DLNA media renderer discovery requests.
 #
 # Default: 60.
-plex_dlna_device_discovery_interval: 60
+plex_cfg_dlna_device_discovery_interval: 60
 
 # DLNA server announcement lease time (seconds).
 #
 # Duration in seconds of DLNA Server SSDP announcement lease time.
 #
 # Default: 1800.
-plex_dlna_announcement_lease_time: 1800
+plex_cfg_dlna_announcement_lease_time: 1800
 
 # DLNA server description icons.
 #
 # Icons offered by DLNA server when devices request server description.
 #
-# plex_dlna_description_icons:
-#     dict - format and size icon specifications.
-#   formats: list of str - supported picture formats.
-#   sizes: list of str - supported picture resolutions.
+# plex_cfg_dlna_description_icons:
+#     dict - Format and size icon specifications.
+#   formats: list of str - Supported picture formats.
+#   sizes: list of str - Supported picture resolutions.
 #
 # Default:
 #   formats: ['png', 'jpeg']
 #   sizes:   ['260x260', '120x120', '48x48']
-plex_dlna_description_icons:
+plex_cfg_dlna_description_icons:
   formats: ['png', 'jpeg']
   sizes: ['260x260', '120x120', '48x48']

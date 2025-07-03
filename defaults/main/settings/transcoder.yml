@@ -14,14 +14,14 @@
 #   3: Make my CPU hurt.
 #
 # Default: 0.
-plex_transcoder_quality: 0
+plex_cfg_transcoder_quality: 0
 
 # Transcoder temporary directory.
 #
 # Directory to use when transcoding for temporary files.
 #
 # Default: '/tmp'.
-plex_transcoder_temp_directory: '/tmp'
+plex_cfg_transcoder_temp_directory: '/tmp'
 
 # Transcoder default throttle buffer (seconds).
 #
@@ -30,7 +30,7 @@ plex_transcoder_temp_directory: '/tmp'
 # takes a long time to start, reduce this value.
 #
 # Default: 60.
-plex_transcoder_throttle_buffer: 60
+plex_cfg_transcoder_throttle_buffer: 60
 
 # Background transcoding x264 preset.
 #
@@ -50,7 +50,7 @@ plex_transcoder_throttle_buffer: 60
 #    veryslow: Very slow.
 #
 # Default: 'ultrafast'.
-plex_transcoder_h264_background_preset: 'veryfast'
+plex_cfg_transcoder_h264_background_preset: 'veryfast'
 
 # Enable HDR tone mapping?
 #
@@ -60,7 +60,7 @@ plex_transcoder_h264_background_preset: 'veryfast'
 # details.
 #
 # Default: True.
-plex_transcoder_tone_mapping: true
+plex_cfg_transcoder_tone_mapping: true
 
 # Tonemapping Algorithm.
 #
@@ -75,7 +75,7 @@ plex_transcoder_tone_mapping: true
 #     mobius: Mobius.
 #
 # Default: 'hable'.
-plex_transcoder_tone_mapping_algorithm: 'hable'
+plex_cfg_transcoder_tone_mapping_algorithm: 'hable'
 
 # Disable video stream transcoding?
 #
@@ -83,7 +83,7 @@ plex_transcoder_tone_mapping_algorithm: 'hable'
 # set, the transcoder may still transcode audio as well as remux video.
 #
 # Default: False.
-plex_transcoder_can_only_remux_video: false
+plex_cfg_transcoder_can_only_remux_video: false
 
 # Use hardware acceleration when available?
 #
@@ -93,7 +93,7 @@ plex_transcoder_can_only_remux_video: false
 # video quality and compatibility.
 #
 # Default: True.
-plex_hardware_accelerated_codecs: true
+plex_cfg_hardware_accelerated_codecs: true
 
 # Use hardware-accelerated video encoding?
 #
@@ -101,21 +101,21 @@ plex_hardware_accelerated_codecs: true
 # encoding, in addition to decoding.
 #
 # Default: True.
-plex_hardware_accelerated_encoders: true
+plex_cfg_hardware_accelerated_encoders: true
 
 # Enable HEVC video Encoding (experimental)?
 #
 # Enable transcoding using the HEVC codec if it is supported by the client.
 #
 # Default: False.
-plex_transcoder_hevc_encoding: false
+plex_cfg_transcoder_hevc_encoding: false
 
 # Enable HEVC Optimization (experimental)?
 #
 # If available, enable use of HEVC while optimizing your media.
 #
 # Default: False.
-plex_transcoder_hevc_optimize: false
+plex_cfg_transcoder_hevc_optimize: false
 
 # Hardware transcoding device.
 #
@@ -123,14 +123,14 @@ plex_transcoder_hevc_optimize: false
 # automatically generated when device is set in WebUI.
 #
 # Special Case:
-#   * Honors plex_keep_auto_generated_values_enable.
+#   * Honors plex_cfg_keep_auto_generated_values_enable.
 #
 # Values:
-#   {PCI_ID}@{DEVICE_ID}: hardware address '10de:1eb1:10de:12a0@0000:42:00.0'
-#                     '': auto device or auto-generated Plex value (default)
+#   {PCI_ID}@{DEVICE_ID}: Hardware address '10de:1eb1:10de:12a0@0000:42:00.0'.
+#                     '': Auto device or auto-generated Plex value (default).
 #
 # Default: ''.
-plex_hardware_device_path: ''
+plex_cfg_hardware_device_path: ''
 
 # Maximum simultaneous video transcodes.
 #
@@ -141,4 +141,4 @@ plex_hardware_device_path: ''
 #   1-20: Max number of connections.
 #
 # Default: 0.
-plex_transcode_count_limit: 0
+plex_cfg_transcode_count_limit: 0

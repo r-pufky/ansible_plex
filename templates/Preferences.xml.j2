@@ -1,2 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Preferences {% for k,v in _plex_config.items() %}{{ k }}="{{ v }}"{% if not loop.last %} {% endif %}{%- endfor %}/>
+<Preferences
+{%- if 1 == 1 %} {% endif %}
+{%- for header in _plex_order -%}
+{%-   for section in _plex_map | selectattr("value.section", "match", header) | sort(attribute="value.order") -%}
+{%-     if not section.value.deprecated -%}
+{%-       if section.value.hint in ['list of str', 'dict'] -%}
+{{ section.value.key }}="{{ section.value.parsed }}"
+{%-       elif section.value.hint == 'bool' -%}
+{{ section.value.key }}="{{ section.value.raw | int }}"
+{%-       else -%}
+{{ section.value.key }}="{{ section.value.raw }}"
+{%-       endif -%}
+{%-     endif %}
+{%- if 1 == 1 %} {% endif -%}
+{%    endfor -%}
+{%  endfor -%}
+/>

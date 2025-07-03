@@ -4,7 +4,7 @@
 ###############################################################################
 
 # Enable server support for IPv6? Default: True.
-plex_enable_ipv6: true
+plex_cfg_enable_ipv6: true
 
 # Use Secure connections?
 #
@@ -17,7 +17,7 @@ plex_enable_ipv6: true
 #   False: Preferred (default).
 #
 # Default: False.
-plex_secure_connections: false
+plex_cfg_secure_connections: false
 
 # Custom certificate location.
 #
@@ -25,10 +25,10 @@ plex_secure_connections: false
 # enable TLS support on a custom domain.
 #
 # Default: ''.
-plex_custom_certificate_path: ''
+plex_cfg_custom_certificate_path: ''
 
 # Custom certificate encryption key. Default: ''.
-plex_custom_certificate_key: ''
+plex_cfg_custom_certificate_key: ''
 
 # Custom certificate domain.
 #
@@ -36,7 +36,7 @@ plex_custom_certificate_key: ''
 # name from the custom certificate file.
 #
 # Default: ''.
-plex_custom_certificate_domain: ''
+plex_cfg_custom_certificate_domain: ''
 
 # Preferred network interface.
 #
@@ -47,7 +47,7 @@ plex_custom_certificate_domain: ''
 #          '': Any network connection (default).
 #
 # Default: '' (any network connection).
-plex_preferred_network_interface: ''
+plex_cfg_preferred_network_interface: ''
 
 # Use Strict TLS configuration?
 #
@@ -55,7 +55,7 @@ plex_preferred_network_interface: ''
 # certificates when renewing. May prevent older clients from connecting.
 #
 # Default: False.
-plex_disable_tlsv1_0: false
+plex_cfg_disable_tlsv1_0: false
 
 # Enable local network discovery (GDM)?
 #
@@ -63,7 +63,7 @@ plex_disable_tlsv1_0: false
 # local network.
 #
 # Default: True.
-plex_gdm_enabled: true
+plex_cfg_gdm_enabled: true
 
 # Remote streams allowed per user.
 #
@@ -75,7 +75,7 @@ plex_gdm_enabled: true
 #   1-20: Max number of connections.
 #
 # Default: 0.
-plex_wan_per_user_stream_count: 0
+plex_cfg_wan_per_user_stream_count: 0
 
 # LAN networks bandwidth enforcement.
 #
@@ -90,13 +90,13 @@ plex_wan_per_user_stream_count: 0
 #   {CIDR}: CIDR notation.
 #     {IP}: IPv4 or IPv6.
 #
-# plex_lan_networks_bandwidth:
+# plex_cfg_lan_networks_bandwidth:
 #   - '10.2.2.0/24'
 #   - '10.2.2.80'
 #   - 'fe80::1ff:fe23:4567:890a'
 #
 # Default: [].
-plex_lan_networks_bandwidth: []
+plex_cfg_lan_networks_bandwidth: []
 
 # Terminate Sessions Paused for Longer Than X (minutes).
 #
@@ -108,7 +108,7 @@ plex_lan_networks_bandwidth: []
 #   0: No limit.
 #
 # Default: 0.
-plex_minutes_allowed_paused: 0
+plex_cfg_minutes_allowed_paused: 0
 
 # Treat WAN IP as LAN bandwidth?
 #
@@ -118,7 +118,7 @@ plex_minutes_allowed_paused: 0
 # have to go through the WAN IP address.
 #
 # Default: True.
-plex_treat_wan_ip_as_local: true
+plex_cfg_treat_wan_ip_as_local: true
 
 # Enable Relay?
 #
@@ -126,7 +126,7 @@ plex_treat_wan_ip_as_local: true
 # is not accessible otherwise. Proxy relay is bandwidth limited.
 #
 # Default: True.
-plex_relay_enabled: true
+plex_cfg_relay_enabled: true
 
 # Custom server access URLs.
 #
@@ -134,7 +134,7 @@ plex_relay_enabled: true
 # discovery.
 #
 # Default: [].
-plex_custom_connections: []
+plex_cfg_custom_connections: []
 
 # List of IP addresses and networks that are allowed without auth.
 #
@@ -153,17 +153,17 @@ plex_custom_connections: []
 #   {CIDR}: CIDR notation.
 #     {IP}: IPv4 or IPv6.
 #
-# plex_lan_networks_bandwidth:
+# plex_cfg_lan_networks_bandwidth:
 #   - '10.2.2.0/24'
 #   - '10.2.2.80'
 #   - 'fe80::1ff:fe23:4567:890a'
 #
 # Default: [].
-plex_allowed_networks: []
+plex_cfg_allowed_networks: []
 
 # Use webhooks?
 #
 # Allow this server to send events to external services.
 #
 # Default: True.
-plex_webhooks_enabled: true
+plex_cfg_webhooks_enabled: true

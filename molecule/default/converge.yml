@@ -1,14 +1,14 @@
 ---
-- name: 'Default | converge'
+- name: 'Converge'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Default | converge | apply r_pufky.srv.plex'
+    - name: 'Converge | apply r_pufky.srv.plex'
       ansible.builtin.include_role:
         name: 'r_pufky.srv.plex'
 
-    - name: 'Default | converge | apply r_pufky.srv.plex (stateful)'
+    - name: 'Converge | apply r_pufky.srv.plex (stateful)'
       ansible.builtin.include_role:
         name: 'r_pufky.srv.plex'
       vars:
-        plex_accepted_eula: false
+        plex_cfg_accepted_eula: false

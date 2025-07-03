@@ -9,7 +9,7 @@
 # are detected.
 #
 # Default: False.
-plex_fs_event_library_updates_enabled: false
+plex_cfg_fs_event_library_updates_enabled: false
 
 # Run a partial scan when changes are detected?
 #
@@ -17,7 +17,7 @@ plex_fs_event_library_updates_enabled: false
 # changed.
 #
 # Default: False.
-plex_fs_event_library_partial_scan_enabled: false
+plex_cfg_fs_event_library_partial_scan_enabled: false
 
 # Include music libraries in automatic updates?
 #
@@ -25,10 +25,10 @@ plex_fs_event_library_partial_scan_enabled: false
 # problems with large music libraries.
 #
 # Default: False.
-plex_watch_music_sections: false
+plex_cfg_watch_music_sections: false
 
 # Enable Scan my library periodically? Default: False.
-plex_scheduled_library_updates_enabled: false
+plex_cfg_scheduled_library_updates_enabled: false
 
 # Library scan interval (seconds).
 #
@@ -42,17 +42,17 @@ plex_scheduled_library_updates_enabled: false
 #   86400: Daily (default).
 #
 # Default: 86400.
-plex_scheduled_library_update_interval: 86400
+plex_cfg_scheduled_library_update_interval: 86400
 
 # Empty trash automatically after every scan? Default: True.
-plex_auto_empty_trash: true
+plex_cfg_auto_empty_trash: true
 
 # Allow media deletion?
 #
 # The owner of the server will be allowed to delete media files from disk.
 #
 # Default: True.
-plex_allow_media_deletion: true
+plex_cfg_allow_media_deletion: true
 
 # Weeks to consider for Continue Watching.
 #
@@ -60,7 +60,7 @@ plex_allow_media_deletion: true
 # Continue Watching.
 #
 # Default: 16.
-plex_on_deck_window: 16
+plex_cfg_on_deck_window: 16
 
 # Maximum number of Continue Watching items which will appear.
 #
@@ -68,7 +68,7 @@ plex_on_deck_window: 16
 # too high can affect performance.
 #
 # Default: 40.
-plex_on_deck_limit: 40
+plex_cfg_on_deck_limit: 40
 
 # Include season premieres in Continue Watching?
 #
@@ -76,7 +76,7 @@ plex_on_deck_limit: 40
 # since watching.
 #
 # Default: True.
-plex_on_deck_include_premieres: true
+plex_cfg_on_deck_include_premieres: true
 
 # Video played threshold.
 #
@@ -92,12 +92,12 @@ plex_on_deck_include_premieres: true
 #   95: 95% complete (default).
 #
 # Default: 95.
-plex_library_video_played_threshold: 95
+plex_cfg_library_video_played_threshold: 95
 
 # Video play completion behaviour.
 #
 # Decide whether to use end credits markers to determine the played state of
-# video items. plex_library_video_played_threshold used when markers are not
+# video items. plex_cfg_library_video_played_threshold used when markers are not
 # available.
 #
 # Values:
@@ -107,30 +107,30 @@ plex_library_video_played_threshold: 95
 #   3: Earliest between threshold percent and first credits marker (default).
 #
 # Default: 3
-plex_library_video_played_at_behaviour: 3
+plex_cfg_library_video_played_at_behaviour: 3
 
 # Enable smart shuffling on artists and smart music playlists?
 #
 # Smart shuffling prefers highly rated, popular and less recently heard tracks.
 #
 # Default: True.
-plex_smart_shuffle_music: true
+plex_cfg_smart_shuffle_music: true
 
 # Group albums by type?
 #
 # Group into LPs, EPs & Singles, Compilations, Live Albums, Demos and Remixes.
 #
 # Default: True.
-plex_music_separate_album_types: true
+plex_cfg_music_separate_album_types: true
 
 # Enable iTunes plugin (requires server restart)? Default: False.
-plex_itunes_sharing_enabled: false
+plex_cfg_itunes_sharing_enabled: false
 
 # iTunes library XML path (absolute path)? Default: ''.
-plex_itunes_library_xml_path: ''
+plex_cfg_itunes_library_xml_path: ''
 
 # Run scanner tasks at a lower priority? Default: False.
-plex_scanner_low_priority: false
+plex_cfg_scanner_low_priority: false
 
 # Marker source.
 #
@@ -145,7 +145,7 @@ plex_scanner_low_priority: false
 #   local: Local detection only.
 #
 # Default: 'any'.
-plex_marker_source: 'any'
+plex_cfg_marker_source: 'any'
 
 # Generate video preview thumbnails.
 #
@@ -160,7 +160,7 @@ plex_marker_source: 'any'
 #        asap: 'as a scheduled task and when media is added'.
 #
 # Default: 'never'.
-plex_generate_bif_behavior: 'never'
+plex_cfg_generate_bif_behavior: 'never'
 
 # Generate intro video markers.
 #
@@ -172,7 +172,7 @@ plex_generate_bif_behavior: 'never'
 #        asap: 'as a scheduled task and when media is added' (default).
 #
 # Default: 'asap'.
-plex_generate_intro_marker_behavior: 'asap'
+plex_cfg_generate_intro_marker_behavior: 'asap'
 
 # Generate credits video markers.
 #
@@ -184,7 +184,7 @@ plex_generate_intro_marker_behavior: 'asap'
 #        asap: 'as a scheduled task and when media is added' (default).
 #
 # Default: 'asap'.
-plex_generate_credits_marker_behavior: 'asap'
+plex_cfg_generate_credits_marker_behavior: 'asap'
 
 # Generate ad video markers.
 #
@@ -196,7 +196,7 @@ plex_generate_credits_marker_behavior: 'asap'
 #        asap: 'as a scheduled task and when media is added'.
 #
 # Default: 'scheduled'.
-plex_generate_ad_marker_behavior: 'scheduled'
+plex_cfg_generate_ad_marker_behavior: 'scheduled'
 
 # Generate voice activity data.
 #
@@ -211,7 +211,7 @@ plex_generate_ad_marker_behavior: 'scheduled'
 #        asap: 'as a scheduled task and when media is added'.
 #
 # Default: 'scheduled'.
-plex_generate_vad_behavior: 'scheduled'
+plex_cfg_generate_vad_behavior: 'scheduled'
 
 # Generate chapter thumbnails.
 #
@@ -224,7 +224,7 @@ plex_generate_vad_behavior: 'scheduled'
 #        asap: 'as a scheduled task and when media is added'.
 #
 # Default: 'scheduled'.
-plex_generate_chapter_thumb_behavior: 'scheduled'
+plex_cfg_generate_chapter_thumb_behavior: 'scheduled'
 
 # Analyze audio tracks for loudness.
 #
@@ -238,7 +238,7 @@ plex_generate_chapter_thumb_behavior: 'scheduled'
 #        asap: 'as a scheduled task and when media is added'.
 #
 # Default: 'scheduled'.
-plex_loudness_analysis_behavior: 'scheduled'
+plex_cfg_loudness_analysis_behavior: 'scheduled'
 
 # Analyze audio tracks for sonic features.
 #
@@ -251,7 +251,7 @@ plex_loudness_analysis_behavior: 'scheduled'
 #        asap: 'as a scheduled task and when media is added'.
 #
 # Default: 'scheduled'.
-plex_music_analysis_behavior: 'scheduled'
+plex_cfg_music_analysis_behavior: 'scheduled'
 
 # Location visibility.
 #
@@ -264,7 +264,7 @@ plex_music_analysis_behavior: 'scheduled'
 #   2: Everyone.
 #
 # Default: 1.
-plex_location_visibility: 1
+plex_cfg_location_visibility: 1
 
 # Database Cache Size (MB).
 #
@@ -274,10 +274,10 @@ plex_location_visibility: 1
 #
 # Special Case:
 #   * becomes minimum DB cache size when
-#     plex_service_auto_grow_db_cache_size_enable=true.
+#     plex_cfg_srv_auto_grow_db_cache_size_enable=true.
 #
 # Default: 40.
 #
 # Reference:
 # * https://old.reddit.com/r/PleX/comments/zkximm/database_cache_size/
-plex_database_cache_size: 40
+plex_cfg_database_cache_size: 40

@@ -8,7 +8,7 @@
 # Version is set on initial Plex installation and recorded in Plex DB.
 #
 # Special Case:
-#   * honors plex_keep_auto_generated_values_enable.
+#   * honors plex_cfg_keep_auto_generated_values_enable.
 #
 # Values:
 #      legacy: Legacy plex install (1st gen plex >10 years ago).
@@ -16,16 +16,16 @@
 #          '': '' or auto-generated Plex value (default).
 #
 # Default: ''.
-plex_oldest_previous_version: ''
+plex_cfg_oldest_previous_version: ''
 
 # Plex username. Default: ''.
-plex_online_username: ''
+plex_cfg_online_username: ''
 
 # Plex user email. Default: ''.
-plex_online_mail: ''
+plex_cfg_online_mail: ''
 
 # Plex user access token (see above). Default: ''.
-plex_online_token: ''
+plex_cfg_online_token: ''
 
 # Use this server as user home (default) server? Default: True.
-plex_online_home: true
+plex_cfg_online_home: true

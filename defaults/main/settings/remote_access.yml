@@ -13,7 +13,7 @@
 # client devices without any configuration of your router.
 #
 # Default: False.
-plex_publish_server_on_plex_online_key: false
+plex_cfg_publish_server_on_plex_online_key: false
 
 # Enable manual port specification?
 #
@@ -21,10 +21,10 @@ plex_publish_server_on_plex_online_key: false
 # your network. You may also need to configure your router.
 #
 # Default: False.
-plex_manual_port_mapping_mode: false
+plex_cfg_manual_port_mapping_mode: false
 
 # Manul Port to Use. Default: 32400.
-plex_manual_port_mapping_port: 32400
+plex_cfg_manual_port_mapping_port: 32400
 
 # Internet upload speed (Kbps).
 #
@@ -32,28 +32,28 @@ plex_manual_port_mapping_port: 32400
 # accordingly.
 #
 # Default: 0 (no limit).
-plex_wan_total_max_upload_rate: 0
+plex_cfg_wan_total_max_upload_rate: 0
 
 # Limit remote stream bitrate (Kbps).
 #
 # Set the maximum bitrate of a single remote stream from this server.
 #
 # Values:
-#       0: original (no limit) (default)
-#   40000: 40 Mbps (4k)
-#   30000: 30 Mbps (4k)
-#   25000: 25 Mbps (4k)
-#   20000: 20 Mbps (1080p)
-#   15000: 15 Mbps (1080p)
-#   12000: 12 Mbps (1080p)
-#   10000: 10 Mbps (1080p)
-#    8000: 8 Mbps (1080p)
-#    4000: 4 Mbps (720p)
-#    3000: 3 Mbps (720p)
-#    2000: 2 Mbps (480p)
-#    1500: 1.5 Mbps (480p)
-#     720: 720 Kbps
-#     320: 320 Kbps
+#       0: Original (no limit) (default).
+#   40000: 40 Mbps (4k).
+#   30000: 30 Mbps (4k).
+#   25000: 25 Mbps (4k).
+#   20000: 20 Mbps (1080p).
+#   15000: 15 Mbps (1080p).
+#   12000: 12 Mbps (1080p).
+#   10000: 10 Mbps (1080p).
+#    8000: 8 Mbps (1080p).
+#    4000: 4 Mbps (720p).
+#    3000: 3 Mbps (720p).
+#    2000: 2 Mbps (480p).
+#    1500: 1.5 Mbps (480p).
+#     720: 720 Kbps.
+#     320: 320 Kbps.
 #
 # Default: 0.
-plex_wan_per_stream_max_upload_rate: 0
+plex_cfg_wan_per_stream_max_upload_rate: 0

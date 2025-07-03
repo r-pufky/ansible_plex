@@ -20,7 +20,7 @@
 # Plex cannot be used without accepting the EULA.
 #
 # Default: True.
-plex_accepted_eula: true
+plex_cfg_accepted_eula: true
 
 # Let's Encrypt certificate UUID.
 #
@@ -36,7 +36,7 @@ plex_accepted_eula: true
 #
 # Reference:
 # * https://words.filippo.io/how-plex-is-doing-https-for-all-its-users/
-plex_certificate_uuid: ''
+plex_cfg_certificate_uuid: ''
 
 # Let's Encrypt certificate version.
 #
@@ -49,7 +49,7 @@ plex_certificate_uuid: ''
 #
 # Reference:
 # * https://words.filippo.io/how-plex-is-doing-https-for-all-its-users/
-plex_certificate_version: 3
+plex_cfg_certificate_version: 3
 
 # Collect usage data?
 #
@@ -63,20 +63,20 @@ plex_certificate_version: 3
 #
 # Reference:
 # * https://www.plex.tv/about/privacy-legal/privacy-preferences-deprecated-june-2024/
-plex_collect_usage_data: false
+plex_cfg_collect_usage_data: false
 
 # Global music video paths migrated from legacy config?
 #
 # Old Plex installs tracked music videos separately from other media; these are
 # now integrated and tracked in Plex DB. This should always be true unless
-# plex_oldest_previous_version=legacy.
+# plex_cfg_oldest_previous_version=legacy.
 #
 # Values:
 #   False: Force Plex to migrate music video paths on next start.
 #    True: Paths already migrated or auto-generated Plex value (default).
 #
 # Default: True.
-plex_global_music_video_path_migrated: true
+plex_cfg_global_music_video_path_migrated: true
 
 # Use plex cloud settings for language options?
 #
@@ -84,17 +84,17 @@ plex_global_music_video_path_migrated: true
 # plex.
 #
 # Default: True.
-plex_language_in_cloud: true
+plex_cfg_language_in_cloud: true
 
-# Last port automatically mapped with plex_publish_server_on_plex_online_key.
+# Last port automatically mapped with plex_cfg_publish_server_on_plex_online_key.
 #
 # Default: 0
-plex_last_automatic_mapped_port: 0
+plex_cfg_last_automatic_mapped_port: 0
 
 # Use year 2038+ safe epochs for timestamps?
 #
 # Old Plex installs used unix timestamp epochs which will generate errors after
-# 2038. This should always be true unless plex_oldest_previous_version=legacy.
+# 2038. This should always be true unless plex_cfg_oldest_previous_version=legacy.
 #
 # Values:
 #   False: Use unix timestamp.
@@ -102,14 +102,14 @@ plex_last_automatic_mapped_port: 0
 #
 # Default: True.
 #
-plex_metrics_epoch: true
+plex_cfg_metrics_epoch: true
 
 # Oldest previously installed plex version.
 #
 # Version is set on initial Plex installation.
 #
 # Special Case:
-#   * Honors plex_keep_auto_generated_values_enable.
+#   * Honors plex_cfg_keep_auto_generated_values_enable.
 #
 # Values:
 #      legacy: Legacy plex install (1st gen plex >10 years ago).
@@ -117,13 +117,13 @@ plex_metrics_epoch: true
 #          '': '' or auto-generated Plex value (default).
 #
 # Default: ''.
-plex_oldest_previous_version: ''
+plex_cfg_oldest_previous_version: ''
 
 # Plex pubsub server IP. Default: '184.105.148.115'.
-plex_pubsub_server: '184.105.148.115'
+plex_cfg_pubsub_server: '184.105.148.115'
 
 # Latest plex pubsub server ping. Default: 65.
-plex_pubsub_server_ping: 65
+plex_cfg_pubsub_server_ping: 65
 
 # Plex pubsub server region. Default: 'sjc'.
-plex_pubsub_server_region: 'sjc'
+plex_cfg_pubsub_server_region: 'sjc'

@@ -1,9 +1,9 @@
 ---
-- name: 'Entitlement test | verify'
+- name: 'Verify'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Entitlement test | verify | assert role success'
+    - name: 'Verify | assert role success'
       ansible.builtin.assert:
         quiet: true
         that:

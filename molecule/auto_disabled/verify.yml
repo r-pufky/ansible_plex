@@ -1,19 +1,10 @@
 ---
-- name: 'Auto disabled | verify'
+- name: 'Verify'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Auto disabled | verify | gather service status'
+    - name: 'Verify | gather service status'
       ansible.builtin.service_facts:
-
-    # Just confirm services, timers are working/active (r_pufky.deb.systemd)
-    - name: 'Auto disabled | verify | assert plexmediaserver.service active'
-      ansible.builtin.assert:
-        quiet: true
-        that:
-          - '"plexmediaserver.service" in ansible_facts.services'
-          - 'ansible_facts["services"]["plexmediaserver.service"]["state"] == "running"'  # yamllint disable-line rule:line-length
-        fail_msg: '✘ plexmediaserver.service should be enabled and running.'
 
     - name: >
         Default | verify |
@@ -31,29 +22,31 @@
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0644'
+        test_diff: true
 
-    - name: 'Auto disabled | verify | assert plex-update.service absent'
+    - name: 'Verify | assert plex-update.service absent'
       ansible.builtin.assert:
         quiet: true
         that:
           - '"plex-update.service" not in ansible_facts.services'
         fail_msg: '✘ plex-update.service should be removed.'
 
-    - name: 'Auto disabled | verify | /etc/systemd/system/plex-update.timer'
+    - name: 'Verify | /etc/systemd/system/plex-update.timer'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'file.yml'
       vars:
         test_name:
-          'Auto disabled | verify | /etc/systemd/system/plex-update.timer'
+          'Verify | /etc/systemd/system/plex-update.timer'
         test_file: '/etc/systemd/system/plex-update.timer'
         test_owner: '{{ omit }}'
         test_group: '{{ omit }}'
         test_mode: '{{ omit }}'
         test_state: 'absent'
+        test_diff: true
 
     - name: >
-        Auto disabled | verify | /var
+        Verify | /var
         /lib/plexmediaserver/Library/Application
         Support/Plex Media Server/plexupdate
       ansible.builtin.include_role:
@@ -61,45 +54,51 @@
         tasks_from: 'file.yml'
       vars:
         test_name: >
-          Auto disabled | verify | /var
+          Verify | /var
           /lib/plexmediaserver/Library/Application
           Support/Plex Media Server/plexupdate
-        test_file: >
-          Auto disabled | verify | /var
-          /lib/plexmediaserver/Library/Application
-          Support/Plex Media Server/plexupdate
+        test_file: '{{
+            "/var/lib/plexmediaserver/Library/" ~
+            "Application Support/" ~
+            "Plex Media Server/" ~
+            "plexupdate"
+          }}'
         test_owner: '{{ omit }}'
         test_group: '{{ omit }}'
         test_mode: '{{ omit }}'
         test_state: 'absent'
+        test_diff: true
 
-    - name: 'Auto disabled | verify | query user plex'
+    - name: 'Verify | query user plex'
       ansible.builtin.getent:
         database: 'passwd'
         key: 'plex'
-      register: _test_plex_user
+      register: _test_plex_srv_user
 
-    - name: 'Auto disabled | verify | assert user plex exists'
+    - name: 'Verify | assert user plex exists'
       ansible.builtin.assert:
         quiet: true
         that:
           - '"plex" in ansible_facts.getent_passwd'
         fail_msg: '✘ plex user should exist {{ ansible_facts.getent_passwd }}.'
 
-    - name: 'Auto disabled | verify | query current plex configuration'
+    - name: 'Verify | query current plex configuration'
       community.general.xml:
-        path: >
-          /var/lib/plexmediaserver/Library/Application
-          Support/Plex Media Server/Preferences.xml
+        path: '{{
+            "/var/lib/plexmediaserver/Library/" ~
+            "Application Support/" ~
+            "Plex Media Server/" ~
+            "Preferences.xml"
+          }}'
         content: 'attribute'
         xpath: '/Preferences'
       register: _plex_xml_raw
 
-    - name: 'Auto disabled | verify | parse current plex configuration'
+    - name: 'Verify | parse current plex configuration'
       ansible.builtin.set_fact:
         _plex_xml: '{{ _plex_xml_raw.matches[0].Preferences }}'
 
-    - name: 'Auto disabled | verify | DB auto grow size'
+    - name: 'Verify | DB auto grow size'
       ansible.builtin.assert:
         quiet: true
         that:
@@ -108,7 +107,7 @@
           ✘ DatabaseCacheSize should be exactly 40
           ({{ _plex_xml.DatabaseCacheSize }}).
 
-    - name: 'Auto disabled | verify | auto-generated preference overwritten'
+    - name: 'Verify | auto-generated preference overwritten'
       ansible.builtin.assert:
         quiet: true
         that:

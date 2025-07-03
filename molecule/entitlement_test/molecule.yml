@@ -5,7 +5,7 @@
 # Use a real plex entitlement token with PlexPass to verify entitlement
 # executes correctly.
 #
-#   molecule test -s entitlement_test -- -v -e 'plex_online_token={TOKEN}'
+#   molecule test -s entitlement_test -- -v -e 'plex_cfg_online_token={TOKEN}'
 #
 # Tests:
 # * Validate use of a real entitlement key.
@@ -22,10 +22,6 @@ provisioner:
       callback_whitelist: 'profile_tasks, timer, yaml'
     ssh_connection:
       pipelining: false
-  inventory:
-    group_vars:
-      all:
-        plex_create_user: true
 platforms:
   - name: 'plex-12-entitlement_test'
     image: 'ghcr.io/hifis-net/debian-systemd:12'

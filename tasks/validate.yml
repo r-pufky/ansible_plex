@@ -1,0 +1,24 @@
+---
+###############################################################################
+# Validate
+###############################################################################
+# Start Plex services and confirm they are active and running.
+
+- name: 'Validate | start services'
+  ansible.builtin.systemd:
+    name: '{{ item }}'
+    state: 'started'
+  failed_when: false
+  loop:
+    - 'plexmediaserver.service'
+
+- name: 'Validate | query service status'
+  ansible.builtin.service_facts:
+
+- name: 'Validate | assert services running'
+  ansible.builtin.assert:
+    quiet: true
+    that: ansible_facts.services[item].state == 'running'
+    fail_msg: '✘ {{ item }} should be running.'
+  loop:
+    - 'plexmediaserver.service'

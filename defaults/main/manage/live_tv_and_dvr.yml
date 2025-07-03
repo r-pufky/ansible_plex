@@ -11,4 +11,4 @@
 # https://github.com/r-pufky/ansible_plex/issues
 
 # Enable incremental DVR electronic program guides loader? Default: False.
-plex_dvr_incremental_epg_loader: false
+plex_cfg_dvr_incremental_epg_loader: false

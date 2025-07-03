@@ -10,4 +10,4 @@
 # the app sidebar will appear in Merged Recently Added recommendations.
 #
 # Default: False.
-plex_merged_recently_added: true
+plex_cfg_merged_recently_added: true

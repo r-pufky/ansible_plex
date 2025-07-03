@@ -10,10 +10,10 @@
 #    *: Use custom name.
 #
 # Default: ''.
-plex_friendly_name: ''
+plex_cfg_friendly_name: ''
 
 # Send crash reports to Plex? Default: False.
-plex_send_crash_reports: false
+plex_cfg_send_crash_reports: false
 
 # Enable Push Notifications?
 #
@@ -23,7 +23,7 @@ plex_send_crash_reports: false
 # library.
 #
 # Default: False.
-plex_push_notifications_enabled: false
+plex_cfg_push_notifications_enabled: false
 
 # Enable Plex Media Server debug logging?
 #
@@ -31,7 +31,7 @@ plex_push_notifications_enabled: false
 # diagnosing problems.
 #
 # Default: False.
-plex_log_debug: false
+plex_cfg_log_debug: false
 
 # Enable Plex Media Server verbose logging?
 #
@@ -39,7 +39,7 @@ plex_log_debug: false
 # enabled if requested by support staff.
 #
 # Default: False.
-plex_log_verbose: false
+plex_cfg_log_verbose: false
 
 # Server update channel.
 #
@@ -50,4 +50,4 @@ plex_log_verbose: false
 #   8: Beta.
 #
 # Default: 0.
-plex_butler_update_channel: 0
+plex_cfg_butler_update_channel: 0

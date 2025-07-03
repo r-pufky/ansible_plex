@@ -2,11 +2,11 @@
 ###############################################################################
 # Default
 ###############################################################################
-# Default configuration is deployed successfully.
+# Default configuration is deployed successfully. Configuration should succeed
+# with and without plex_srv_user_data_manage_enable.
 #
 # Tests:
-# * plexmediaserver, plex-update services are active (configs loaded
-#   successfully).
+# * plexmediaserver, plex-update services are active (configs loaded).
 # * DB cache auto grow is applied (44).
 # * auto-generated variables are NOT the same as default values
 #   (except plex_hardware_device_path).
@@ -24,8 +24,21 @@ provisioner:
       callback_whitelist: 'profile_tasks, timer, yaml'
     ssh_connection:
       pipelining: false
+  inventory:
+    host_vars:
+      plex-debian-12-user_data:
+        plex_srv_user_data_manage_enable: true
 platforms:
   - name: 'plex-debian-12-default'
+    image: 'ghcr.io/hifis-net/debian-systemd:12'
+    systemd: 'always'
+    volumes:
+      - '/sys/fs/cgroup:/sys/fs/cgroup:ro'
+    command: '/lib/systemd/systemd'
+    pre_build_image: true
+    published_ports:
+      - '32400/tcp'
+  - name: 'plex-debian-12-user_data'
     image: 'ghcr.io/hifis-net/debian-systemd:12'
     systemd: 'always'
     volumes:
@@ -45,7 +58,7 @@ scenario:
     - 'destroy'
     - 'syntax'
     - 'create'
-    # - 'prepare'
+    - 'prepare'
     - 'converge'
     # - 'idempotence'  # Files created, extracted, created, deleted.
     # - 'side_effect'

@@ -2,9 +2,9 @@
 ###############################################################################
 # Configure Plex Install
 ###############################################################################
-# Cleanup Plex package install, query auto-generated Plex configuration
-# settings and inject them into the plex configuration if the role values are
-# not set, as well as stateful options.
+# Stop Plex during service reconfiguration. Cleanup Plex package install, query
+# auto-generated Plex configuration settings and inject them into the plex
+# configuration if the role values are not set, as well as stateful options.
 #
 # Do not remove the default (plex) user as this will put APT in a broken
 # state. Instead ensure the account is fully locked.
@@ -19,14 +19,14 @@
 #
 # New Preferences.xml options must be manually added to the template.
 #
-# Args:
-#   _plex_uid: int - Plex user UID.
-#   _plex_gid: int - Plex user GID.
-#   _plex_library_dir: str - Plex media location.
-#   _plex_config: dict - user Plex preference options to render (XML).
+# Install Plex update timer if enabled.
+#
+# Reference:
+# * https://github.com/mrworf/plexupdate
+# * https://github.com/linuxserver/docker-plex/blob/master/root/etc/
 
 - name: 'Config | lock Plex package user'
-  when: plex_user != 'plex'
+  when: _plex_srv_user.raw != 'plex'
   ansible.builtin.user:
     name: 'plex'
     password: '!'
@@ -37,59 +37,243 @@
     path: '/etc/apt/sources.list.d/plexmediaserver.list'
     state: 'absent'
 
-- name: 'Config | stop plex'
-  ansible.builtin.service:
-    name: 'plexmediaserver'
-    state: 'stopped'
-
 - name: 'Config | query current plex configuration'
   community.general.xml:
-    path: '{{ _plex_library_dir }}/Preferences.xml'
+    path: '{{ _plex_srv_application_support_dir.role ~ "Preferences.xml" }}'
     content: 'attribute'
     xpath: '/Preferences'
   register: _plex_xml_raw
-  no_log: true  # lifetime API access token, machine identifiers
+  no_log: true  # Lifetime API access token, machine identifiers.
 
 - name: 'Config | parse current plex configuration'
   ansible.builtin.set_fact:
     _plex_xml: '{{ _plex_xml_raw.matches[0].Preferences }}'
-  no_log: true  # lifetime API access token, machine identifiers
+  no_log: true  # Lifetime API access token, machine identifiers.
 
-- name: 'Config | keep auto-generated options'
-  when: plex_service_keep_auto_generated_values
+- name: 'Config | keep auto-generated options'  # _plex_auto_options.
+  when: _plex_srv_keep_auto_generated_values.raw
   ansible.builtin.set_fact:
-    _plex_config: '{{
-        _plex_config | combine({item: _plex_xml[item]}, recursive=true)
-        if item in _plex_xml else
-        _plex_config
+    _plex_cfg_machine_identifier: '{{
+        _plex_cfg_machine_identifier |
+        combine({"raw":
+            _plex_xml["MachineIdentifier"]
+            if "MachineIdentifier" in _plex_xml else
+            _plex_cfg_machine_identifier.raw})
       }}'
-  loop: '{{ plex_role_auto_options }}'
-  loop_control:
-    label: '{{ item }}'  # only display option, not value.
+    _plex_cfg_processed_machine_identifier: '{{
+        _plex_cfg_processed_machine_identifier |
+        combine({"raw":
+            _plex_xml["ProcessedMachineIdentifier"]
+            if "ProcessedMachineIdentifier" in _plex_xml else
+            _plex_cfg_processed_machine_identifier.raw})
+      }}'
+    _plex_cfg_anonymous_machine_identifier: '{{
+        _plex_cfg_anonymous_machine_identifier |
+        combine({"raw":
+            _plex_xml["AnonymousMachineIdentifier"]
+            if "AnonymousMachineIdentifier" in _plex_xml else
+            _plex_cfg_anonymous_machine_identifier.raw})
+      }}'
+    _plex_cfg_hardware_device_path: '{{
+        _plex_cfg_hardware_device_path |
+        combine({"raw":
+            _plex_xml["HardwareDevicePath"]
+            if "HardwareDevicePath" in _plex_xml else
+            _plex_cfg_hardware_device_path.raw})
+      }}'
 
-- name: 'Config | keep stateful options'
+- name: 'Config | keep stateful options'  # _plex_stateful_options.
   ansible.builtin.set_fact:
-    _plex_config: '{{
-        _plex_config | combine({item: _plex_xml[item]}, recursive=true)
-        if item in _plex_xml else
-        _plex_config
+    _plex_cfg_accepted_eula: '{{
+        _plex_cfg_accepted_eula |
+        combine({"raw":
+            _plex_xml["AcceptedEULA"] | bool
+            if "AcceptedEULA" in _plex_xml else
+            _plex_cfg_accepted_eula.raw})
       }}'
-  loop: '{{ plex_role_stateful_options }}'
-  loop_control:
-    label: '{{ item }}'  # only display option, not value.
+    _plex_cfg_certificate_uuid: '{{
+        _plex_cfg_certificate_uuid |
+        combine({"raw":
+            _plex_xml["CertificateUUID"]
+            if "CertificateUUID" in _plex_xml else
+            _plex_cfg_certificate_uuid.raw})
+      }}'
+    _plex_cfg_certificate_version: '{{
+        _plex_cfg_certificate_version |
+        combine({"raw":
+            _plex_xml["CertificateVersion"] | int
+            if "CertificateVersion" in _plex_xml else
+            _plex_cfg_certificate_version.raw})
+      }}'
+    _plex_cfg_collect_usage_data: '{{
+        _plex_cfg_collect_usage_data |
+        combine({"raw":
+            _plex_xml["collectUsageData"] | bool
+            if "collectUsageData" in _plex_xml else
+            _plex_cfg_collect_usage_data.raw})
+      }}'
+    _plex_cfg_global_music_video_path_migrated: '{{
+        _plex_cfg_global_music_video_path_migrated |
+        combine({"raw":
+            _plex_xml["GlobalMusicVideoPathMigrated"] | bool
+            if "GlobalMusicVideoPathMigrated" in _plex_xml else
+            _plex_cfg_global_music_video_path_migrated.raw})
+      }}'
+    _plex_cfg_language_in_cloud: '{{
+        _plex_cfg_language_in_cloud |
+        combine({"raw":
+            _plex_xml["LanguageInCloud"] | bool
+            if "LanguageInCloud" in _plex_xml else
+            _plex_cfg_language_in_cloud.raw})
+      }}'
+    _plex_cfg_last_automatic_mapped_port: '{{
+        _plex_cfg_last_automatic_mapped_port |
+        combine({"raw":
+            _plex_xml["LastAutomaticMappedPort"] | int
+            if "LastAutomaticMappedPort" in _plex_xml else
+            _plex_cfg_last_automatic_mapped_port.raw})
+      }}'
+    _plex_cfg_metrics_epoch: '{{
+        _plex_cfg_metrics_epoch |
+        combine({"raw":
+            _plex_xml["MetricsEpoch"] | int
+            if "MetricsEpoch" in _plex_xml else
+            _plex_cfg_metrics_epoch.raw})
+      }}'
+    _plex_cfg_oldest_previous_version: '{{
+        _plex_cfg_oldest_previous_version |
+        combine({"raw":
+            _plex_xml["OldestPreviousVersion"]
+            if "OldestPreviousVersion" in _plex_xml else
+            _plex_cfg_oldest_previous_version.raw})
+      }}'
+    _plex_cfg_pubsub_server: '{{
+        _plex_cfg_pubsub_server |
+        combine({"raw":
+            _plex_xml["PubSubServer"]
+            if "PubSubServer" in _plex_xml else
+            _plex_cfg_pubsub_server.raw})
+      }}'
+    _plex_cfg_pubsub_server_ping: '{{
+        _plex_cfg_pubsub_server_ping |
+        combine({"raw":
+            _plex_xml["PubsubServerPing"]
+            if "PubsubServerPing" in _plex_xml else
+            _plex_cfg_pubsub_server_ping.raw})
+      }}'
+    _plex_cfg_pubsub_server_region: '{{
+        _plex_cfg_pubsub_server_region |
+        combine({"raw":
+            _plex_xml["PubSubServerRegion"] | int
+            if "PubSubServerRegion" in _plex_xml else
+            _plex_cfg_pubsub_server_region.raw})
+      }}'
 
-# Writing the configuration back requires to_json, ansible.utils.to_xml, and
-# xmltodict python3 package installed on both controller and node. Just use a
-# template instead.
+- name: 'Annotate | update config map'
+  ansible.builtin.set_fact:
+    _plex_map: '{{
+        hostvars[inventory_hostname] | dict2items |
+        selectattr("key", "match", "_plex_cfg_*")
+      }}'
+
+# ansible.utils.to_xml requires to_json, xmltodict python3 package installed on
+# both controller and node. Just use a template.
 - name: 'Config | set plex configuration'
   ansible.builtin.template:
     src: 'Preferences.xml.j2'
-    dest: '{{ _plex_library_dir }}/Preferences.xml'
-    owner: '{{ _plex_uid }}'
-    group: '{{ _plex_gid }}'
-    mode: '0644'
+    dest: '{{ _plex_srv_application_support_dir.role ~ "Preferences.xml" }}'
+    owner: '{{ _plex_srv_user.parsed }}'
+    group: '{{ _plex_srv_group.parsed }}'
+    mode: '0600'
+  changed_when: false  # https://github.com/ansible/ansible/issues/32636
+  become:
+    '{{ true if _plex_srv_user_data_manage_enable.raw else omit }}'
+  become_user: '{{
+      _plex_srv_user.raw
+      if _plex_srv_user_data_manage_enable.raw else
+      omit
+    }}'
 
-- name: 'Config | start plex'
-  ansible.builtin.service:
-    name: 'plexmediaserver'
-    state: 'started'
+- name: 'Config | enable updates'
+  when: _plex_srv_auto_update_enable.raw
+  block:
+    - name: 'Config | enable updates | auto-update script'
+      ansible.builtin.template:
+        src: 'plexupdate.j2'
+        dest: '{{ _plex_srv_application_support_dir.role ~ "plexupdate" }}'
+        owner: '{{ _plex_srv_user.parsed }}'
+        group: '{{ _plex_srv_group.parsed }}'
+        mode: '0750'
+      changed_when: false  # https://github.com/ansible/ansible/issues/32636
+      become:
+        '{{ true if _plex_srv_user_data_manage_enable.raw else omit }}'
+      become_user: '{{
+          _plex_srv_user.raw
+          if _plex_srv_user_data_manage_enable.raw else
+          omit
+        }}'
+
+    - name: 'Config | enable updates | systemd'
+      ansible.builtin.include_role:
+        name: 'r_pufky.deb.systemd'
+      vars:
+        systemd_daemon_reload_enable: true
+        systemd_services:
+          - name: 'plex-update'
+            state: 'present'
+            drop_in: false
+            unit:
+              description: 'Automatically update Plex Media Server.'
+              requires: ['plex-update.timer']
+            service:
+              type: 'oneshot'
+              exec_start:
+                - '"{{ _plex_srv_application_support_dir.role }}plexupdate"'
+              success_exit_status: ['0', '1']
+            exec:
+              user: 'root'
+              group: 'root'
+            install:
+              wanted_by: ['multi-user.target']
+        systemd_timers:
+          - name: 'plex-update'
+            state: 'present'
+            drop_in: false
+            unit:
+              description: 'plex-update.service timer'
+              requires: ['plex-update.service']
+            timer:
+              unit: 'plex-update.service'
+              on_calendar: ['*-*-* 04:00:00']
+            install:
+              wanted_by: ['timers.target']
+
+- name: 'Config | disable updates'
+  when: not _plex_srv_auto_update_enable.raw
+  block:
+    - name: 'Config | disable updates | auto-update script'
+      ansible.builtin.file:
+        path: '{{ _plex_srv_application_support_dir.role ~ "plexupdate" }}'
+        state: 'absent'
+      changed_when: false  # https://github.com/ansible/ansible/issues/32636
+      become:
+        '{{ true if _plex_srv_user_data_manage_enable.raw else omit }}'
+      become_user: '{{
+          _plex_srv_user.raw
+          if _plex_srv_user_data_manage_enable.raw else
+          omit
+        }}'
+
+    - name: 'Config | disable updates | systemd'
+      ansible.builtin.include_role:
+        name: 'r_pufky.deb.systemd'
+      vars:
+        systemd_daemon_reload_enable: true
+        systemd_services:
+          - name: 'plex-update'
+            state: 'absent'
+            drop_in: false
+        systemd_timers:
+          - name: 'plex-update'
+            state: 'absent'
+            drop_in: false

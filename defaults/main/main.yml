@@ -5,10 +5,10 @@
 ###############################################################################
 
 # Maximum number of plugins to run at once. Default: 6.
-plex_service_max_plugin_processes: 6
+plex_srv_max_plugin_processes: 6
 
 # Maximum plex process CPU stack size (bytes). Default: 3000.
-plex_service_max_stack_size: 3000
+plex_srv_max_stack_size: 3000
 
 # Plex metadata storage location.
 #
@@ -16,7 +16,7 @@ plex_service_max_stack_size: 3000
 #
 # Reference:
 # * https://community.synology.com/enu/forum/17/post/115743
-plex_service_application_support_dir:
+plex_srv_application_support_dir:
   '/var/lib/plexmediaserver/Library/Application Support'
 
 # Recursively set metadata permissions?
@@ -25,10 +25,10 @@ plex_service_application_support_dir:
 # slow.
 #
 # Default: False.
-plex_service_permissions_recursive_enable: false
+plex_srv_permissions_recursive_enable: false
 
 # Enable syslog instead of logging to 'Plex Media Server.log'. Default: True.
-plex_service_use_syslog_enable: true
+plex_srv_use_syslog_enable: true
 
 # Specific platform architecture.
 #
@@ -38,7 +38,7 @@ plex_service_use_syslog_enable: true
 #   amd64: 64bit x86 (default).
 #
 # Default: 'amd64'.
-plex_service_arch: 'amd64'
+plex_srv_arch: 'amd64'
 
 # Generic platform architecture.
 #
@@ -47,7 +47,7 @@ plex_service_arch: 'amd64'
 #   x86_64: 64bit x86 (default).
 #
 # Default: 'x86_64'.
-plex_service_arch_generic: 'x86_64'
+plex_srv_arch_generic: 'x86_64'
 
 # Keep auto-generated Plex values?
 #
@@ -64,7 +64,7 @@ plex_service_arch_generic: 'x86_64'
 #         (plex_) value.
 #
 # Default: True.
-plex_service_keep_auto_generated_values: true
+plex_srv_keep_auto_generated_values: true
 
 # Enable automatic updates?
 #
@@ -72,15 +72,15 @@ plex_service_keep_auto_generated_values: true
 # updates every day at 0400 using the current entitlement token.
 #
 # Default: True.
-plex_service_auto_update_enable: true
+plex_srv_auto_update_enable: true
 
 # Automatically adjust DB cache size?
 #
-# Increase plex_database_cache_size to actual DB size + 10%. Minimum value will
-# never be below plex_database_cache_size.
+# Increase plex_cfg_database_cache_size to actual DB size + 10%. Minimum value
+# will never be below plex_cfg_database_cache_size.
 #
 # Default: True.
-plex_service_auto_grow_db_cache_size_enable: true
+plex_srv_auto_grow_db_cache_size_enable: true
 
 ###############################################################################
 # Plex User
@@ -88,24 +88,37 @@ plex_service_auto_grow_db_cache_size_enable: true
 
 # User that Plex will run under.
 #
-# Enable plex_create_user if this account is not externally managed.
+# Enable plex_srv_create_user if this account is not externally managed.
 #
 # Default: 'media'.
-plex_user: 'media'
+plex_srv_user: 'media'
 
 # Group that Plex will run under.
 #
-# Enable plex_create_user if this group is not externally managed.
+# Enable plex_srv_create_user if this group is not externally managed.
 #
 # Default: 'media'.
-plex_group: 'media'
+plex_srv_group: 'media'
 
-# Create plex_user, plex_group if not detected?
+# Create plex_srv_user, plex_srv_group if not detected?
 #
 # Applied via r_pufky.deb.users, see vars/main.yml for default user attributes.
 #
 # Default: True.
-plex_create_user: true
+plex_srv_create_user: true
+
+# Enable user management of data/media files?
+#
+# Use plex_srv_user to execute data/media management commands. Role
+# applies media permissions using 'root' by default. For mounted data locations
+# (NFS with squashed mounts, mapped container mounts, etc) the local root user
+# will not have sufficient privileges to modify these files.
+#
+# Applies to:
+# * plex_srv_application_support_dir
+#
+# Default: False.
+plex_srv_user_data_manage_enable: false
 
 ###############################################################################
 # Miscellaneous Section
@@ -117,15 +130,15 @@ plex_create_user: true
 # tokens).
 #
 # Access token and configured preferences settings are located in
-# plex_service_application_support_dir/Plex Media Server/Preferences.xml.
+# plex_srv_application_support_dir/Plex Media Server/Preferences.xml.
 #
 # Be sure to use vault to encrypt sensitive tokens & identifiers.
 
 # Plex username. Default: ''.
-plex_online_username: ''
+plex_cfg_online_username: ''
 
 # Plex user email. Default: ''.
-plex_online_mail: ''
+plex_cfg_online_mail: ''
 
 # Plex user access token.
 #
@@ -135,7 +148,7 @@ plex_online_mail: ''
 # tunnel to access the server-side configuration page; if it cannot be accessed
 # locally.
 #
-# ssh -L 32400:localhost:32400 {plex_host}
+# ssh -L 32400:localhost:32400 {plex_cfg_host}
 #
 # Connect to http://localhost:32400/web and run through configuration steps:
 # 1. Select media libraries to use.
@@ -148,43 +161,43 @@ plex_online_mail: ''
 #
 # Reference:
 # * https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
-plex_online_token: ''
+plex_cfg_online_token: ''
 
 # Use this server as user home (default) server? Default: True.
-plex_online_home: true
+plex_cfg_online_home: true
 
 # Machine UUID to identify machine hardware.
 #
 # Special Case:
-#   * Honors plex_keep_auto_generated_values_enable.
+#   * Honors plex_cfg_keep_auto_generated_values_enable.
 #
 # Values:
 #   {UUIDv4}: UUIDv4a, generated random data.
 #         '': '' or auto-generated Plex value (default).
 #
 # Default: ''.
-plex_machine_identifier: ''
+plex_cfg_machine_identifier: ''
 
 # Plex Client ID used to claim plex server.
 #
 # Special Case:
-#   * Honors plex_keep_auto_generated_values_enable.
+#   * Honors plex_cfg_keep_auto_generated_values_enable.
 #
 # Values:
-#   {SHA1}: SHA1 generated hash of plex_machine_identifier.
+#   {SHA1}: SHA1 generated hash of plex_cfg_machine_identifier.
 #       '': '' or auto-generated Plex value (default).
 #
 # Default: ''.
-plex_processed_machine_identifier: ''
+plex_cfg_processed_machine_identifier: ''
 
 # Anonymous UUID to identify plex server.
 #
 # Special Case:
-#   * Honors plex_keep_auto_generated_values_enable.
+#   * Honors plex_cfg_keep_auto_generated_values_enable.
 #
 # Values:
 #   {UUIDv4}: UUIDv4a, generated random data.
 #         '': '' or auto-generated Plex value (default).
 #
 # Default: ''.
-plex_anonymous_machine_identifier: ''
+plex_cfg_anonymous_machine_identifier: ''

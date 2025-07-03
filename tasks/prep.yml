@@ -16,366 +16,76 @@
 # package.
 #
 # Prepare system for pre-configured package install.
-#
-# Generates:
-#   _plex_uid: int - Plex user UID.
-#   _plex_gid: int - Plex user GID.
-#   _plex_library_dir: str - Plex media location.
-#   _plex_config: dict - user Plex preference options to render (XML).
-
-- name: 'Prep | calculate variables'
-  ansible.builtin.set_fact:
-    _plex_library_dir:
-      '{{ plex_service_application_support_dir }}/Plex Media Server'
-    _plex_config: '{{ {} }}'
-    _plex_preroll_join:
-      '{{ "," if plex_cinema_trailers_preroll_play_all else ";" }}'
 
 - name: 'Prep | manage users'
-  when: plex_create_user
+  when: _plex_srv_create_user.raw
   ansible.builtin.include_role:
     name: 'r_pufky.deb.users'
     tasks_from: 'role_account_add.yml'
   vars:
-    users_role_group: '{{ plex_role_group }}'
     users_role_user: '{{ plex_role_user }}'
+    users_role_group: '{{ plex_role_group }}'
 
-- name: 'Prep | enumerate system user {{ plex_user }}'
+- name: 'Prep | enumerate system user {{ _plex_srv_user.raw }}'
   ansible.builtin.user:
-    name: '{{ plex_user }}'
+    name: '{{ _plex_srv_user.raw }}'
   check_mode: true
   changed_when: false
-  register: _plex_user_query
+  register: _plex_srv_user_query
 
 - name: 'Prep | parse system user UID/GID'
   ansible.builtin.set_fact:
-    _plex_uid: '{{ _plex_user_query.uid }}'
-    _plex_gid: '{{ _plex_user_query.group }}'
+    _plex_srv_user: '{{
+        _plex_srv_user |
+        combine({"parsed": _plex_srv_user_query.uid})
+      }}'
+    _plex_srv_group: '{{
+        _plex_srv_group |
+        combine({"parsed": _plex_srv_user_query.group})
+      }}'
 
-- name: 'Prep | set {{ plex_service_application_support_dir }}'
-  ansible.builtin.include_role:
-    name: 'r_pufky.lib.utils'
-    tasks_from: 'remote_file.yml'
-  vars:
-    file_path: '{{ plex_service_application_support_dir }}'
-    file_owner: '{{ _plex_uid }}'
-    file_group: '{{ _plex_gid }}'
-    file_mode: '0755'
-    file_recurse: '{{ plex_service_permissions_recursive_enable }}'
-    file_state: 'directory'
-
-# Plex service potentially not installed yet, do not reload.
-- name: 'Install | set plex service drop-in'
-  ansible.builtin.include_role:
-    name: 'r_pufky.deb.systemd'
-  vars:
-    systemd_daemon_reload_enable: false
-    systemd_services:
-      - name: 'plexmediaserver'
-        state: 'present'
-        drop_in: true
-        service: {}
-        exec:
-          environment:
-            - var: 'TMPDIR'
-              value: '{{ plex_transcoder_temp_directory | default("/tmp") }}'
-            - var: 'PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR'
-              value: '{{ plex_service_application_support_dir | default("/var/lib/plexmediaserver/Library/Application Support") }}'  # yamllint disable-line rule:line-length
-            - var: 'PLEX_MEDIA_SERVER_MAX_PLUGIN_PROCS'
-              value: '{{ plex_service_max_plugin_processes | default(6) }}'
-            - var: 'PLEX_MEDIA_SERVER_MAX_STACK_SIZE'
-              value: '{{ plex_service_max_stack_size | default(3000) }}'
-            - var: 'PLEX_MEDIA_SERVER_USER'
-              value: '{{ plex_user }}'
-            - var: 'PLEX_USER'
-              value: '{{ plex_user }}'
-            - var: 'PLEX_MEDIA_SERVER_USE_SYSLOG'
-              value: '{{ plex_service_use_syslog_enable | string | lower }}'
-          user: '{{ plex_user }}'
-          group: '{{ plex_group }}'
+- name: 'Prep | set {{ _plex_srv_application_support_dir.raw }}'
+  ansible.builtin.file:
+    path: '{{ _plex_srv_application_support_dir.raw }}'
+    owner: '{{ _plex_srv_user.parsed }}'
+    group: '{{ _plex_srv_group.parsed }}'
+    mode: '0755'
+    recurse: '{{ _plex_srv_permissions_recursive_enable.raw }}'
+    state: 'directory'
+  changed_when: false  # https://github.com/ansible/ansible/issues/32636
+  become:
+    '{{ true if _plex_srv_user_data_manage_enable.raw else omit }}'
+  become_user: '{{
+      _plex_srv_user.raw
+      if _plex_srv_user_data_manage_enable.raw else
+      omit
+    }}'
 
 - name: 'Config | grow DB cache'
-  when: plex_service_auto_grow_db_cache_size_enable
+  when: _plex_srv_auto_grow_db_cache_size_enable.raw
   block:
     - name: 'Config | grow DB cache | query size'
       ansible.builtin.stat:
-        path: '{{ _plex_library_dir }}/{{ plex_role_db_dir }}'
+        path: '{{
+            _plex_srv_application_support_dir.role ~ plex_role_db_dir
+          }}'
       register: _plex_db
 
-    # cache_size in MB, stat.size in KB
+    # cache_size in MB, stat.size in KB.
     - name: 'Config | grow DB cache | calculate grow size'
       ansible.builtin.set_fact:
         _plex_db_grow_size: '{{
-            (plex_database_cache_size * 0.1) | int
+            (_plex_cfg_database_cache_size.raw | int * 0.1) | int
             if not _plex_db.stat.exists else
             ([_plex_db.stat.size, 4194304] | max / 1048576 * 1.1) | int
           }}'
 
     - name: 'Config | set auto grow DB cache size'
       ansible.builtin.set_fact:
-        _plex_database_cache_size:
-          '{{ plex_database_cache_size | int + _plex_db_grow_size | int }}'
-
-# Plex does not consistently apply casing to XML settings and are frequently
-# mis-spelled or inconsistently spelled; so we have to explicitly map those
-# settings to the equivalent role settings. Overlay these with values read from
-# Preferences.xml if auto-generated values are kept; as well as any stateful
-# options. Order does not matter (Plex initially only stores non-default values
-# until it is set once, then the setting is always stored, last changed setting
-# last).
-- name: 'Prep | build base user preference mapping'
-  ansible.builtin.set_fact:
-    _plex_config: {
-      # Settings > General
-      FriendlyName: '{{ plex_friendly_name | default("") }}',
-      sendCrashReports:
-        '{{ plex_send_crash_reports | default(false) | bool | int }}',
-      PushNotificationsEnabled:
-        '{{ plex_push_notifications_enabled | default(false) | bool | int }}',
-      logDebug: '{{ plex_log_debug | default(false) | bool | int }}',
-      LogVerbose: '{{ plex_log_verbose | default(false) | bool | int }}',
-      ButlerUpdateChannel: '{{ plex_butler_update_channel | default(0) }}',
-      # Settings > Remote Access
-      PublishServerOnPlexOnlineKey: '{{
-          plex_publish_server_on_plex_online_key | default(false) | bool | int
-        }}',
-      ManualPortMappingMode:
-        '{{ plex_manual_port_mapping_mode | default(false) | bool | int }}',
-      ManualPortMappingPort:
-        '{{ plex_manual_port_mapping_port | default(32400) }}',
-      WanTotalMaxUploadRate:
-        '{{ plex_wan_total_max_upload_rate | default(0) }}',
-      WanPerStreamMaxUploadRate:
-        '{{ plex_wan_per_stream_max_upload_rate | default(0) }}',
-      # Settings > Agents (Legacy) (no settings)
-      # Settings > Library
-      FSEventLibraryUpdatesEnabled: '{{
-          plex_fs_event_library_updates_enabled | default(false) |
-          bool | int
-        }}',
-      FSEventLibraryPartialScanEnabled: '{{
-          plex_fs_event_library_partial_scan_enabled | default(false) |
-          bool | int
-        }}',
-      watchMusicSections:
-        '{{ plex_watch_music_sections | default(false) | bool | int }}',
-      ScheduledLibraryUpdatesEnabled: '{{
-          plex_scheduled_library_updates_enabled | default(false) | bool | int
-        }}',
-      ScheduledLibraryUpdateInterval: '{{
-          plex_scheduled_library_update_interval | default(86400) }}',
-      autoEmptyTrash:
-        '{{ plex_auto_empty_trash | default(true) | bool | int }}',
-      allowMediaDeletion:
-        '{{ plex_allow_media_deletion | default(true) | bool | int }}',
-      OnDeckWindow: '{{ plex_on_deck_window | default(16) }}',
-      OnDeckLimit: '{{ plex_on_deck_limit | default(40) }}',
-      OnDeckIncludePremieres:
-        '{{ plex_on_deck_include_premieres | default(true) | bool | int }}',
-      LibraryVideoPlayedThreshold:
-        '{{ plex_library_video_played_threshold | default(95) }}',
-      LibraryVideoPlayedAtBehaviour:
-        '{{ plex_library_video_played_at_behaviour | default(0) }}',
-      SmartShuffleMusic:
-        '{{ plex_smart_shuffle_music | default(true) | bool | int }}',
-      MusicSeparateAlbumTypes: '{{
-          "enabled"
-          if plex_music_separate_album_types | default(true) else
-          "disabled"
-        }}',  # XML bool rendered as text
-      iTunesSharingEnabled:
-        '{{ plex_itunes_sharing_enabled | default(false) | bool | int }}',
-      iTunesLibraryXmlPath: '{{ plex_itunes_library_xml_path | default("") }}',
-      ScannerLowPriority: '{{ plex_scanner_low_priority | default(false) }}',
-      MarkerSource: '{{ plex_marker_source | default("any") }}',
-      GenerateBIFBehavior:
-        '{{ plex_generate_bif_behavior | default("never") }}',
-      GenerateIntroMarkerBehavior:
-        '{{ plex_generate_intro_marker_behavior | default("asap") }}',
-      GenerateCreditsMarkerBehavior:
-        '{{ plex_generate_credits_marker_behavior | default("asap") }}',
-      GenerateAdMarkerBehavior:
-        '{{ plex_generate_ad_marker_behavior | default("scheduled") }}',
-      GenerateVADBehavior:
-        '{{ plex_generate_vad_behavior | default("scheduled") }}',
-      GenerateChapterThumbBehavior:
-        '{{ plex_generate_chapter_thumb_behavior | default("scheduled") }}',
-      LoudnessAnalysisBehavior:
-        '{{ plex_loudness_analysis_behavior | default("scheduled") }}',
-      MusicAnalysisBehavior:
-        '{{ plex_music_analysis_behavior | default("scheduled") }}',
-      LocationVisibility: '{{ plex_location_visibility | default(1) }}',
-      DatabaseCacheSize: '{{
-          _plex_database_cache_size
-          if _plex_database_cache_size is defined else
-          plex_database_cache_size | default(40)
-        }}',
-      # Settings > Network
-      EnableIPv6: '{{ plex_enable_ipv6 | default(true) | bool | int }}',
-      secureConnections:
-        '{{ plex_secure_connections | default(false) | bool | int }}',
-      customCertificatePath:
-        '{{ plex_custom_certificate_path | default("") }}',
-      customCertificateKey: '{{ plex_custom_certificate_key | default("") }}',
-      customCertificateDomain:
-        '{{ plex_custom_certificate_domain | default("") }}',
-      PreferredNetworkInterface:
-        '{{ plex_preferred_network_interface | default("") }}',
-      DisableTLSv1_0:
-        '{{ plex_disable_tlsv1_0 | default(false) | bool | int }}',
-      GdmEnabled: '{{ plex_gdm_enabled | default(true) | bool | int }}',
-      WanPerUserStreamCount:
-        '{{ plex_wan_per_user_stream_count | default(0) }}',
-      LanNetworksBandwidth:
-        '{{ plex_lan_networks_bandwidth | default([]) | join(",") }}',
-      MinutesAllowedPaused: '{{ plex_minutes_allowed_paused | default(0) }}',
-      TreatWanIpAsLocal:
-        '{{ plex_treat_wan_ip_as_local | default(true) | bool | int }}',
-      RelayEnabled: '{{ plex_relay_enabled | default(true) | bool | int }}',
-      customConnections:
-        '{{ plex_custom_connections | default([]) | join(",") }}',
-      allowedNetworks: '{{ plex_allowed_networks | default([]) | join(",") }}',
-      WebHooksEnabled:
-        '{{ plex_webhooks_enabled | default(true) | bool | int }}',
-      # Settings > Transcoder
-      TranscoderQuality: '{{ plex_transcoder_quality | default(0) }}',
-      TranscoderTempDirectory:
-        '{{ plex_transcoder_temp_directory | default("/tmp") }}',
-      TranscoderThrottleBuffer:
-        '{{ plex_transcoder_throttle_buffer | default(60) }}',
-      TranscoderH264BackgroundPreset:
-        '{{ plex_transcoder_h264_background_preset | default("veryfast") }}',
-      TranscoderToneMapping:
-        '{{ plex_transcoder_tone_mapping | default(true) | bool | int }}',
-      # XML var IS mis-spelled
-      TranscoderToneMappingAgorithm:
-        '{{ plex_transcoder_tone_mapping_algorithm | default("veryfast") }}',
-      TranscoderCanOnlyRemuxVideo: '{{
-          plex_transcoder_can_only_remux_video | default(false) | bool | int
-        }}',
-      HardwareAcceleratedCodecs:
-        '{{ plex_hardware_accelerated_codecs | default(true) | bool | int }}',
-      HardwareAcceleratedEncoders:
-        '{{ plex_hardware_accelerated_encoders | default(true) | bool | int }}',
-      TranscoderHEVCEncoding:
-        '{{ plex_transcoder_hevc_encoding | default(false) | bool | int }}',
-      TranscoderHEVCOptimize:
-        '{{ plex_transcoder_hevc_encoding | default(false) | bool | int }}',
-      # auto-generated
-      HardwareDevicePath: '{{ plex_hardware_device_path | default("") }}',
-      TranscodeCountLimit: '{{ plex_transcode_count_limit | default(0) }}',
-      # Settings > Languages (no settings)
-      # Settings > DLNA
-      DlnaEnabled: '{{ plex_dlna_enabled | default(false) | bool | int }}',
-      DlnaClientPreferences:
-        '{{ plex_dlna_client_preferences | default("") }}',
-      DlnaReportTimeline:
-        '{{ plex_dlna_report_timeline | default(true) | bool | int }}',
-      DlnaDefaultProtocolInfo:
-        '{{ plex_dlna_default_protocol_info | join(",") }}',
-      DlnaDeviceDiscoveryInterval:
-        '{{ plex_dlna_device_discovery_interval | default(60) }}',
-      DlnaAnnouncementLeaseTime:
-        '{{ plex_dlna_announcement_lease_time | default(1800) }}',
-      DlnaDescriptionIcons: '{{
-          plex_dlna_description_icons.formats | join(",") ~ ";" ~
-          plex_dlna_description_icons.sizes | join(",") }}',
-      # Settings > Scheduled Tasks
-      ButlerStartHour: '{{ plex_butler_start_hour | default(2) }}',
-      ButlerEndHour: '{{ plex_butler_end_hour | default(5) }}',
-      ButlerTaskBackupDatabase:
-        '{{ plex_butler_task_backup_database | default(true) | bool | int }}',
-      ButlerDatabaseBackupPath: '{{
-          plex_butler_database_backup_path |
-          default("/var/lib/plex/Plex Media Server/Plug-in Support/Databases")
-        }}',
-      ButlerTaskOptimizeDatabase: '{{
-          plex_butler_task_optimize_database | default(true) | bool | int
-        }}',
-      ButlerTaskCleanOldBundles: '{{
-          plex_butler_task_clean_old_bundles | default(true) | bool | int
-        }}',
-      ButlerTaskCleanOldCacheFiles: '{{
-          plex_butler_task_clean_old_cache_files | default(true) | bool | int
-        }}',
-      ButlerTaskRefreshLocalMedia: '{{
-          plex_butler_task_refresh_local_media | default(true) | bool | int
-        }}',
-      ButlerTaskRefreshLibraries: '{{
-          plex_butler_task_refresh_libraries | default(false) | bool | int
-        }}',
-      ButlerTaskUpgradeMediaAnalysis: '{{
-          plex_butler_task_upgrade_media_analysis | default(true) | bool | int
-        }}',
-      ButlerTaskRefreshPeriodicMetadata: '{{
-          plex_butler_task_refresh_periodic_metadata | default(true) |
-          bool | int
-        }}',
-      ButlerTaskDeepMediaAnalysis: '{{
-          plex_butler_task_deep_media_analysis | default(true) | bool | int
-        }}',
-      # Extras
-      CinemaTrailersType:
-        '{{ plex_cinema_trailers_type | default(true) | bool | int }}',
-      CinemaTrailersFromLibrary: '{{
-          plex_cinema_trailers_from_library | default(true) | bool | int
-        }}',
-      CinemaTrailersFromTheater: '{{
-          plex_cinema_trailers_from_theater | default(false) | bool | int
-        }}',
-      CinemaTrailersFromBluRay: '{{
-          plex_cinema_trailers_from_bluray | default(false) | bool | int
-        }}',
-      CinemaTrailersIncludeEnglish: '{{
-          plex_cinema_trailers_include_english | default(true) | bool | int
-        }}',
-      CinemaTrailersPrerollID: '{{
-          plex_cinema_trailers_preroll_id | default([]) |
-          join(_plex_preroll_join)
-        }}',
-      GlobalMusicVideoPath: '{{ plex_global_music_video_path | default("") }}',
-      # Manage > Libraries
-      MergedRecentlyAdded:
-        '{{ plex_merged_recently_added | default(false) | bool | int }}',
-      # Manage > Live TV & DVR
-      DvrIncrementalEpgLoader:
-        '{{ plex_dvr_incremental_epg_loader | default(false) | bool | int }}',
-      # auto-generated (no WebUI)
-      MachineIdentifier: '{{ plex_machine_identifier | default("") }}',
-      ProcessedMachineIdentifier:
-        '{{ plex_processed_machine_identifier | default("") }}',
-      AnonymousMachineIdentifier:
-        '{{ plex_anonymous_machine_identifier | default("") }}',
-      # stateful (no WebUI)
-      AcceptedEULA: '{{ plex_accepted_eula | default(true) | bool | int }}',
-      CertificateUUID: '{{ plex_certificate_uuid | default("") }}',
-      CertificateVersion: '{{ plex_certificate_version | default(3) }}',
-      collectUsageData:
-        '{{ plex_collect_usage_data | default(false) | bool | int }}',
-      GlobalMusicVideoPathMigrated: '{{
-          plex_global_music_video_path_migrated | default(true) | bool | int
-        }}',
-      # forced true from plex
-      LanguageInCloud:
-        '{{ plex_language_in_cloud | default(true) | bool | int }}',
-      LastAutomaticMappedPort:
-        '{{ plex_last_automatic_mapped_port | default(0) }}',
-      MetricsEpoch: '{{ plex_metrics_epoch | default(true) | bool | int }}',
-      OldestPreviousVersion:
-        '{{ plex_oldest_previous_version | default("") }}',
-      PubSubServer: '{{ plex_pubsub_server | default("184.105.148.115") }}',
-      PubSubServerPing: '{{ plex_pubsub_server_ping | default(65) }}',
-      PubSubServerRegion: '{{ plex_pubsub_server_region | default("sjc") }}',
-      # Plex Service (no WebUI)
-      PlexOnlineUsername: '{{ plex_online_username | default("") }}',
-      PlexOnlineMail: '{{ plex_online_mail | default("") }}',
-      PlexOnlineToken: '{{ plex_online_token | default("") }}',
-      PlexOnlineHome: '{{ plex_online_home | default(true) | bool | int }}',
-    }
-
-- name: 'Prep | add preference extensions'
-  when: plex_preference_extensions | length > 0
-  ansible.builtin.set_fact:
-    _plex_config: '{{
-        _plex_config | combine(plex_preference_extensions, recursive=true)
-      }}'
+        _plex_cfg_database_cache_size: '{{
+          _plex_cfg_database_cache_size |
+          combine({"raw":
+              _plex_cfg_database_cache_size.raw |
+              int + _plex_db_grow_size |
+              int})
+          }}'

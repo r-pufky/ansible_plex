@@ -1,10 +1,10 @@
 ---
-- name: 'Auto disabled | prepare'
+- name: 'Prepare'
   hosts: 'all'
   gather_facts: false
   tasks:
     # User from plex package
-    - name: 'Auto disabled | prepare | create manual managed user plex'
+    - name: 'Prepare | create manual managed user plex'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.users'
         tasks_from: 'role_account_add.yml'

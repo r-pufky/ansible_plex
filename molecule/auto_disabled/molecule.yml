@@ -29,14 +29,14 @@ provisioner:
   inventory:
     group_vars:
       all:
-        plex_create_user: false
-        plex_user: 'plex'
-        plex_group: 'plex'
-        plex_service_purge_package_user_enable: false
-        plex_service_keep_auto_generated_values: false
-        plex_hardware_device_path: '10de:1eb1:10de:12a0@0000:42:00.0'
-        plex_service_auto_update_enable: false
-        plex_service_auto_grow_db_cache_size_enable: false
+        plex_srv_create_user: false
+        plex_srv_user: 'plex'
+        plex_srv_group: 'plex'
+        plex_srv_purge_package_user_enable: false
+        plex_srv_keep_auto_generated_values: false
+        plex_cfg_hardware_device_path: '10de:1eb1:10de:12a0@0000:42:00.0'
+        plex_srv_auto_update_enable: false
+        plex_srv_auto_grow_db_cache_size_enable: false
 platforms:
   - name: 'plex-debian-12-auto_disabled'
     image: 'ghcr.io/hifis-net/debian-systemd:12'

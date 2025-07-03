@@ -1,21 +1,11 @@
 ---
+- name: 'Annotate'
+  ansible.builtin.import_tasks: 'annotate.yml'
 - name: 'Prep'
   ansible.builtin.import_tasks: 'prep.yml'
-
 - name: 'Install'
-  ansible.builtin.include_role:
-    name: 'r_pufky.deb.apt'
-  vars:
-    apt_packages:
-      - '{{ plex_role_packages }}'
-    apt_sources: '{{ plex_role_apt_sources }}'
-    apt_package_update_cache: true
-
-- name: 'Entitlements'
-  when: plex_online_token | length > 0
-  ansible.builtin.import_tasks: 'entitlements.yml'
-
+  ansible.builtin.import_tasks: 'install.yml'
 - name: 'Config'
   ansible.builtin.import_tasks: 'config.yml'
-- name: 'Update'
-  ansible.builtin.import_tasks: 'update.yml'
+- name: 'Validate'
+  ansible.builtin.import_tasks: 'validate.yml'

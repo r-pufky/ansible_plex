@@ -20,7 +20,7 @@ All ports and protocols have been defined for the role.
 Read defaults documentation.
 
 ### Plex Online Token
-Obtain your `plex_online_token` via [this support article.](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/)
+Obtain your `plex_cfg_online_token` via [this support article.](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/)
 
 Alternatively, the initial manual setup process to be run locally. Use a SSH
 tunnel to access the server-side configuration page; if it cannot be accessed
@@ -54,22 +54,21 @@ the host config:
   ansible.builtin.include_role:
     name: 'r_pufky.srv.plex'
   vars:
-    plex_service_keep_auto_generated_values: true
+    plex_srv_keep_auto_generated_values: true
 ```
 
-
-`{plex_service_application_support_dir}/Plex Media Server/Preferences.xml`
+`{plex_srv_application_support_dir}/Plex Media Server/Preferences.xml`
 ``` xml
 <Preferences MachineIdentifier="..." ProcessedMachineIdentifier="..." AnonymousMachineIdentifier="..." HardwareDevicePath="..." .../>
 ```
 
 host_vars/plex.example.com/vars/plex.yml
 ``` yaml
-plex_service_keep_auto_generated_values: false
-plex_machine_identifier: '..."
-plex_processed_machine_identifier: '..."
-plex_anonymous_machine_identifier: '..."
-plex_hardware_device_path: '..."
+plex_srv_keep_auto_generated_values: false
+plex_cfg_machine_identifier: '...'
+plex_cfg_processed_machine_identifier: '...'
+plex_cfg_anonymous_machine_identifier: '...'
+plex_cfg_hardware_device_path: '...'
 ```
 
 This will enable idempotent role application on different machines.
@@ -77,22 +76,22 @@ This will enable idempotent role application on different machines.
 ## Example Playbook
 host_vars/plex.example.com/vars/plex.yml
 ``` yaml
-plex_online_username: 'example'
-plex_online_mail: 'example@example.com'
-plex_online_token: '{{ vault_plex_online_token }}'
-plex_service_keep_auto_generated_values: false
-plex_machine_identifier: '{{ vault_plex_machine_identifier }}'
-plex_processed_machine_identifier: '{{ vault_plex_processed_machine_identifier }}'
-plex_anonymous_machine_identifier: '{{ vault_plex_anonymous_machine_identifier }}'
-plex_online_home: true
-plex_publish_server_on_plex_online_key: '1'
-plex_service_transcode_memory: '1G'
-plex_transcoder_temp_directory: '/tmp'
-plex_transcoder_tone_mapping: true
-plex_hardware_accelerated_codecs: true
-plex_hardware_accelerated_encoders: true
-plex_transcoder_hevc_encoding: true
-plex_transcoder_hevc_optimize: true
+plex_cfg_online_username: 'example'
+plex_cfg_online_mail: 'example@example.com'
+plex_cfg_online_token: '{{ vault_plex_cfg_online_token }}'
+plex_srv_keep_auto_generated_values: false
+plex_cfg_machine_identifier: '{{ vault_plex_cfg_machine_identifier }}'
+plex_cfg_processed_machine_identifier: '{{ vault_plex_cfg_processed_machine_identifier }}'
+plex_cfg_anonymous_machine_identifier: '{{ vault_plex_cfg_anonymous_machine_identifier }}'
+plex_cfg_online_home: true
+plex_cfg_publish_server_on_plex_online_key: '1'
+plex_srv_transcode_memory: '1G'
+plex_cfg_transcoder_temp_directory: '/tmp'
+plex_cfg_transcoder_tone_mapping: true
+plex_cfg_hardware_accelerated_codecs: true
+plex_cfg_hardware_accelerated_encoders: true
+plex_cfg_transcoder_hevc_encoding: true
+plex_cfg_transcoder_hevc_optimize: true
 ```
 
 Configure Plex server.

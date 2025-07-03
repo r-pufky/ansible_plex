@@ -2,11 +2,27 @@
 ###############################################################################
 # Plex Role Options
 ###############################################################################
+#
+# Updates:
+# * New MAJOR, MINOR releases should hard branch at version before starting
+#   (e.g. 2.14.x branch).
+# * Keep a separate change log as changes are made, you will not remember all
+#   of them.
+# * Use bare-metal docs to validate package/process changes.
+# * Update role defaults (includes updating defaults, tasks):
+#   * Use configuration docs to add new variables.
+#   * Use defaults/ to remove any changed/deprecated variables.
+#   * Show advanced options in UI, compare to existing config files.
+#   * Set advanced options to reveal additional variables.
+# * Update tests for any changes.
+# * Standard role validation testing (yamllint, ansible-lint, todo, noqa).
+# * Tag with MAJOR.MINOR version, with PATCH representing role change.
+#   change - e.g. Plex: 1.41.8.9834 -> Role: 1.41.801  (01 role release).
 
 # Last time Plex options were validated against a default configuration.
-plex_role_validate_date: '2024-06-14'
+plex_role_validate_date: '2024-07-03'
 plex_role_validate_release: 'bookworm'
-plex_role_validate_version: '1.41.4.9399'
+plex_role_validate_version: '1.41.8.9834'
 
 # Location of plex DB.
 plex_role_db_dir: 'Plug-in Support/Databases/com.plexapp.plugins.library.db'
@@ -55,29 +71,3 @@ plex_role_user:
   update_password: 'always'
   expires: -1
   system: true
-
-###############################################################################
-# Preference.xml Options
-###############################################################################
-
-# Auto-generated options for plex_service_keep_auto_generated_values.
-plex_role_auto_options:
-  - 'MachineIdentifier'
-  - 'ProcessedMachineIdentifier'
-  - 'AnonymousMachineIdentifier'
-  - 'HardwareDevicePath'
-
-# Stateful options that should never be configured.
-plex_role_stateful_options:
-  - 'AcceptedEULA'
-  - 'CertificateUUID'
-  - 'CertificateVersion'
-  - 'collectUsageData'
-  - 'GlobalMusicVideoPathMigrated'
-  - 'LanguageInCloud'
-  - 'LastAutomaticMappedPort'
-  - 'MetricsEpoch'
-  - 'OldestPreviousVersion'
-  - 'PubSubServer'
-  - 'PubsubServerPing'
-  - 'PubSubServerRegion'
