@@ -8,9 +8,9 @@
 # Tests:
 # * plexmediaserver, plex-update services are active (configs loaded).
 # * DB cache auto grow is applied (44).
-# * auto-generated variables are NOT the same as default values
+# * Auto-generated variables are NOT the same as default values
 #   (except plex_hardware_device_path).
-# * stateful options are NOT the same as default values.
+# * Stateful options are NOT the same as default values.
 
 dependency:
   name: 'galaxy'

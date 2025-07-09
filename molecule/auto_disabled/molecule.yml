@@ -6,6 +6,7 @@
 #
 # Tests:
 # * Service 'auto' options are disabled correctly.
+# * 'plex' user is debian package user.
 # * plexmediaserver service active.
 # * plex-update services are removed.
 # * plexupdate script removed.

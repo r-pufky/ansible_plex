@@ -7,6 +7,8 @@
 - name: 'Validate | start services'
   ansible.builtin.systemd:
     name: '{{ item }}'
+    enabled: true
+    daemon_reload: true
     state: 'started'
   failed_when: false
   loop:

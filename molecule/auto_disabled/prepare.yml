@@ -3,7 +3,6 @@
   hosts: 'all'
   gather_facts: false
   tasks:
-    # User from plex package
     - name: 'Prepare | create manual managed user plex'
       ansible.builtin.include_role:
         name: 'r_pufky.deb.users'

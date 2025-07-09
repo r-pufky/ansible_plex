@@ -91,7 +91,7 @@
         fail_msg: >
           ✘ MachineIdentifier should have an auto-generated value ("")
 
-    # stateful will override the user configured value
+    # Stateful will override the user configured value.
     - name: 'Verify | stateful preference passed through'
       ansible.builtin.assert:
         quiet: true
