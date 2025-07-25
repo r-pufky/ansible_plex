@@ -51,9 +51,9 @@
     hostvars[inventory_hostname] | dict2items |
     selectattr("key", "match", "plex_service_*") | length > 0 or
     hostvars[inventory_hostname] | dict2items |
-    selectattr("key", "match", "plex_online_token") | length > 0 or
+    selectattr("key", "==", "plex_online_token") | length > 0 or
     hostvars[inventory_hostname] | dict2items |
-    selectattr("key", "match", "plex_online_username") | length > 0
+    selectattr("key", "==", "plex_online_username") | length > 0
   ansible.builtin.fail:
     msg: |
       ✘ Role variables have migrated. Read defaults and update.
