@@ -20,20 +20,21 @@
 # * Simplified role updates for variable changes.
 # * All data touched by user is in a standard, expected format.
 #
-# Annotated Defaults:
+# Annotated Defaults (2.0):
 # _{VAR}: dict - Annotated and sanitized default variable.
 #   section: str - Section name.
 #   key: str - Config file key.
-#   raw: any - Raw config file value (set from defaults > role defaults).
-#   parsed: any - Processed raw config file value. Optional.
-#   role: any - Role specific config usage. Optional.
+#   raw: any - Raw value from user, defaults, or role defaults.
+#   data: any - Processed raw value for use in rendering. Optional.
+#   default: any - Role default (testing for changed defaults).
 #   hint: str - Value rendering type hint (docstring types).
+#   role_*: any - Role specific usage. Optional.
 #   added: str - Release version variable added.
 #       Special Case:
 #         0.0.0: Unknown or since role inception.
 #   sensitive: bool - True for PII/SPII data that should not be logged.
 #   deprecated: bool - True if no longer used in current role release.
-#   order: int - Order item should appear in rendered files.
+#   order: int - Order item should appear in templated files.
 #
 # Generates:
 #   _plex_map: list of dict - Annotated config map.
@@ -63,12 +64,23 @@
       plex_* -> plex_srv_*
       plex_* -> plex_cfg_*
 
+- name: 'Annotate | DEPRECATED VARIABLES IN USE ⚠'
+  when: plex_cfg_enable_ipv6 is defined
+  ansible.builtin.fail:
+    msg: |
+      ⚠ DEPRECATED VARIABLES IN USE.
+
+      Refer to defaults and update variables:
+
+      plex_cfg_enable_ipv6 -> plex_cfg_ip_network_type
+
 - name: 'Annotate | sanitize & annotate service defaults'
   ansible.builtin.set_fact:
     _plex_srv_max_plugin_processes: {
       section: '',
       key: '',
-      raw: '{{ plex_srv_max_plugin_processes | default(6) }}',
+      raw: '{{ plex_srv_max_plugin_processes }}',
+      default: 6,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -78,8 +90,8 @@
     _plex_srv_max_stack_size: {
       section: '',
       key: '',
-      raw: '{{ plex_srv_max_stack_size | default(3000)
-      }}',
+      raw: '{{ plex_srv_max_stack_size }}',
+      default: 3000,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -89,22 +101,25 @@
     _plex_srv_application_support_dir: {
       section: '',
       key: '',
-      raw: '{{
+      raw: '{{ plex_srv_application_support_dir }}',
+      data: "{{
+          plex_srv_application_support_dir | regex_replace('\\/$', '') ~ '/'
+        }}",
+      default: '/var/lib/plexmediaserver/Library/Application Support',
+      role_preferences: "{{
           plex_srv_application_support_dir |
-          default("/var/lib/plexmediaserver/Library/Application Support")
-        }}',
-      parsed: '{{
-        plex_srv_application_support_dir |
-        default("/var/lib/plexmediaserver/Library/Application Support")
-        if (
-            plex_srv_application_support_dir |
-            default("/var/lib/plexmediaserver/Library/Application Support")
-          ).endswith("/")
-        else
-        plex_srv_application_support_dir |
-        default("/var/lib/plexmediaserver/Library/Application Support") ~ "/"
-      }}',
-      role: '',  # Updated after initial set.
+          regex_replace('\\/$', '') ~ '/Plex Media Server/Preferences.xml'
+        }}",
+      role_db_dir: "{{
+          plex_srv_application_support_dir |
+          regex_replace('\\/$', '') ~
+          '/Plex Media Server/Plug-in Support/Databases/' ~
+          'com.plexapp.plugins.library.db'
+        }}",
+      role_plex_update: "{{
+          plex_srv_application_support_dir |
+          regex_replace('\\/$', '') ~ '/Plex Media Server/plexupdate'
+        }}",
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -114,7 +129,8 @@
     _plex_srv_permissions_recursive_enable: {
       section: '',
       key: '',
-      raw: '{{ plex_srv_permissions_recursive_enable | default(false) }}',
+      raw: '{{ plex_srv_permissions_recursive_enable }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -124,9 +140,9 @@
     _plex_srv_use_syslog_enable: {
       section: '',
       key: '',
-      raw: '{{ plex_srv_use_syslog_enable | default(true) }}',
-      parsed:
-        '{{ plex_srv_use_syslog_enable | default(true) | string | lower }}',
+      raw: '{{ plex_srv_use_syslog_enable }}',
+      default: true,
+      role_options: '{{ plex_srv_use_syslog_enable | lower }}',
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -136,7 +152,8 @@
     _plex_srv_arch: {
       section: '',
       key: '',
-      raw: '{{ plex_srv_arch | default("amd64") }}',
+      raw: '{{ plex_srv_arch }}',
+      default: 'amd64',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -146,7 +163,8 @@
     _plex_srv_arch_generic: {
       section: '',
       key: '',
-      raw: '{{ plex_srv_arch_generic | default("x86_64") }}',
+      raw: '{{ plex_srv_arch_generic }}',
+      default: 'x86_64',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -156,7 +174,8 @@
     _plex_srv_keep_auto_generated_values: {
       section: '',
       key: '',
-      raw: '{{ plex_srv_keep_auto_generated_values | default(true) }}',
+      raw: '{{ plex_srv_keep_auto_generated_values }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -166,7 +185,8 @@
     _plex_srv_auto_update_enable: {
       section: '',
       key: '',
-      raw: '{{ plex_srv_auto_update_enable | default(true) }}',
+      raw: '{{ plex_srv_auto_update_enable }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -176,7 +196,8 @@
     _plex_srv_auto_grow_db_cache_size_enable: {
       section: '',
       key: '',
-      raw: '{{ plex_srv_auto_grow_db_cache_size_enable | default(true) }}',
+      raw: '{{ plex_srv_auto_grow_db_cache_size_enable }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -186,7 +207,9 @@
     _plex_srv_user: {
       section: '',
       key: '',
-      raw: '{{ plex_srv_user | default("media") }}',
+      raw: '{{ plex_srv_user }}',
+      default: 'media',
+      role_uid: '',  # (str) UID.
       parsed: '',  # Updated with UID when determined in prep.
       hint: 'str',
       added: '0.0.0',
@@ -197,7 +220,9 @@
     _plex_srv_group: {
       section: '',
       key: '',
-      raw: '{{ plex_srv_group | default("media") }}',
+      raw: '{{ plex_srv_group }}',
+      default: 'media',
+      role_gid: '',  # (str) GID.
       parsed: '',  # Updated with UID when determined in prep.
       hint: 'str',
       added: '0.0.0',
@@ -208,7 +233,8 @@
     _plex_srv_create_user: {
       section: '',
       key: '',
-      raw: '{{ plex_srv_create_user | default(true) }}',
+      raw: '{{ plex_srv_create_user }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -218,7 +244,8 @@
     _plex_srv_user_data_manage_enable: {
       section: '',
       key: '',
-      raw: '{{ plex_srv_user_data_manage_enable | default(false) }}',
+      raw: '{{ plex_srv_user_data_manage_enable }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -231,7 +258,8 @@
     _plex_cfg_friendly_name: {
       section: 'General',
       key: 'FriendlyName',
-      raw: '{{ plex_cfg_friendly_name | default("*") }}',
+      raw: '{{ plex_cfg_friendly_name }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -241,7 +269,8 @@
     _plex_cfg_send_crash_reports: {
       section: 'General',
       key: 'sendCrashReports',
-      raw: '{{ plex_cfg_send_crash_reports | default(false) }}',
+      raw: '{{ plex_cfg_send_crash_reports }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -251,7 +280,8 @@
     _plex_cfg_push_notifications_enabled: {
       section: 'General',
       key: 'PushNotificationsEnabled',
-      raw: '{{ plex_cfg_push_notifications_enabled | default(false) }}',
+      raw: '{{ plex_cfg_push_notifications_enabled }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -261,7 +291,8 @@
     _plex_cfg_log_debug: {
       section: 'General',
       key: 'logDebug',
-      raw: '{{ plex_cfg_log_debug | default(bool) }}',
+      raw: '{{ plex_cfg_log_debug }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -271,7 +302,8 @@
     _plex_cfg_log_verbose: {
       section: 'General',
       key: 'LogVerbose',
-      raw: '{{ plex_cfg_log_verbose | default(false) }}',
+      raw: '{{ plex_cfg_log_verbose }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -281,7 +313,8 @@
     _plex_cfg_butler_update_channel: {
       section: 'General',
       key: 'ButlerUpdateChannel',
-      raw: '{{ plex_cfg_butler_update_channel | default(0) }}',
+      raw: '{{ plex_cfg_butler_update_channel }}',
+      default: 0,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -291,7 +324,8 @@
     _plex_cfg_publish_server_on_plex_online_key: {
       section: 'Remote',
       key: 'PublishServerOnPlexOnlineKey',
-      raw: '{{ plex_cfg_publish_server_on_plex_online_key | default(false) }}',
+      raw: '{{ plex_cfg_publish_server_on_plex_online_key }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -301,7 +335,8 @@
     _plex_cfg_manual_port_mapping_mode: {
       section: 'Remote',
       key: 'ManualPortMappingMode',
-      raw: '{{ plex_cfg_manual_port_mapping_mode | default(false) }}',
+      raw: '{{ plex_cfg_manual_port_mapping_mode }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: true,
@@ -311,7 +346,8 @@
     _plex_cfg_manual_port_mapping_port: {
       section: 'Remote',
       key: 'AuthenticationMethod',
-      raw: '{{ plex_cfg_manual_port_mapping_port | default(32400) }}',
+      raw: '{{ plex_cfg_manual_port_mapping_port }}',
+      default: 32400,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -321,7 +357,8 @@
     _plex_cfg_wan_total_max_upload_rate: {
       section: 'Remote',
       key: 'AuthenticationRequired',
-      raw: '{{ plex_cfg_wan_total_max_upload_rate | default(0) }}',
+      raw: '{{ plex_cfg_wan_total_max_upload_rate }}',
+      default: 0,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -331,7 +368,8 @@
     _plex_cfg_wan_per_stream_max_upload_rate: {
       section: 'Remote',
       key: 'WanPerStreamMaxUploadRate',
-      raw: '{{ plex_cfg_wan_per_stream_max_upload_rate | default(0) }}',
+      raw: '{{ plex_cfg_wan_per_stream_max_upload_rate }}',
+      default: 0,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -342,7 +380,8 @@
     _plex_cfg_fs_event_library_updates_enabled: {
       section: 'Library',
       key: 'FSEventLibraryUpdatesEnabled',
-      raw: '{{ plex_fs_event_library_updates_enabled | default(false) }}',
+      raw: '{{ plex_cfg_fs_event_library_updates_enabled }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -352,9 +391,8 @@
     _plex_cfg_fs_event_library_partial_scan_enabled: {
       section: 'Library',
       key: 'FSEventLibraryPartialScanEnabled',
-      raw: '{{
-          plex_cfg_fs_event_library_partial_scan_enabled | default(false)
-        }}',
+      raw: '{{ plex_cfg_fs_event_library_partial_scan_enabled }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -364,7 +402,8 @@
     _plex_cfg_watch_music_sections: {
       section: 'Library',
       key: 'watchMusicSections',
-      raw: '{{ plex_cfg_watch_music_sections | default(false) }}',
+      raw: '{{ plex_cfg_watch_music_sections }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -374,7 +413,8 @@
     _plex_cfg_scheduled_library_updates_enabled: {
       section: 'Library',
       key: 'ScheduledLibraryUpdatesEnabled',
-      raw: '{{ plex_cfg_scheduled_library_updates_enabled | default(false) }}',
+      raw: '{{ plex_cfg_scheduled_library_updates_enabled }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -384,7 +424,8 @@
     _plex_cfg_scheduled_library_update_interval: {
       section: 'Library',
       key: 'ScheduledLibraryUpdateInterval',
-      raw: '{{ plex_cfg_scheduled_library_update_interval | default(86400) }}',
+      raw: '{{ plex_cfg_scheduled_library_update_interval }}',
+      default: 86400,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -394,7 +435,8 @@
     _plex_cfg_auto_empty_trash: {
       section: 'Library',
       key: 'autoEmptyTrash',
-      raw: '{{ plex_cfg_auto_empty_trash | default(true) }}',
+      raw: '{{ plex_cfg_auto_empty_trash }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -404,7 +446,8 @@
     _plex_cfg_allow_media_deletion: {
       section: 'Library',
       key: 'allowMediaDeletion',
-      raw: '{{ plex_cfg_allow_media_deletion | default(true) }}',
+      raw: '{{ plex_cfg_allow_media_deletion }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -414,7 +457,8 @@
     _plex_cfg_on_deck_window: {
       section: 'Library',
       key: 'OnDeckWindow',
-      raw: '{{ plex_cfg_on_deck_window | default(16) }}',
+      raw: '{{ plex_cfg_on_deck_window }}',
+      default: 16,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -424,7 +468,8 @@
     _plex_cfg_on_deck_limit: {
       section: 'Library',
       key: 'OnDeckLimit',
-      raw: '{{ plex_cfg_on_deck_limit | default(40) }}',
+      raw: '{{ plex_cfg_on_deck_limit }}',
+      default: 40,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -434,7 +479,8 @@
     _plex_cfg_on_deck_include_premieres: {
       section: 'Library',
       key: 'OnDeckIncludePremieres',
-      raw: '{{ plex_cfg_on_deck_include_premieres | default(true) }}',
+      raw: '{{ plex_cfg_on_deck_include_premieres }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -444,7 +490,8 @@
     _plex_cfg_library_video_played_threshold: {
       section: 'Library',
       key: 'LibraryVideoPlayedThreshold',
-      raw: '{{ plex_cfg_library_video_played_threshold | default(95) }}',
+      raw: '{{ plex_cfg_library_video_played_threshold }}',
+      default: 95,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -454,7 +501,8 @@
     _plex_cfg_library_video_played_at_behaviour: {
       section: 'Library',
       key: 'LibraryVideoPlayedAtBehaviour',
-      raw: '{{ plex_cfg_library_video_played_at_behaviour | default(0) }}',
+      raw: '{{ plex_cfg_library_video_played_at_behaviour }}',
+      default: 3,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -464,7 +512,8 @@
     _plex_cfg_smart_shuffle_music: {
       section: 'Library',
       key: 'SmartShuffleMusic',
-      raw: '{{ plex_cfg_smart_shuffle_music | default(true) }}',
+      raw: '{{ plex_cfg_smart_shuffle_music }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -474,12 +523,13 @@
     _plex_cfg_music_separate_album_types: {
       section: 'Library',
       key: 'MusicSeparateAlbumTypes',
-      raw: '{{
+      raw: '{{ plex_cfg_music_separate_album_types }}',
+      data: '{{
           "enabled"
-          if plex_cfg_music_separate_album_types | default(true) else
+          if plex_cfg_music_separate_album_types else
           "disabled"
         }}',
-      hint: 'str',  # Bool toggle rendered as XML string.
+      hint: 'bool as str',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
@@ -488,7 +538,8 @@
     _plex_cfg_itunes_sharing_enabled: {
       section: 'Library',
       key: 'iTunesSharingEnabled',
-      raw: '{{ plex_cfg_itunes_sharing_enabled | default(false) }}',
+      raw: '{{ plex_cfg_itunes_sharing_enabled }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -498,7 +549,8 @@
     _plex_cfg_itunes_library_xml_path: {
       section: 'Library',
       key: 'iTunesLibraryXmlPath',
-      raw: '{{ plex_cfg_itunes_library_xml_path | default("") }}',
+      raw: '{{ plex_cfg_itunes_library_xml_path }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -508,7 +560,8 @@
     _plex_cfg_scanner_low_priority: {
       section: 'Library',
       key: 'ScannerLowPriority',
-      raw: '{{ plex_cfg_scanner_low_priority | default(false) }}',
+      raw: '{{ plex_cfg_scanner_low_priority }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -518,7 +571,8 @@
     _plex_cfg_marker_source: {
       section: 'Library',
       key: 'MarkerSource',
-      raw: '{{ plex_cfg_marker_source | default("any") }}',
+      raw: '{{ plex_cfg_marker_source }}',
+      default: 'any',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -528,7 +582,8 @@
     _plex_cfg_generate_bif_behavior: {
       section: 'Library',
       key: 'GenerateBIFBehavior',
-      raw: '{{ plex_cfg_generate_bif_behavior | default("never") }}',
+      raw: '{{ plex_cfg_generate_bif_behavior }}',
+      default: 'never',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -538,7 +593,8 @@
     _plex_cfg_generate_intro_marker_behavior: {
       section: 'Library',
       key: 'GenerateIntroMarkerBehavior',
-      raw: '{{ plex_cfg_generate_intro_marker_behavior | default("asap") }}',
+      raw: '{{ plex_cfg_generate_intro_marker_behavior }}',
+      default: 'asap',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -548,7 +604,8 @@
     _plex_cfg_generate_credits_marker_behavior: {
       section: 'Library',
       key: 'GenerateCreditsMarkerBehavior',
-      raw: '{{ plex_cfg_generate_credits_marker_behavior | default("asap") }}',
+      raw: '{{ plex_cfg_generate_credits_marker_behavior }}',
+      default: 'asap',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -558,7 +615,8 @@
     _plex_cfg_generate_ad_marker_behavior: {
       section: 'Library',
       key: 'GenerateAdMarkerBehavior',
-      raw: '{{ plex_cfg_generate_ad_marker_behavior | default("scheduled") }}',
+      raw: '{{ plex_cfg_generate_ad_marker_behavior }}',
+      default: 'scheduled',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -568,7 +626,8 @@
     _plex_cfg_generate_vad_behavior: {
       section: 'Library',
       key: 'GenerateVADBehavior',
-      raw: '{{ plex_cfg_generate_vad_behavior | default("scheduled") }}',
+      raw: '{{ plex_cfg_generate_vad_behavior }}',
+      default: 'scheduled',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -578,9 +637,8 @@
     _plex_cfg_generate_chapter_thumb_behavior: {
       section: 'Library',
       key: 'GenerateChapterThumbBehavior',
-      raw: '{{
-          plex_cfg_generate_chapter_thumb_behavior | default("scheduled")
-        }}',
+      raw: '{{ plex_cfg_generate_chapter_thumb_behavior }}',
+      default: 'scheduled',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -590,9 +648,8 @@
     _plex_cfg_loudness_analysis_behavior: {
       section: 'Library',
       key: 'LoudnessAnalysisBehavior',
-      raw: '{{
-          plex_cfg_loudness_analysis_behavior | default("scheduled")
-        }}',
+      raw: '{{ plex_cfg_loudness_analysis_behavior }}',
+      default: 'scheduled',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -602,9 +659,8 @@
     _plex_cfg_music_analysis_behavior: {
       section: 'Library',
       key: 'MusicAnalysisBehavior',
-      raw: '{{
-          plex_cfg_music_analysis_behavior | default("scheduled")
-        }}',
+      raw: '{{ plex_cfg_music_analysis_behavior }}',
+      default: 'scheduled',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -614,7 +670,8 @@
     _plex_cfg_location_visibility: {
       section: 'Library',
       key: 'LocationVisibility',
-      raw: '{{ plex_cfg_location_visibility | default(1) }}',
+      raw: '{{ plex_cfg_location_visibility }}',
+      default: 1,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -624,31 +681,41 @@
     _plex_cfg_database_cache_size: {
       section: 'Library',
       key: 'DatabaseCacheSize',
-      raw: '{{
-          plex_cfg_database_cache_size
-          if plex_cfg_database_cache_size is defined else
-          plex_cfg_database_cache_size | default(40)
-        }}',
+      raw: '{{ plex_cfg_database_cache_size }}',
+      default: 40,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
       order: 28,
     }
+    _plex_cfg_ip_network_type: {
+      section: 'Network',
+      key: 'IPNetworkType',
+      raw: '{{ plex_cfg_ip_network_type }}',
+      default: 'dualstack',
+      hint: 'str',
+      added: '1.42.1',
+      sensitive: false,
+      deprecated: false,
+      order: 1,
+    }
     _plex_cfg_enable_ipv6: {
       section: 'Network',
       key: 'EnableIPv6',
-      raw: '{{ plex_cfg_enable_ipv6 | default(true) }}',
+      raw: true,
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
-      deprecated: false,
+      deprecated: true,  # Replaced by IPNetworkType.
       order: 1,
     }
     _plex_cfg_secure_connections: {
       section: 'Network',
       key: 'secureConnections',
-      raw: '{{ plex_cfg_secure_connections | default(false) }}',
+      raw: '{{ plex_cfg_secure_connections }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -658,7 +725,8 @@
     _plex_cfg_custom_certificate_path: {
       section: 'Network',
       key: 'customCertificatePath',
-      raw: '{{ plex_cfg_custom_certificate_path | default("") }}',
+      raw: '{{ plex_cfg_custom_certificate_path }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -668,7 +736,8 @@
     _plex_cfg_custom_certificate_key: {
       section: 'Network',
       key: 'customCertificateKey',
-      raw: '{{ plex_cfg_custom_certificate_key | default("") }}',
+      raw: '{{ plex_cfg_custom_certificate_key }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: true,
@@ -678,7 +747,8 @@
     _plex_cfg_custom_certificate_domain: {
       section: 'Network',
       key: 'customCertificateDomain',
-      raw: '{{ plex_cfg_custom_certificate_domain | default("") }}',
+      raw: '{{ plex_cfg_custom_certificate_domain }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -688,7 +758,8 @@
     _plex_cfg_preferred_network_interface: {
       section: 'Network',
       key: 'PreferredNetworkInterface',
-      raw: '{{ plex_cfg_preferred_network_interface | default("") }}',
+      raw: '{{ plex_cfg_preferred_network_interface }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -698,7 +769,8 @@
     _plex_cfg_disable_tlsv1_0: {
       section: 'Network',
       key: 'DisableTLSv1_0',
-      raw: '{{ plex_cfg_disable_tlsv1_0 | default(false) }}',
+      raw: '{{ plex_cfg_disable_tlsv1_0 }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -708,7 +780,8 @@
     _plex_cfg_gdm_enabled: {
       section: 'Network',
       key: 'GdmEnabled',
-      raw: '{{ plex_cfg_gdm_enabled | default(true) }}',
+      raw: '{{ plex_cfg_gdm_enabled }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -718,7 +791,8 @@
     _plex_cfg_wan_per_user_stream_count: {
       section: 'Network',
       key: 'WanPerUserStreamCount',
-      raw: '{{ plex_cfg_wan_per_user_stream_count | default(0) }}',
+      raw: '{{ plex_cfg_wan_per_user_stream_count }}',
+      default: 0,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -728,9 +802,9 @@
     _plex_cfg_lan_networks_bandwidth: {
       section: 'Network',
       key: 'LanNetworksBandwidth',
-      raw: '{{ plex_cfg_lan_networks_bandwidth | default([]) }}',
-      parsed:
-        '{{ plex_cfg_lan_networks_bandwidth | default([]) | join(",") }}',
+      raw: '{{ plex_cfg_lan_networks_bandwidth }}',
+      data: '{{ plex_cfg_lan_networks_bandwidth | join(",") }}',
+      default: [],
       hint: 'list of str',
       added: '0.0.0',
       sensitive: false,
@@ -740,7 +814,8 @@
     _plex_cfg_minutes_allowed_paused: {
       section: 'Network',
       key: 'MinutesAllowedPaused',
-      raw: '{{ plex_cfg_minutes_allowed_paused | default(0) }}',
+      raw: '{{ plex_cfg_minutes_allowed_paused }}',
+      default: 0,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -750,7 +825,8 @@
     _plex_cfg_treat_wan_ip_as_local: {
       section: 'Network',
       key: 'TreatWanIpAsLocal',
-      raw: '{{ plex_cfg_treat_wan_ip_as_local | default(true) }}',
+      raw: '{{ plex_cfg_treat_wan_ip_as_local }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -760,7 +836,8 @@
     _plex_cfg_relay_enabled: {
       section: 'Network',
       key: 'RelayEnabled',
-      raw: '{{ plex_cfg_relay_enabled | default(true) }}',
+      raw: '{{ plex_cfg_relay_enabled }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -770,9 +847,9 @@
     _plex_cfg_custom_connections: {
       section: 'Network',
       key: 'customConnections',
-      raw: '{{ plex_cfg_custom_connections | default([]) }}',
-      parsed:
-        '{{ plex_cfg_custom_connections | default([]) | join(",") }}',
+      raw: '{{ plex_cfg_custom_connections }}',
+      data: '{{ plex_cfg_custom_connections | join(",") }}',
+      default: [],
       hint: 'list of str',
       added: '0.0.0',
       sensitive: false,
@@ -782,9 +859,9 @@
     _plex_cfg_allowed_networks: {
       section: 'Network',
       key: 'allowedNetworks',
-      raw: '{{ plex_cfg_allowed_networks | default([]) }}',
-      parsed:
-        '{{ plex_cfg_allowed_networks | default([]) | join(",") }}',
+      raw: '{{ plex_cfg_allowed_networks }}',
+      data: '{{ plex_cfg_allowed_networks | join(",") }}',
+      default: [],
       hint: 'list of str',
       added: '0.0.0',
       sensitive: false,
@@ -794,7 +871,8 @@
     _plex_cfg_webhooks_enabled: {
       section: 'Network',
       key: 'WebHooksEnabled',
-      raw: '{{ plex_cfg_webhooks_enabled | default(true) }}',
+      raw: '{{ plex_cfg_webhooks_enabled }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -804,7 +882,8 @@
     _plex_cfg_transcoder_quality: {
       section: 'Transcoder',
       key: 'TranscoderQuality',
-      raw: '{{ plex_cfg_transcoder_quality | default(0) }}',
+      raw: '{{ plex_cfg_transcoder_quality }}',
+      default: 0,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -814,132 +893,163 @@
     _plex_cfg_transcoder_temp_directory: {
       section: 'Transcoder',
       key: 'TranscoderTempDirectory',
-      raw: '{{ plex_cfg_transcoder_temp_directory | default("/tmp") }}',
+      raw: '{{ plex_cfg_transcoder_temp_directory }}',
+      default: '/tmp',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
       order: 2,
     }
-    _plex_cfg_transcoder_throttle_buffer: {
+    _plex_cfg_transcoder_downloads_temp_directory: {
       section: 'Transcoder',
-      key: 'TranscoderThrottleBuffer',
-      raw: '{{ plex_cfg_transcoder_throttle_buffer | default(60) }}',
-      hint: 'int',
-      added: '0.0.0',
+      key: 'DownloadsTempDirectory',
+      raw: '{{ plex_cfg_transcoder_downloads_temp_directory }}',
+      default: '/tmp',
+      hint: 'str',
+      added: '1.42.1',
       sensitive: false,
       deprecated: false,
       order: 3,
     }
-    _plex_cfg_transcoder_h264_background_preset: {
+    _plex_cfg_transcoder_throttle_buffer: {
       section: 'Transcoder',
-      key: 'TranscoderH264BackgroundPreset',
-      raw: '{{
-          plex_cfg_transcoder_h264_background_preset | default("veryfast")
-        }}',
-      hint: 'str',
+      key: 'TranscoderThrottleBuffer',
+      raw: '{{ plex_cfg_transcoder_throttle_buffer }}',
+      default: 60,
+      hint: 'int',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
       order: 4,
     }
-    _plex_cfg_transcoder_tone_mapping: {
+    _plex_cfg_transcoder_h264_background_preset: {
       section: 'Transcoder',
-      key: 'TranscoderToneMapping',
-      raw: '{{ plex_cfg_transcoder_tone_mapping | default(true) }}',
-      hint: 'bool',
+      key: 'TranscoderH264BackgroundPreset',
+      raw: '{{ plex_cfg_transcoder_h264_background_preset }}',
+      default: 'veryfast',
+      hint: 'str',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
       order: 5,
     }
-    _plex_cfg_transcoder_tone_mapping_algorithm: {
+    _plex_cfg_transcoder_tone_mapping: {
       section: 'Transcoder',
-      key: 'TranscoderToneMappingAgorithm',  # XML var IS mis-spelled.
-      raw: '{{
-          plex_cfg_transcoder_tone_mapping_algorithm | default("veryfast")
-        }}',
-      hint: 'str',
+      key: 'TranscoderToneMapping',
+      raw: '{{ plex_cfg_transcoder_tone_mapping }}',
+      default: true,
+      hint: 'bool',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
       order: 6,
     }
-    _plex_cfg_transcoder_can_only_remux_video: {
+    _plex_cfg_transcoder_tone_mapping_algorithm: {
       section: 'Transcoder',
-      key: 'TranscoderCanOnlyRemuxVideo',
-      raw: '{{ plex_cfg_transcoder_can_only_remux_video | default(false) }}',
-      hint: 'bool',
+      key: 'TranscoderToneMappingAgorithm',  # XML var IS mis-spelled.
+      raw: '{{ plex_cfg_transcoder_tone_mapping_algorithm }}',
+      default: 'veryfast',
+      hint: 'str',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
       order: 7,
     }
-    _plex_cfg_hardware_accelerated_codecs: {
+    _plex_cfg_transcoder_can_only_remux_video: {
       section: 'Transcoder',
-      key: 'HardwareAcceleratedCodecs',
-      raw: '{{ plex_cfg_hardware_accelerated_codecs | default(true) }}',
+      key: 'TranscoderCanOnlyRemuxVideo',
+      raw: '{{ plex_cfg_transcoder_can_only_remux_video }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
       order: 8,
     }
-    _plex_cfg_hardware_accelerated_encoders: {
+    _plex_cfg_hardware_accelerated_codecs: {
       section: 'Transcoder',
-      key: 'HardwareAcceleratedEncoders',
-      raw: '{{ plex_cfg_hardware_accelerated_encoders | default(true) }}',
+      key: 'HardwareAcceleratedCodecs',
+      raw: '{{ plex_cfg_hardware_accelerated_codecs }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
       order: 9,
     }
-    _plex_cfg_transcoder_hevc_encoding: {
+    _plex_cfg_hardware_accelerated_encoders: {
       section: 'Transcoder',
-      key: 'TranscoderHEVCEncoding',
-      raw: '{{ plex_cfg_transcoder_hevc_encoding | default(false) }}',
+      key: 'HardwareAcceleratedEncoders',
+      raw: '{{ plex_cfg_hardware_accelerated_encoders }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
       order: 10,
     }
-    _plex_cfg_transcoder_hevc_optimize: {
+    _plex_cfg_transcoder_hevc_encoding: {
       section: 'Transcoder',
-      key: 'TranscoderHEVCOptimize',
-      raw: '{{ plex_cfg_transcoder_hevc_optimize | default(false) }}',
+      key: 'TranscoderHEVCEncoding',
+      raw: '{{ plex_cfg_transcoder_hevc_encoding }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
       order: 11,
     }
-    _plex_cfg_hardware_device_path: {
+    _plex_cfg_transcoder_hevc_optimize: {
       section: 'Transcoder',
-      key: 'HardwareDevicePath',  # Auto-generated.
-      raw: '{{ plex_cfg_hardware_device_path | default("") }}',
-      hint: 'str',
+      key: 'TranscoderHEVCOptimize',
+      raw: '{{ plex_cfg_transcoder_hevc_optimize }}',
+      default: false,
+      hint: 'bool',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
       order: 12,
     }
-    _plex_cfg_transcode_count_limit: {
+    _plex_cfg_hardware_device_path: {
       section: 'Transcoder',
-      key: 'TranscodeCountLimit',  # Auto-generated.
-      raw: '{{ plex_cfg_transcode_count_limit | default(0) }}',
-      hint: 'int',
+      key: 'HardwareDevicePath',  # Auto-generated.
+      raw: '{{ plex_cfg_hardware_device_path }}',
+      default: '',
+      hint: 'str',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
       order: 13,
     }
+    _plex_cfg_transcode_count_limit: {
+      section: 'Transcoder',
+      key: 'TranscodeCountLimit',  # Auto-generated.
+      raw: '{{ plex_cfg_transcode_count_limit }}',
+      default: 0,
+      hint: 'int',
+      added: '0.0.0',
+      sensitive: false,
+      deprecated: false,
+      order: 14,
+    }
+    _plex_cfg_transcode_optimizer_transcode_count_limit: {
+      section: 'Transcoder',
+      key: 'OptimizerTranscodeCountLimit',
+      raw: '{{ plex_cfg_transcode_optimizer_transcode_count_limit }}',
+      default: 0,
+      hint: 'int',
+      added: '1.42.1',
+      sensitive: false,
+      deprecated: false,
+      order: 15,
+    }
     # Settings > Languages (no settings)
     _plex_cfg_dlna_enabled: {
       section: 'DLNA',
       key: 'DlnaEnabled',
-      raw: '{{ plex_cfg_dlna_enabled | default(false) }}',
+      raw: '{{ plex_cfg_dlna_enabled }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -949,7 +1059,8 @@
     _plex_cfg_dlna_client_preferences: {
       section: 'DLNA',
       key: 'DlnaClientPreferences',
-      raw: '{{ plex_cfg_dlna_client_preferences | default("") }}',
+      raw: '{{ plex_cfg_dlna_client_preferences }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -959,7 +1070,8 @@
     _plex_cfg_dlna_report_timeline: {
       section: 'DLNA',
       key: 'DlnaReportTimeline',
-      raw: '{{ plex_cfg_dlna_report_timeline | default(true) }}',
+      raw: '{{ plex_cfg_dlna_report_timeline }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -969,10 +1081,17 @@
     _plex_cfg_dlna_default_protocol_info: {
       section: 'DLNA',
       key: 'DlnaDefaultProtocolInfo',
-      raw: '{{ plex_cfg_dlna_default_protocol_info | default(true) }}',
-      parsed: '{{
-          plex_cfg_dlna_default_protocol_info | default(true) | join(",")
-        }}',
+      raw: '{{ plex_cfg_dlna_default_protocol_info }}',
+      data: '{{ plex_cfg_dlna_default_protocol_info | join(",") }}',
+      default: ['http-get:*:video/mpeg:*', 'http-get:*:video/mp4:*',
+                'http-get:*:video/vnd.dlna.mpeg-tts:*',
+                'http-get:*:video/avi:*', 'http-get:*:video/x-matroska:*',
+                'http-get:*:video/x-ms-wmv:*', 'http-get:*:video/wtv:*',
+                'http-get:*:audio/mpeg:*', 'http-get:*:audio/mp3:*',
+                'http-get:*:audio/mp4:*', 'http-get:*:audio/x-ms-wma*',
+                'http-get:*:audio/wav:*', 'http-get:*:audio/L16:*',
+                'http-get:*image/jpeg:*', 'http-get:*image/png:*',
+                'http-get:*image/gif:*', 'http-get:*image/tiff:*'],
       hint: 'list of str',
       added: '0.0.0',
       sensitive: false,
@@ -982,7 +1101,8 @@
     _plex_cfg_dlna_device_discovery_interval: {
       section: 'DLNA',
       key: 'DlnaDeviceDiscoveryInterval',
-      raw: '{{ plex_cfg_dlna_device_discovery_interval | default(60) }}',
+      raw: '{{ plex_cfg_dlna_device_discovery_interval }}',
+      default: 60,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -992,7 +1112,8 @@
     _plex_cfg_dlna_announcement_lease_time: {
       section: 'DLNA',
       key: 'DlnaAnnouncementLeaseTime',
-      raw: '{{ plex_cfg_dlna_announcement_lease_time | default(1800) }}',
+      raw: '{{ plex_cfg_dlna_announcement_lease_time }}',
+      default: 1800,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -1002,11 +1123,13 @@
     _plex_cfg_dlna_description_icons: {
       section: 'DLNA',
       key: 'DlnaDescriptionIcons',
-      raw: '{{
-          plex_cfg_dlna_description_icons |
-          default({"formats": ["png", "jpeg"], "sizes": ["260x260", "120x120", "48x48"]})
+      raw: '{{ plex_cfg_dlna_description_icons }}',
+      data: '{{
+            plex_cfg_dlna_description_icons.formats | join(",") ~ ";" ~
+            plex_cfg_dlna_description_icons.sizes | join(",")
         }}',
-      parsed: '',  # Updated after initial set.
+      default: {"formats": ["png", "jpeg"],
+                "sizes": ["260x260", "120x120", "48x48"]},
       hint: 'dict',
       added: '0.0.0',
       sensitive: false,
@@ -1016,7 +1139,8 @@
     _plex_cfg_butler_start_hour: {
       section: 'Scheduled',
       key: 'ButlerStartHour',
-      raw: '{{ plex_cfg_butler_start_hour | default(2) }}',
+      raw: '{{ plex_cfg_butler_start_hour }}',
+      default: 2,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -1026,7 +1150,8 @@
     _plex_cfg_butler_end_hour: {
       section: 'Scheduled',
       key: 'ButlerEndHour',
-      raw: '{{ plex_cfg_butler_end_hour | default(5) }}',
+      raw: '{{ plex_cfg_butler_end_hour }}',
+      default: 5,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -1036,7 +1161,8 @@
     _plex_cfg_butler_task_backup_database: {
       section: 'Scheduled',
       key: 'ButlerTaskBackupDatabase',
-      raw: '{{ plex_cfg_butler_task_backup_database | default(true) }}',
+      raw: '{{ plex_cfg_butler_task_backup_database }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1046,10 +1172,8 @@
     _plex_cfg_butler_database_backup_path: {
       section: 'Scheduled',
       key: 'ButlerDatabaseBackupPath',
-      raw: '{{
-          plex_cfg_butler_database_backup_path |
-          default("/var/lib/plex/Plex Media Server/Plug-in Support/Databases")
-        }}',
+      raw: '{{ plex_cfg_butler_database_backup_path }}',
+      default: '/var/lib/plex/Plex Media Server/Plug-in Support/Databases',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -1059,7 +1183,8 @@
     _plex_cfg_butler_task_optimize_database: {
       section: 'Scheduled',
       key: 'ButlerTaskOptimizeDatabase',
-      raw: '{{ plex_cfg_butler_task_optimize_database | default(true) }}',
+      raw: '{{ plex_cfg_butler_task_optimize_database }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1069,7 +1194,8 @@
     _plex_cfg_butler_task_clean_old_bundles: {
       section: 'Scheduled',
       key: 'ButlerTaskCleanOldBundles',
-      raw: '{{ plex_cfg_butler_task_clean_old_bundles | default(true) }}',
+      raw: '{{ plex_cfg_butler_task_clean_old_bundles }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1079,7 +1205,8 @@
     _plex_cfg_butler_task_clean_old_cache_files: {
       section: 'Scheduled',
       key: 'ButlerTaskCleanOldCacheFiles',
-      raw: '{{ plex_cfg_butler_task_clean_old_cache_files | default(true) }}',
+      raw: '{{ plex_cfg_butler_task_clean_old_cache_files }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1089,7 +1216,8 @@
     _plex_cfg_butler_task_refresh_local_media: {
       section: 'Scheduled',
       key: 'ButlerTaskRefreshLocalMedia',
-      raw: '{{ plex_cfg_butler_task_refresh_local_media | default(true) }}',
+      raw: '{{ plex_cfg_butler_task_refresh_local_media }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1099,7 +1227,8 @@
     _plex_cfg_butler_task_refresh_libraries: {
       section: 'Scheduled',
       key: 'ButlerTaskRefreshLibraries',
-      raw: '{{ plex_cfg_butler_task_refresh_libraries | default(false) }}',
+      raw: '{{ plex_cfg_butler_task_refresh_libraries }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1109,7 +1238,8 @@
     _plex_cfg_butler_task_upgrade_media_analysis: {
       section: 'Scheduled',
       key: 'ButlerTaskUpgradeMediaAnalysis',
-      raw: '{{ plex_cfg_butler_task_upgrade_media_analysis | default(true) }}',
+      raw: '{{ plex_cfg_butler_task_upgrade_media_analysis }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1119,8 +1249,8 @@
     _plex_cfg_butler_task_refresh_periodic_metadata: {
       section: 'Scheduled',
       key: 'ButlerTaskRefreshPeriodicMetadata',
-      raw:
-        '{{ plex_cfg_butler_task_refresh_periodic_metadata | default(true) }}',
+      raw: '{{ plex_cfg_butler_task_refresh_periodic_metadata }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1130,8 +1260,8 @@
     _plex_cfg_butler_task_deep_media_analysis: {
       section: 'Scheduled',
       key: 'ButlerTaskDeepMediaAnalysis',
-      raw:
-        '{{ plex_cfg_butler_task_deep_media_analysis | default(true) }}',
+      raw: '{{ plex_cfg_butler_task_deep_media_analysis }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1141,7 +1271,8 @@
     _plex_cfg_cinema_trailers_type: {
       section: 'Extras',
       key: 'CinemaTrailersType',
-      raw: '{{ plex_cfg_cinema_trailers_type | default(true) }}',
+      raw: '{{ plex_cfg_cinema_trailers_type }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1151,7 +1282,8 @@
     _plex_cfg_cinema_trailers_from_library: {
       section: 'Extras',
       key: 'CinemaTrailersFromLibrary',
-      raw: '{{ plex_cfg_cinema_trailers_from_library | default(true) }}',
+      raw: '{{ plex_cfg_cinema_trailers_from_library }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1161,7 +1293,8 @@
     _plex_cfg_cinema_trailers_from_theater: {
       section: 'Extras',
       key: 'CinemaTrailersFromTheater',
-      raw: '{{ plex_cfg_cinema_trailers_from_theater | default(false) }}',
+      raw: '{{ plex_cfg_cinema_trailers_from_theater }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1171,7 +1304,8 @@
     _plex_cfg_cinema_trailers_from_bluray: {
       section: 'Extras',
       key: 'CinemaTrailersFromBluRay',
-      raw: '{{ plex_cfg_cinema_trailers_from_bluray | default(false) }}',
+      raw: '{{ plex_cfg_cinema_trailers_from_bluray }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1181,7 +1315,8 @@
     _plex_cfg_cinema_trailers_include_english: {
       section: 'Extras',
       key: 'CinemaTrailersIncludeEnglish',
-      raw: '{{ plex_cfg_cinema_trailers_include_english | default(true) }}',
+      raw: '{{ plex_cfg_cinema_trailers_include_english }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1191,28 +1326,45 @@
     _plex_cfg_cinema_trailers_preroll_id: {
       section: 'Extras',
       key: 'CinemaTrailersPrerollID',
-      raw: '{{ plex_cfg_cinema_trailers_preroll_id | default([]) }}',
-      parsed: '',  # Updated after initial set.
+      raw: '{{ plex_cfg_cinema_trailers_preroll_id }}',
+      data: '{{
+          plex_cfg_cinema_trailers_preroll_id |
+          join("," if plex_cfg_cinema_trailers_preroll_play_all else ";")
+      }}',
+      default: [],
       hint: 'list of str',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
       order: 6,
     }
+    _plex_cfg_cinema_trailers_preroll_play_all: {
+      section: 'Extras',
+      key: '',  # Not rendered; sets separator in CinemaTrailersPrerollID.
+      raw: '{{ plex_cfg_cinema_trailers_preroll_play_all }}',
+      default: true,
+      hint: 'bool',
+      added: '0.0.0',
+      sensitive: false,
+      deprecated: true,
+      order: 7,
+    }
     _plex_cfg_global_music_video_path: {
       section: 'Extras',
       key: 'GlobalMusicVideoPath',
-      raw: '{{ plex_cfg_global_music_video_path | default("") }}',
+      raw: '{{ plex_cfg_global_music_video_path }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
       deprecated: false,
-      order: 7,
+      order: 8,
     }
     _plex_cfg_merged_recently_added: {
       section: 'Libraries',  # Different from Library section.
       key: 'MergedRecentlyAdded',
-      raw: '{{ plex_cfg_merged_recently_added | default(false) }}',
+      raw: '{{ plex_cfg_merged_recently_added }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1222,7 +1374,8 @@
     _plex_cfg_dvr_incremental_epg_loader: {
       section: 'LiveTVDVR',
       key: 'DvrIncrementalEpgLoader',
-      raw: '{{ plex_cfg_dvr_incremental_epg_loader | default(false) }}',
+      raw: '{{ plex_cfg_dvr_incremental_epg_loader }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1232,7 +1385,8 @@
     _plex_cfg_machine_identifier: {
       section: 'Identifiers',
       key: 'MachineIdentifier',  # Auto-generated.
-      raw: '{{ plex_cfg_machine_identifier | default("") }}',
+      raw: '{{ plex_cfg_machine_identifier }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -1242,7 +1396,8 @@
     _plex_cfg_processed_machine_identifier: {
       section: 'Identifiers',
       key: 'ProcessedMachineIdentifier',  # Auto-generated.
-      raw: '{{ plex_cfg_processed_machine_identifier | default("") }}',
+      raw: '{{ plex_cfg_processed_machine_identifier }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -1252,7 +1407,8 @@
     _plex_cfg_anonymous_machine_identifier: {
       section: 'Identifiers',
       key: 'AnonymousMachineIdentifier',  # Auto-generated.
-      raw: '{{ plex_cfg_anonymous_machine_identifier | default("") }}',
+      raw: '{{ plex_cfg_anonymous_machine_identifier }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -1262,7 +1418,8 @@
     _plex_cfg_accepted_eula: {
       section: 'Stateful',
       key: 'AcceptedEULA',
-      raw: '{{ plex_cfg_accepted_eula | default(true) }}',
+      raw: '{{ plex_cfg_accepted_eula }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1272,7 +1429,8 @@
     _plex_cfg_certificate_uuid: {
       section: 'Stateful',
       key: 'CertificateUUID',
-      raw: '{{ plex_cfg_certificate_uuid | default("") }}',
+      raw: '{{ plex_cfg_certificate_uuid }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: true,
@@ -1282,7 +1440,8 @@
     _plex_cfg_certificate_version: {
       section: 'Stateful',
       key: 'CertificateVersion',
-      raw: '{{ plex_cfg_certificate_version | default(3) }}',
+      raw: '{{ plex_cfg_certificate_version }}',
+      default: 3,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -1292,7 +1451,8 @@
     _plex_cfg_collect_usage_data: {
       section: 'Stateful',
       key: 'collectUsageData',
-      raw: '{{ plex_cfg_collect_usage_data | default(false) }}',
+      raw: '{{ plex_cfg_collect_usage_data }}',
+      default: false,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1302,7 +1462,8 @@
     _plex_cfg_global_music_video_path_migrated: {
       section: 'Stateful',
       key: 'GlobalMusicVideoPathMigrated',
-      raw: '{{ plex_cfg_global_music_video_path_migrated | default(true) }}',
+      raw: '{{ plex_cfg_global_music_video_path_migrated }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1312,7 +1473,8 @@
     _plex_cfg_language_in_cloud: {
       section: 'Stateful',
       key: 'LanguageInCloud',
-      raw: '{{ true }}',  # Forced true from plex.
+      raw: true,  # Forced true from plex.
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: false,
@@ -1322,7 +1484,8 @@
     _plex_cfg_last_automatic_mapped_port: {
       section: 'Stateful',
       key: 'LastAutomaticMappedPort',
-      raw: '{{ plex_cfg_last_automatic_mapped_port | default(0) }}',
+      raw: '{{ plex_cfg_last_automatic_mapped_port }}',
+      default: 0,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -1332,7 +1495,8 @@
     _plex_cfg_metrics_epoch: {
       section: 'Stateful',
       key: 'MetricsEpoch',
-      raw: '{{ plex_cfg_metrics_epoch | default(true) }}',
+      raw: '{{ plex_cfg_metrics_epoch }}',
+      default: true,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -1342,7 +1506,8 @@
     _plex_cfg_oldest_previous_version: {
       section: 'Stateful',
       key: 'OldestPreviousVersion',
-      raw: '{{ plex_cfg_oldest_previous_version | default("") }}',
+      raw: '{{ plex_cfg_oldest_previous_version }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -1352,7 +1517,8 @@
     _plex_cfg_pubsub_server: {
       section: 'Stateful',
       key: 'PubSubServer',
-      raw: '{{ plex_cfg_pubsub_server | default("184.105.148.115") }}',
+      raw: '{{ plex_cfg_pubsub_server }}',
+      default: '184.105.148.115',
       hint: 'str',
       added: '0.0.0',
       sensitive: false,
@@ -1362,7 +1528,8 @@
     _plex_cfg_pubsub_server_ping: {
       section: 'Stateful',
       key: 'PubSubServerPing',
-      raw: '{{ plex_cfg_pubsub_server_ping | default(65) }}',
+      raw: '{{ plex_cfg_pubsub_server_ping }}',
+      default: 65,
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -1372,7 +1539,8 @@
     _plex_cfg_pubsub_server_region: {
       section: 'Stateful',
       key: 'PubSubServerRegion',
-      raw: '{{ plex_cfg_pubsub_server_region | default("sjc") }}',
+      raw: '{{ plex_cfg_pubsub_server_region }}',
+      default: 'sjc',
       hint: 'int',
       added: '0.0.0',
       sensitive: false,
@@ -1382,7 +1550,8 @@
     _plex_cfg_online_username: {
       section: 'Service',
       key: 'PlexOnlineUsername',
-      raw: '{{ plex_cfg_online_username | default("") }}',
+      raw: '{{ plex_cfg_online_username }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: true,
@@ -1392,7 +1561,8 @@
     _plex_cfg_online_mail: {
       section: 'Service',
       key: 'PlexOnlineMail',
-      raw: '{{ plex_cfg_online_mail | default("") }}',
+      raw: '{{ plex_cfg_online_mail }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: true,
@@ -1402,7 +1572,8 @@
     _plex_cfg_online_token: {
       section: 'Service',
       key: 'PlexOnlineToken',
-      raw: '{{ plex_cfg_online_token | default("") }}',
+      raw: '{{ plex_cfg_online_token }}',
+      default: '',
       hint: 'str',
       added: '0.0.0',
       sensitive: true,
@@ -1412,7 +1583,8 @@
     _plex_cfg_online_home: {
       section: 'Service',
       key: 'PlexOnlineHome',
-      raw: '{{ plex_cfg_online_home | default(true) }}',
+      raw: '{{ plex_cfg_online_home }}',
+      default: true,
       hint: 'bool',
       added: '0.0.0',
       sensitive: true,
@@ -1420,30 +1592,8 @@
       order: 4,
     }
 
-- name: 'Annotate | update annotations with results'
-  ansible.builtin.set_fact:
-    _plex_cfg_dlna_description_icons: '{{
-      _plex_cfg_dlna_description_icons |
-      combine({"parsed":
-            _plex_cfg_dlna_description_icons.raw.formats | join(",") ~ ";" ~
-            _plex_cfg_dlna_description_icons.raw.sizes | join(",")
-          })
-        }}'
-    _plex_cfg_cinema_trailers_preroll_id: '{{
-      _plex_cfg_cinema_trailers_preroll_id |
-      combine({"parsed":
-          _plex_cfg_cinema_trailers_preroll_id.raw | default([]) |
-          join("," if plex_cfg_cinema_trailers_preroll_play_all else ";")})
-      }}'
-
 - name: 'Annotate | generate role settings'
   ansible.builtin.set_fact:
-    _plex_srv_application_support_dir: '{{
-      _plex_srv_application_support_dir |
-      combine({"role":
-          _plex_srv_application_support_dir.parsed ~ "Plex Media Server/"
-        })
-      }}'
     _plex_auto_options:  # Auto-generated on plex startup.
       - 'MachineIdentifier'
       - 'ProcessedMachineIdentifier'

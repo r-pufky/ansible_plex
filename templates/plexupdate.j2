@@ -16,12 +16,12 @@
 PLEX_URL_BASE="https://downloads.plex.tv/plex-media-server-new"
 INSTALLED_VERSION=$(dpkg-query --show --showformat='${Version}' plexmediaserver)
 
-if [ ! -e "{{ _plex_srv_application_support_dir.role ~ 'Preferences.xml' }}" ]; then
-  echo 'No preference file located: {{ _plex_srv_application_support_dir.role ~ "Preferences.xml" }}'
+if [ ! -e "{{ _plex_srv_application_support_dir.role_preferences }}" ]; then
+  echo 'No preference file located: {{ _plex_srv_application_support_dir.role_preferences }}'
   exit 1
 fi
 
-PLEX_TOKEN=$( sed --silent 's/.*PlexOnlineToken="//p' "{{ _plex_srv_application_support_dir.role ~ 'Preferences.xml' }}" | sed "s/\".*//")
+PLEX_TOKEN=$( sed --silent 's/.*PlexOnlineToken="//p' "{{ _plex_srv_application_support_dir.role_preferences }}" | sed "s/\".*//")
 if [ -z "$PLEX_TOKEN" ]; then
   PLEX_TOKEN='no-entitlement-token'  # ensure token defined for check
 fi

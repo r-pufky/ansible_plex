@@ -3,8 +3,17 @@
 # Settings > Network
 ###############################################################################
 
-# Enable server support for IPv6? Default: True.
-plex_cfg_enable_ipv6: true
+# Client network.
+#
+# Network to advertise to clients.
+#
+# Values:
+#   v4only: Advertise only IPv4.
+#   v6only: Advertise only IPv6.
+#   dualstack: Advertise on both IPv4/6 networks (default).
+#
+# Default: 'dualstack'.
+plex_cfg_ip_network_type: 'dualstack'
 
 # Use Secure connections?
 #

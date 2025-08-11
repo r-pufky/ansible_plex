@@ -273,7 +273,7 @@ plex_cfg_location_visibility: 1
 # server is restarted.
 #
 # Special Case:
-#   * becomes minimum DB cache size when
+#   * Minimum DB cache size grows to current size+10% when
 #     plex_cfg_srv_auto_grow_db_cache_size_enable=true.
 #
 # Default: 40.

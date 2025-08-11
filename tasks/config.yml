@@ -39,16 +39,18 @@
 
 - name: 'Config | query current plex configuration'
   community.general.xml:
-    path: '{{ _plex_srv_application_support_dir.role ~ "Preferences.xml" }}'
+    path: '{{ _plex_srv_application_support_dir.role_preferences }}'
     content: 'attribute'
     xpath: '/Preferences'
   register: _plex_xml_raw
-  no_log: true  # Lifetime API access token, machine identifiers.
+  # TODO(role): disabled until future ansible data tagging update.
+  # no_log: true  # Lifetime API access token, machine identifiers.
 
+# TODO(role): disabled until future ansible data tagging update.
+# no_log: true  # Lifetime API access token, machine identifiers.
 - name: 'Config | parse current plex configuration'
   ansible.builtin.set_fact:
     _plex_xml: '{{ _plex_xml_raw.matches[0].Preferences }}'
-  no_log: true  # Lifetime API access token, machine identifiers.
 
 - name: 'Config | keep auto-generated options'  # _plex_auto_options.
   when: _plex_srv_keep_auto_generated_values.raw
@@ -181,17 +183,16 @@
 - name: 'Config | set plex configuration'
   ansible.builtin.template:
     src: 'Preferences.xml.j2'
-    dest: '{{ _plex_srv_application_support_dir.role ~ "Preferences.xml" }}'
-    owner: '{{ _plex_srv_user.parsed }}'
-    group: '{{ _plex_srv_group.parsed }}'
+    dest: '{{ _plex_srv_application_support_dir.role_preferences }}'
+    owner: '{{ _plex_srv_user.role_uid }}'
+    group: '{{ _plex_srv_group.role_gid }}'
     mode: '0600'
   changed_when: false  # https://github.com/ansible/ansible/issues/32636
-  become:
-    '{{ true if _plex_srv_user_data_manage_enable.raw else omit }}'
+  become: true
   become_user: '{{
       _plex_srv_user.raw
       if _plex_srv_user_data_manage_enable.raw else
-      omit
+      "root"
     }}'
 
 - name: 'Config | enable updates'
@@ -200,17 +201,16 @@
     - name: 'Config | enable updates | auto-update script'
       ansible.builtin.template:
         src: 'plexupdate.j2'
-        dest: '{{ _plex_srv_application_support_dir.role ~ "plexupdate" }}'
-        owner: '{{ _plex_srv_user.parsed }}'
-        group: '{{ _plex_srv_group.parsed }}'
+        dest: '{{ _plex_srv_application_support_dir.role_plex_update }}'
+        owner: '{{ _plex_srv_user.role_uid }}'
+        group: '{{ _plex_srv_group.role_gid }}'
         mode: '0750'
       changed_when: false  # https://github.com/ansible/ansible/issues/32636
-      become:
-        '{{ true if _plex_srv_user_data_manage_enable.raw else omit }}'
+      become: true
       become_user: '{{
           _plex_srv_user.raw
           if _plex_srv_user_data_manage_enable.raw else
-          omit
+          "root"
         }}'
 
     - name: 'Config | enable updates | systemd'
@@ -228,7 +228,7 @@
             service:
               type: 'oneshot'
               exec_start:
-                - '"{{ _plex_srv_application_support_dir.role }}plexupdate"'
+                - '"{{ _plex_srv_application_support_dir.role_plex_update }}"'
               success_exit_status: ['0', '1']
             exec:
               user: 'root'
@@ -253,15 +253,14 @@
   block:
     - name: 'Config | disable updates | auto-update script'
       ansible.builtin.file:
-        path: '{{ _plex_srv_application_support_dir.role ~ "plexupdate" }}'
+        path: '{{ _plex_srv_application_support_dir.role_plex_update }}'
         state: 'absent'
       changed_when: false  # https://github.com/ansible/ansible/issues/32636
-      become:
-        '{{ true if _plex_srv_user_data_manage_enable.raw else omit }}'
+      become: true
       become_user: '{{
           _plex_srv_user.raw
           if _plex_srv_user_data_manage_enable.raw else
-          omit
+          "root"
         }}'
 
     - name: 'Config | disable updates | systemd'

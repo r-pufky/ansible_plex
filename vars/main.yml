@@ -20,9 +20,9 @@
 #   change - e.g. Plex: 1.41.8.9834 -> Role: 1.41.801  (01 role release).
 
 # Last time Plex options were validated against a default configuration.
-plex_role_validate_date: '2024-07-03'
+plex_role_validate_date: '2024-08-11'
 plex_role_validate_release: 'bookworm'
-plex_role_validate_version: '1.41.8.9834'
+plex_role_validate_version: '1.42.1.10060'
 
 # Location of plex DB.
 plex_role_db_dir: 'Plug-in Support/Databases/com.plexapp.plugins.library.db'

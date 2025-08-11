@@ -37,7 +37,7 @@
             - var: 'PLEX_USER'
               value: '{{ _plex_srv_user.raw }}'
             - var: 'PLEX_MEDIA_SERVER_USE_SYSLOG'
-              value: '{{ _plex_srv_use_syslog_enable.parsed }}'
+              value: '{{ _plex_srv_use_syslog_enable.role_options }}'
           user: '{{ _plex_srv_user.raw }}'
           group: '{{ _plex_srv_group.raw }}'
 
@@ -67,7 +67,8 @@
         method: 'GET'
         return_content: true
       register: _plex_entitlement
-      no_log: true  # Lifetime API access token.
+      # TODO(role): disabled until future ansible data tagging update.
+      # no_log: true  # Lifetime API access token.
 
     - name: 'Install | entitlements | determine plexpass version'
       ansible.builtin.set_fact:
@@ -95,17 +96,17 @@
 
 - name: 'Install | check directory structure'
   ansible.builtin.stat:
-    path: '{{ _plex_srv_application_support_dir.role ~ "Preferences.xml" }}'
+    path: '{{ _plex_srv_application_support_dir.role_preferences }}'
   register: _plex_install_structure
 
 - name: 'Install | init first run'
   when: not _plex_install_structure.stat.exists
   block:
-    - name: 'Config | init first run | poll service 🗘'
+    - name: 'Install | init first run | poll service 🗘'
       ansible.builtin.debug:
         msg: '🗘 Initial Plex run to generate directory structure (max 30s) ...'
 
-    - name: 'Config | init first run | start services'
+    - name: 'Install | init first run | start services'
       ansible.builtin.systemd:
         name: '{{ item }}'
         state: 'started'
@@ -113,17 +114,16 @@
       loop:
         - 'plexmediaserver.service'
 
-    - name: 'Config | init first run | check directory structure'
+    - name: 'Install | init first run | check directory structure'
       ansible.builtin.wait_for:
-        path:
-          '{{ _plex_srv_application_support_dir.role ~ "Preferences.xml" }}'
+        path: '{{ _plex_srv_application_support_dir.role_preferences }}'
         msg: 'Plex did not create initial directory layout.'
         delay: 15  # Initial plex run downloads external plugins, etc.
         sleep: 3
         timeout: 30
         state: 'present'
 
-- name: 'Config | stop services'
+- name: 'Install | stop services'
   ansible.builtin.systemd:
     name: '{{ item }}'
     state: 'stopped'

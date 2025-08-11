@@ -23,6 +23,14 @@ plex_cfg_transcoder_quality: 0
 # Default: '/tmp'.
 plex_cfg_transcoder_temp_directory: '/tmp'
 
+# Downloads temporary directory.
+#
+# Directory to use when storing transcoded downloads until the client downloads
+# them.
+#
+# Default: '/tmp'.
+plex_cfg_transcoder_downloads_temp_directory: '/tmp'
+
 # Transcoder default throttle buffer (seconds).
 #
 # Number of seconds to buffer before throttling the transcoder. Playback will
@@ -142,3 +150,15 @@ plex_cfg_hardware_device_path: ''
 #
 # Default: 0.
 plex_cfg_transcode_count_limit: 0
+
+# Maximum simultaneous background video transcodes.
+#
+# Limit the number of simultaneous video transcode your server can utilize for
+# the optimizer and downloads.
+#
+# Values:
+#      0: Unlimited connections (default).
+#   1-20: Max number of connections.
+#
+# Default: 0.
+plex_cfg_transcode_optimizer_transcode_count_limit: 0

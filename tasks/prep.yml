@@ -37,42 +37,41 @@
   ansible.builtin.set_fact:
     _plex_srv_user: '{{
         _plex_srv_user |
-        combine({"parsed": _plex_srv_user_query.uid})
+        combine({"role_uid": _plex_srv_user_query.uid})
       }}'
     _plex_srv_group: '{{
         _plex_srv_group |
-        combine({"parsed": _plex_srv_user_query.group})
+        combine({"role_gid": _plex_srv_user_query.group})
       }}'
 
 - name: 'Prep | set {{ _plex_srv_application_support_dir.raw }}'
   ansible.builtin.file:
     path: '{{ _plex_srv_application_support_dir.raw }}'
-    owner: '{{ _plex_srv_user.parsed }}'
-    group: '{{ _plex_srv_group.parsed }}'
+    owner: '{{ _plex_srv_user.role_uid }}'
+    group: '{{ _plex_srv_group.role_gid }}'
     mode: '0755'
     recurse: '{{ _plex_srv_permissions_recursive_enable.raw }}'
     state: 'directory'
   changed_when: false  # https://github.com/ansible/ansible/issues/32636
-  become:
-    '{{ true if _plex_srv_user_data_manage_enable.raw else omit }}'
+  become: true
   become_user: '{{
       _plex_srv_user.raw
       if _plex_srv_user_data_manage_enable.raw else
-      omit
+      "root"
     }}'
 
-- name: 'Config | grow DB cache'
+- name: 'Prep | grow DB cache'
   when: _plex_srv_auto_grow_db_cache_size_enable.raw
   block:
-    - name: 'Config | grow DB cache | query size'
+    - name: 'Prep | grow DB cache | query size'
       ansible.builtin.stat:
         path: '{{
-            _plex_srv_application_support_dir.role ~ plex_role_db_dir
+            _plex_srv_application_support_dir.role_db_dir
           }}'
       register: _plex_db
 
     # cache_size in MB, stat.size in KB.
-    - name: 'Config | grow DB cache | calculate grow size'
+    - name: 'Prep | grow DB cache | calculate grow size'
       ansible.builtin.set_fact:
         _plex_db_grow_size: '{{
             (_plex_cfg_database_cache_size.raw | int * 0.1) | int
@@ -80,7 +79,7 @@
             ([_plex_db.stat.size, 4194304] | max / 1048576 * 1.1) | int
           }}'
 
-    - name: 'Config | set auto grow DB cache size'
+    - name: 'Prep | set auto grow DB cache size'
       ansible.builtin.set_fact:
         _plex_cfg_database_cache_size: '{{
           _plex_cfg_database_cache_size |

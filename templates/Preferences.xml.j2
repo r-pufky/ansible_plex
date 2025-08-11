@@ -5,9 +5,11 @@
 {%-   for section in _plex_map | selectattr('value.section', '==', header) | sort(attribute='value.order') -%}
 {%-     if not section.value.deprecated -%}
 {%-       if section.value.hint in ['list of str', 'dict'] -%}
-{{ section.value.key }}="{{ section.value.parsed }}"
+{{ section.value.key }}="{{ section.value.data }}"
 {%-       elif section.value.hint == 'bool' -%}
 {{ section.value.key }}="{{ section.value.raw | int }}"
+{%-       elif section.value.hint == 'bool as str' -%}
+{{ section.value.key }}="{{ section.value.data }}"
 {%-       else -%}
 {{ section.value.key }}="{{ section.value.raw }}"
 {%-       endif -%}

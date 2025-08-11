@@ -1,14 +1,11 @@
 ---
 ###############################################################################
-# Entitlement Test
+# Assert Requirements
 ###############################################################################
-# Use a real plex entitlement token with PlexPass to verify entitlement
-# executes correctly.
-#
-#   molecule test -s entitlement_test -- -v -e 'plex_cfg_online_token={TOKEN}'
+# Verify assertion logic correctly prevent role from executing.
 #
 # Tests:
-# * Validate use of a real entitlement key.
+# * Test all assertions are triggered correctly.
 
 dependency:
   name: 'galaxy'
@@ -22,16 +19,18 @@ provisioner:
       callback_whitelist: 'profile_tasks, timer, yaml'
     ssh_connection:
       pipelining: false
+  inventory:
+    host_vars:
+      plex-debian-12-user_data:
+        plex_srv_user_data_manage_enable: true
 platforms:
-  - name: 'plex-12-entitlement_test'
+  - name: 'plex-debian-12-assert_requirements'
     image: 'ghcr.io/hifis-net/debian-systemd:12'
     systemd: 'always'
     volumes:
       - '/sys/fs/cgroup:/sys/fs/cgroup:ro'
     command: '/lib/systemd/systemd'
     pre_build_image: true
-    # published_ports:
-    #   - '32400/tcp'
 verifier:
   name: 'ansible'
 lint: |
@@ -45,7 +44,7 @@ scenario:
     - 'destroy'
     - 'syntax'
     - 'create'
-    # - 'prepare'
+    - 'prepare'
     - 'converge'
     # - 'idempotence'  # Files created, extracted, created, deleted.
     # - 'side_effect'
