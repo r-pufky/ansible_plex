@@ -3,6 +3,9 @@
 ###############################################################################
 # Plex Service Configuration
 ###############################################################################
+# Install size: ~223MB
+#       Plex: ~222MB.
+#   Packages: ~1MB.
 
 # Maximum number of plugins to run at once. Default: 6.
 plex_srv_max_plugin_processes: 6
