@@ -5,4 +5,9 @@
   tasks:
     - name: 'Verify | PASS ✔'
       ansible.builtin.debug:
-        msg: '✔ Tests PASSED during converge.'
+        msg: |
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │                   Tests PASSED during converge.                   │
+          │                                                                   │
+          ╰───────────────────────────────────────────────────────────────────╯

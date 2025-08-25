@@ -39,8 +39,8 @@ provisioner:
         plex_srv_auto_update_enable: false
         plex_srv_auto_grow_db_cache_size_enable: false
 platforms:
-  - name: 'plex-debian-12-auto_disabled'
-    image: 'ghcr.io/hifis-net/debian-systemd:12'
+  - name: 'plex-debian-13-auto_disabled'
+    image: 'ghcr.io/hifis-net/debian-systemd:13'
     systemd: 'always'
     volumes:
       - '/sys/fs/cgroup:/sys/fs/cgroup:ro'

@@ -44,35 +44,18 @@
 # * https://plex.tv
 # * https://support.plex.tv/
 
-# TODO(5.0+): Remove variable renaming check on next major Plex release.
-- name: 'Annotate | check deprecated variable usage'
-  when: >
-    hostvars[inventory_hostname] | dict2items |
-    selectattr("key", "match", "plex_config_*") | length > 0 or
-    hostvars[inventory_hostname] | dict2items |
-    selectattr("key", "match", "plex_service_*") | length > 0 or
-    hostvars[inventory_hostname] | dict2items |
-    selectattr("key", "==", "plex_online_token") | length > 0 or
-    hostvars[inventory_hostname] | dict2items |
-    selectattr("key", "==", "plex_online_username") | length > 0
-  ansible.builtin.fail:
-    msg: |
-      ✘ Role variables have migrated. Read defaults and update.
-
-      plex_config_* -> plex_cfg_*
-      plex_service_* -> plex_srv_*
-      plex_* -> plex_srv_*
-      plex_* -> plex_cfg_*
-
 - name: 'Annotate | DEPRECATED VARIABLES IN USE ⚠'
   when: plex_cfg_enable_ipv6 is defined
   ansible.builtin.fail:
     msg: |
-      ⚠ DEPRECATED VARIABLES IN USE.
-
-      Refer to defaults and update variables:
-
-      plex_cfg_enable_ipv6 -> plex_cfg_ip_network_type
+      ╭───────────────────────────────────────────────────────────────────╮
+      │                                                                   │
+      │                   DEPRECATED VARIABLES IN USE.                    │
+      │                                                                   │
+      ├───────────────────────────────────────────────────────────────────╯
+      │ Refer to defaults and update variables:
+      │
+      │ plex_cfg_enable_ipv6 -> plex_cfg_ip_network_type
 
 - name: 'Annotate | sanitize & annotate service defaults'
   ansible.builtin.set_fact:

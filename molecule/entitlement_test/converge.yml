@@ -8,11 +8,15 @@
       when: plex_cfg_online_token is not defined
       ansible.builtin.debug:
         msg: |
-          ⚠ TEST WILL NOT EXECUTE UNLESS IT IS EXPLICITLY ENABLED.
-
-          Set plex_cfg_online_token with a PlexPass entitlement.
-
-            molecule test -s entitlement_test -- -v -e 'plex_cfg_online_token={TOKEN}'
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │      TEST WILL NOT EXECUTE UNLESS IT IS EXPLICITLY ENABLED.       │
+          │                                                                   │
+          ├───────────────────────────────────────────────────────────────────╯
+          │ Set plex_cfg_online_token with a PlexPass entitlement:
+          │
+          │   molecule test -s entitlement_test -- -v -e \
+          │     'plex_cfg_online_token={TOKEN}'
 
     - name: 'Converge | apply r_pufky.srv.plex'
       when: plex_cfg_online_token is defined

@@ -104,7 +104,13 @@
   block:
     - name: 'Install | init first run | poll service 🗘'
       ansible.builtin.debug:
-        msg: '🗘 Initial Plex run to generate directory structure (max 30s) ...'
+        msg: |
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │         Initial Plex run to generate directory structure.         │
+          │                                                                   │
+          ├───────────────────────────────────────────────────────────────────╯
+          │ Max 30 seconds.
 
     - name: 'Install | init first run | start services'
       ansible.builtin.systemd:

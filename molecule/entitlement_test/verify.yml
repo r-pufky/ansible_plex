@@ -8,4 +8,9 @@
         quiet: true
         that:
           - 0 == 0
-        fail_msg: '✘ Role should execute without any errors.'
+        fail_msg: |
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │              Role should execute without any errors.              │
+          │                                                                   │
+          ╰───────────────────────────────────────────────────────────────────╯

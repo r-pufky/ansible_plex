@@ -29,7 +29,12 @@
         quiet: true
         that:
           - '"plex-update.service" not in ansible_facts.services'
-        fail_msg: '✘ plex-update.service should be removed.'
+        fail_msg: |
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │              plex-update.service should be removed.               │
+          │                                                                   │
+          ╰───────────────────────────────────────────────────────────────────╯
 
     - name: 'Verify | /etc/systemd/system/plex-update.timer'
       ansible.builtin.include_role:
@@ -80,7 +85,13 @@
         quiet: true
         that:
           - '"plex" in ansible_facts.getent_passwd'
-        fail_msg: '✘ plex user should exist {{ ansible_facts.getent_passwd }}.'
+        fail_msg: |
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │                      Plex user should exist.                      │
+          │                                                                   │
+          ├───────────────────────────────────────────────────────────────────╯
+          │ {{ ansible_facts.getent_passwd }}
 
     - name: 'Verify | query current plex configuration'
       community.general.xml:
@@ -103,15 +114,23 @@
         quiet: true
         that:
           - _plex_xml.DatabaseCacheSize == '40'
-        fail_msg: >
-          ✘ DatabaseCacheSize should be exactly 40
-          ({{ _plex_xml.DatabaseCacheSize }}).
+        fail_msg: |
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │              DatabaseCacheSize should be exactly 40.              │
+          │                                                                   │
+          ├───────────────────────────────────────────────────────────────────╯
+          │ {{ _plex_xml.DatabaseCacheSize }}
 
     - name: 'Verify | auto-generated preference overwritten'
       ansible.builtin.assert:
         quiet: true
         that:
           - _plex_xml.HardwareDevicePath == '10de:1eb1:10de:12a0@0000:42:00.0'
-        fail_msg: >
-          ✘ HardwareDevicePath should have pre-configured value
-          ({{ _plex_xml.HardwareDevicePath }}).
+        fail_msg: |
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │       HardwareDevicePath should have pre-configured value.        │
+          │                                                                   │
+          ├───────────────────────────────────────────────────────────────────╯
+          │ {{ _plex_xml.HardwareDevicePath }}

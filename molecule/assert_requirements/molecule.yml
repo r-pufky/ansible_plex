@@ -21,11 +21,11 @@ provisioner:
       pipelining: false
   inventory:
     host_vars:
-      plex-debian-12-user_data:
+      plex-debian-13-user_data:
         plex_srv_user_data_manage_enable: true
 platforms:
-  - name: 'plex-debian-12-assert_requirements'
-    image: 'ghcr.io/hifis-net/debian-systemd:12'
+  - name: 'plex-debian-13-assert_requirements'
+    image: 'ghcr.io/hifis-net/debian-systemd:13'
     systemd: 'always'
     volumes:
       - '/sys/fs/cgroup:/sys/fs/cgroup:ro'

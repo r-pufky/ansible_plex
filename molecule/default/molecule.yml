@@ -26,11 +26,11 @@ provisioner:
       pipelining: false
   inventory:
     host_vars:
-      plex-debian-12-user_data:
+      plex-debian-13-user_data:
         plex_srv_user_data_manage_enable: true
 platforms:
-  - name: 'plex-debian-12-default'
-    image: 'ghcr.io/hifis-net/debian-systemd:12'
+  - name: 'plex-debian-13-default'
+    image: 'ghcr.io/hifis-net/debian-systemd:13'
     systemd: 'always'
     volumes:
       - '/sys/fs/cgroup:/sys/fs/cgroup:ro'
@@ -38,8 +38,8 @@ platforms:
     pre_build_image: true
     published_ports:
       - '32400/tcp'
-  - name: 'plex-debian-12-user_data'
-    image: 'ghcr.io/hifis-net/debian-systemd:12'
+  - name: 'plex-debian-13-user_data'
+    image: 'ghcr.io/hifis-net/debian-systemd:13'
     systemd: 'always'
     volumes:
       - '/sys/fs/cgroup:/sys/fs/cgroup:ro'

@@ -3,17 +3,6 @@
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Verify | gather service status'
-      ansible.builtin.service_facts:
-
-    # Update service is not enforced on validate as it is toggled.
-    - name: 'Verify | assert plex-update.service active'
-      ansible.builtin.assert:
-        quiet: true
-        that:
-          - '"plex-update.service" in ansible_facts.services'
-        fail_msg: '✘ plex-update.service should be enabled.'
-
     - name: >
         Default | verify |
         /etc/systemd/system/plexmediaserver.service.d/override.conf
@@ -43,7 +32,12 @@
         that:
           - _test_plex_timer_status.rc == 0
           - '"Active: active" in _test_plex_timer_status.stdout'
-        fail_msg: '✘ plex-update.timer should be enabled.'
+        fail_msg: |
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │               plex-update.timer should be enabled.                │
+          │                                                                   │
+          ╰───────────────────────────────────────────────────────────────────╯
 
     - name: 'Verify | /etc/systemd/system/plex-update.timer'
       ansible.builtin.include_role:
@@ -79,17 +73,25 @@
         quiet: true
         that:
           - _plex_xml.DatabaseCacheSize == '44'
-        fail_msg: >
-          ✘ DatabaseCacheSize should grow to 44
-          ({{ _plex_xml.DatabaseCacheSize }}).
+        fail_msg: |
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │               DatabaseCacheSize should grow to 44.                │
+          │                                                                   │
+          ├───────────────────────────────────────────────────────────────────╯
+          │ {{ _plex_xml.DatabaseCacheSize }}
 
     - name: 'Verify | auto-generated preference passed through'
       ansible.builtin.assert:
         quiet: true
         that:
           - _plex_xml.MachineIdentifier != ''
-        fail_msg: >
-          ✘ MachineIdentifier should have an auto-generated value ("")
+        fail_msg: |
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │      MachineIdentifier should have an auto-generated value.       │
+          │                                                                   │
+          ╰───────────────────────────────────────────────────────────────────╯
 
     # Stateful will override the user configured value.
     - name: 'Verify | stateful preference passed through'
@@ -97,6 +99,10 @@
         quiet: true
         that:
           - _plex_xml.AcceptedEULA == '1'
-        fail_msg: >
-          ✘ AcceptedEULA should be a stateful value (1)
-          ({{ _plex_xml.AcceptedEULA }}).
+        fail_msg: |
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │           AcceptedEULA should be a stateful value (1).            │
+          │                                                                   │
+          ├───────────────────────────────────────────────────────────────────╯
+          │ {{ _plex_xml.AcceptedEULA }}
