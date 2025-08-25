@@ -101,6 +101,21 @@ Configure Plex server.
     name: 'r_pufky.srv.plex'
 ```
 
+## Development
+Configure [environment](https://github.com/r-pufky/ansible_collection_srv/blob/main/docs/dev/environment/README.md)
+
+Run all unit tests:
+``` bash
+molecule test --all
+```
+
+### Releases
+Major release versions track Plex release versions. Branch label tracks
+Debian OS release.
+
+* **[13.x.x](https://github.com/r-pufky/ansible_plex)**: 13 Trixie.
+* **[12.x.x](https://github.com/r-pufky/ansible_plex/tree/12.x)**: 12 Bookworm.
+
 ### Issues
 Create a bug and provide as much information as possible.
 
