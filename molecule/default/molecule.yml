@@ -37,7 +37,7 @@ platforms:
     command: '/lib/systemd/systemd'
     pre_build_image: true
     published_ports:
-      - '32400/tcp'
+      - '32400:32400/tcp'
   - name: 'plex-debian-13-user_data'
     image: 'ghcr.io/hifis-net/debian-systemd:13'
     systemd: 'always'

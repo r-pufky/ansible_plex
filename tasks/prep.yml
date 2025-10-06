@@ -37,18 +37,18 @@
   ansible.builtin.set_fact:
     _plex_srv_user: '{{
         _plex_srv_user |
-        combine({"role_uid": _plex_srv_user_query.uid})
+        combine({"_uid": _plex_srv_user_query.uid})
       }}'
     _plex_srv_group: '{{
         _plex_srv_group |
-        combine({"role_gid": _plex_srv_user_query.group})
+        combine({"_gid": _plex_srv_user_query.group})
       }}'
 
 - name: 'Prep | set {{ _plex_srv_application_support_dir.raw }}'
   ansible.builtin.file:
     path: '{{ _plex_srv_application_support_dir.raw }}'
-    owner: '{{ _plex_srv_user.role_uid }}'
-    group: '{{ _plex_srv_group.role_gid }}'
+    owner: '{{ _plex_srv_user._uid }}'
+    group: '{{ _plex_srv_group._gid }}'
     mode: '0755'
     recurse: '{{ _plex_srv_permissions_recursive_enable.raw }}'
     state: 'directory'
@@ -66,7 +66,7 @@
     - name: 'Prep | grow DB cache | query size'
       ansible.builtin.stat:
         path: '{{
-            _plex_srv_application_support_dir.role_db_dir
+            _plex_srv_application_support_dir._db_dir
           }}'
       register: _plex_db
 

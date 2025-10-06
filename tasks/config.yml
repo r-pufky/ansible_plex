@@ -39,7 +39,7 @@
 
 - name: 'Config | query current plex configuration'
   community.general.xml:
-    path: '{{ _plex_srv_application_support_dir.role_preferences }}'
+    path: '{{ _plex_srv_application_support_dir._preferences }}'
     content: 'attribute'
     xpath: '/Preferences'
   register: _plex_xml_raw
@@ -183,9 +183,9 @@
 - name: 'Config | set plex configuration'
   ansible.builtin.template:
     src: 'Preferences.xml.j2'
-    dest: '{{ _plex_srv_application_support_dir.role_preferences }}'
-    owner: '{{ _plex_srv_user.role_uid }}'
-    group: '{{ _plex_srv_group.role_gid }}'
+    dest: '{{ _plex_srv_application_support_dir._preferences }}'
+    owner: '{{ _plex_srv_user._uid }}'
+    group: '{{ _plex_srv_group._gid }}'
     mode: '0600'
   changed_when: false  # https://github.com/ansible/ansible/issues/32636
   become: true
@@ -201,9 +201,9 @@
     - name: 'Config | enable updates | auto-update script'
       ansible.builtin.template:
         src: 'plexupdate.j2'
-        dest: '{{ _plex_srv_application_support_dir.role_plex_update }}'
-        owner: '{{ _plex_srv_user.role_uid }}'
-        group: '{{ _plex_srv_group.role_gid }}'
+        dest: '{{ _plex_srv_application_support_dir._plex_update }}'
+        owner: '{{ _plex_srv_user._uid }}'
+        group: '{{ _plex_srv_group._gid }}'
         mode: '0750'
       changed_when: false  # https://github.com/ansible/ansible/issues/32636
       become: true
@@ -228,7 +228,7 @@
             service:
               type: 'oneshot'
               exec_start:
-                - '"{{ _plex_srv_application_support_dir.role_plex_update }}"'
+                - '"{{ _plex_srv_application_support_dir._plex_update }}"'
               success_exit_status: ['0', '1']
             exec:
               user: 'root'
@@ -253,7 +253,7 @@
   block:
     - name: 'Config | disable updates | auto-update script'
       ansible.builtin.file:
-        path: '{{ _plex_srv_application_support_dir.role_plex_update }}'
+        path: '{{ _plex_srv_application_support_dir._plex_update }}'
         state: 'absent'
       changed_when: false  # https://github.com/ansible/ansible/issues/32636
       become: true

@@ -151,6 +151,18 @@ plex_cfg_hardware_device_path: ''
 # Default: 0.
 plex_cfg_transcode_count_limit: 0
 
+# Maximum simultaneous CPU transcodes.
+#
+# Limit the number of simultaneous video transcode streams your server can
+# utilize on your CPU.
+#
+# Values:
+#      0: Unlimited connections (default).
+#   1-20: Max number of connections.
+#
+# Default: 0.
+plex_cfg_transcode_cpu_transcode_count_limit: 0
+
 # Maximum simultaneous background video transcodes.
 #
 # Limit the number of simultaneous video transcode your server can utilize for

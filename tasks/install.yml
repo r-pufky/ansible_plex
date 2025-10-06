@@ -37,7 +37,7 @@
             - var: 'PLEX_USER'
               value: '{{ _plex_srv_user.raw }}'
             - var: 'PLEX_MEDIA_SERVER_USE_SYSLOG'
-              value: '{{ _plex_srv_use_syslog_enable.role_options }}'
+              value: '{{ _plex_srv_use_syslog_enable._options }}'
           user: '{{ _plex_srv_user.raw }}'
           group: '{{ _plex_srv_group.raw }}'
 
@@ -96,7 +96,7 @@
 
 - name: 'Install | check directory structure'
   ansible.builtin.stat:
-    path: '{{ _plex_srv_application_support_dir.role_preferences }}'
+    path: '{{ _plex_srv_application_support_dir._preferences }}'
   register: _plex_install_structure
 
 - name: 'Install | init first run'
@@ -122,7 +122,7 @@
 
     - name: 'Install | init first run | check directory structure'
       ansible.builtin.wait_for:
-        path: '{{ _plex_srv_application_support_dir.role_preferences }}'
+        path: '{{ _plex_srv_application_support_dir._preferences }}'
         msg: 'Plex did not create initial directory layout.'
         delay: 15  # Initial plex run downloads external plugins, etc.
         sleep: 3
