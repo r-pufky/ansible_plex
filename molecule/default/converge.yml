@@ -3,12 +3,12 @@
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Converge | apply r_pufky.srv.plex'
+    - name: 'Converge | apply r_pufky.media.plex'
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.plex'
+        name: 'r_pufky.media.plex'
 
-    - name: 'Converge | apply r_pufky.srv.plex (stateful)'
+    - name: 'Converge | apply r_pufky.media.plex (stateful)'
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.plex'
+        name: 'r_pufky.media.plex'
       vars:
         plex_cfg_accepted_eula: false

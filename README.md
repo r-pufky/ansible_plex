@@ -14,7 +14,7 @@ All ports and protocols have been defined for the role.
 
 ## Dependencies
 **galaxy-ng** roles cannot be used independently. Part of
-[r_pufky.srv](https://github.com/r-pufky/ansible_collection_srv) collection.
+[r_pufky.media](https://github.com/r-pufky/ansible_collection_media) collection.
 
 ## New Plex Installation
 Read defaults documentation.
@@ -52,7 +52,7 @@ the host config:
 ``` yaml
 - name: 'New Plex installation'
   ansible.builtin.include_role:
-    name: 'r_pufky.srv.plex'
+    name: 'r_pufky.media.plex'
   vars:
     plex_srv_keep_auto_generated_values: true
 ```
@@ -98,7 +98,7 @@ Configure Plex server.
 ``` yaml
 - name: 'Manage Plex'
   ansible.builtin.include_role:
-    name: 'r_pufky.srv.plex'
+    name: 'r_pufky.media.plex'
 ```
 
 ## Development

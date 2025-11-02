@@ -18,7 +18,7 @@
           │   molecule test -s entitlement_test -- -v -e \
           │     'plex_cfg_online_token={TOKEN}'
 
-    - name: 'Converge | apply r_pufky.srv.plex'
+    - name: 'Converge | apply r_pufky.media.plex'
       when: plex_cfg_online_token is defined
       ansible.builtin.include_role:
-        name: 'r_pufky.srv.plex'
+        name: 'r_pufky.media.plex'
