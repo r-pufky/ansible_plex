@@ -115,9 +115,9 @@ Release format: **{OS}-{SERVICE}-{ROLE}**
 Each type inherits the versioning system used; defaulting to schematic
 versioning.
 
-`12.0.0-2.0.3-1.0.0`
+`12-2.0.3-1.0.0`
 
-* 12.0.0 - Debian 12 (bookworm).
+* 12 - Debian 12 (bookworm).
 * 2.0.3 - Service/app version.
 * 1.0.0 - Role version.
 

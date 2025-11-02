@@ -2,22 +2,20 @@
 ###############################################################################
 # Plex Role Options
 ###############################################################################
+# Use Debian package for installation.
 #
 # Updates:
-# * New MAJOR, MINOR releases should hard branch at version before starting
-#   (e.g. 2.14.x branch).
-# * Keep a separate change log as changes are made, you will not remember all
-#   of them.
+# * Branch for new Debian releases.
+# * KEEP a separate change log as changes are made.
 # * Use bare-metal docs to validate package/process changes.
 # * Update role defaults (includes updating defaults, tasks):
 #   * Use configuration docs to add new variables.
-#   * Use defaults/ to remove any changed/deprecated variables.
+#   * Use defaults to remove any changed/deprecated variables.
 #   * Show advanced options in UI, compare to existing config files.
 #   * Set advanced options to reveal additional variables.
 # * Update tests for any changes.
-# * Standard role validation testing (yamllint, ansible-lint, todo, noqa).
-# * Tag with MAJOR.MINOR version, with PATCH representing role change.
-#   change - e.g. Plex: 1.41.8.9834 -> Role: 1.41.801  (01 role release).
+# * Standard role validation testing (yamllint, ansible-lint, to-do, no-qa).
+# * Tag with OS-APP-ROLE version.
 #
 # Reference:
 # * https://forums.plex.tv/t/plex-media-server/30447

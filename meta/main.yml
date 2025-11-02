@@ -16,5 +16,7 @@ galaxy_info:
     - 'plex'
     - 'media'
     - 'plexmediaserver'
+    - 'streaming'
+    - 'management'
 
 dependencies: []
