@@ -18,6 +18,8 @@ All ports and protocols have been defined for the role.
 
 ## New Plex Installation
 Read defaults documentation.
+[Additional documentation](http://r-pufky.github.io/r-pufky/docs/media/plex).
+
 
 ### Plex Online Token
 Obtain your `plex_cfg_online_token` via [this support article.](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/)
