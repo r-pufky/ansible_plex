@@ -25,7 +25,9 @@
 # * https://support.plex.tv/
 
 - name: 'Annotate | DEPRECATED VARIABLES IN USE ⚠'
-  when: plex_cfg_enable_ipv6 is defined
+  when: >
+    plex_cfg_enable_ipv6 is defined or
+    plex_cfg_transcoder_hevc_encoding is boolean
   ansible.builtin.fail:
     msg: |
       ╭───────────────────────────────────────────────────────────────────╮
@@ -35,7 +37,8 @@
       ├───────────────────────────────────────────────────────────────────╯
       │ Refer to defaults and update variables:
       │
-      │ plex_cfg_enable_ipv6 -> plex_cfg_ip_network_type
+      │ plex_cfg_enable_ipv6 ➔ plex_cfg_ip_network_type
+      │ plex_cfg_transcoder_hevc_encoding ➔ Plex 1.43.0.10389+ - changed to string
 
 - name: 'Annotate | sanitize & annotate service defaults'
   ansible.builtin.set_fact:  # noqa jinja[spacing] readability.
@@ -772,9 +775,10 @@
     _plex_cfg_transcoder_hevc_encoding: "{{ {} | r_pufky.data.v3(
         section='Transcoder',
         key='TranscoderHEVCEncoding',
-        raw=plex_cfg_transcoder_hevc_encoding,
-        default=false,
-        hint='bool',
+        raw=plex_cfg_transcoder_hevc_encoding | lower,
+        default='always',
+        hint='str',
+        comment='1.43.0.10389 changed from boolean to string.',
         order=11
         )
       }}"
@@ -1292,6 +1296,175 @@
         order=4
         )
       }}"
+    # Experimental Settings
+    _plex_cfg_experimental_album_sort: "{{ {} | r_pufky.data.v3(
+        section='Experimental',
+        key='AlbumSort',
+        raw=plex_cfg_experimental_album_sort,
+        default='',
+        hint='str',
+        order=1
+        )
+      }}"
+    _plex_cfg_experimental_article_strings: "{{ {} | r_pufky.data.v3(
+        section='Experimental',
+        key='ArticleStrings',
+        raw=plex_cfg_experimental_article_strings,
+        default='',
+        hint='str',
+        order=2
+        )
+      }}"
+    _plex_cfg_experimental_background_transcode_low_priority: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='BackgroundTranscodeLowPriority',
+        raw=plex_cfg_experimental_background_transcode_low_priority,
+        default='',
+        hint='str',
+        order=3
+        )
+      }}"
+    _plex_cfg_experimental_dlna_platinum_logging_level: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='DlnaPlatinumLoggingLevel',
+        raw=plex_cfg_experimental_dlna_platinum_logging_level,
+        default='',
+        hint='str',
+        order=4
+        )
+      }}"
+    _plex_cfg_experimental_enable_local_security: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='enableLocalSecurity',
+        raw=plex_cfg_experimental_enable_local_security,
+        default='',
+        hint='str',
+        order=5
+        )
+      }}"
+    _plex_cfg_experimental_generate_bif_frame_interval: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='GenerateBIFFrameInterval',
+        raw=plex_cfg_experimental_generate_bif_frame_interval,
+        default='',
+        hint='str',
+        order=6
+        )
+      }}"
+    _plex_cfg_experimental_generate_bif_keyframes_only: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='GenerateBIFKeyframesOnly',
+        raw=plex_cfg_experimental_generate_bif_keyframes_only,
+        default='',
+        hint='str',
+        order=7
+        )
+      }}"
+    _plex_cfg_experimental_local_app_data_path: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='LocalAppDataPath',
+        raw=plex_cfg_experimental_local_app_data_path,
+        default='',
+        hint='str',
+        order=8
+        )
+      }}"
+    _plex_cfg_experimental_log_memory_use: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='LogMemoryUse',
+        raw=plex_cfg_experimental_log_memory_use,
+        default='',
+        hint='str',
+        order=9
+        )
+      }}"
+    _plex_cfg_experimental_log_num_files: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='LogNumFiles',
+        raw=plex_cfg_experimental_log_num_files,
+        default='',
+        hint='str',
+        order=10
+        )
+      }}"
+    _plex_cfg_experimental_long_running_job_threads: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='LongRunningJobThreads',
+        raw=plex_cfg_experimental_long_running_job_threads,
+        default='',
+        hint='str',
+        order=11
+        )
+      }}"
+    _plex_cfg_experimental_radio_days_since_last_played: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='RadioDaysSinceLastPlayed',
+        raw=plex_cfg_experimental_radio_days_since_last_played,
+        default='',
+        hint='str',
+        order=12
+        )
+      }}"
+    _plex_cfg_experimental_radio_directory_limit: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='RadioDirectoryLimit',
+        raw=plex_cfg_experimental_radio_directory_limit,
+        default='',
+        hint='str',
+        order=13
+        )
+      }}"
+    _plex_cfg_experimental_transcoder_default_duration: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='TranscoderDefaultDuration',
+        raw=plex_cfg_experimental_transcoder_default_duration,
+        default='',
+        hint='str',
+        order=14
+        )
+      }}"
+    _plex_cfg_experimental_transcoder_h264_options_override: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='TranscoderH264OptionsOverride',
+        raw=plex_cfg_experimental_transcoder_h264_options_override,
+        default='',
+        hint='str',
+        order=15
+        )
+      }}"
+    _plex_cfg_experimental_transcoder_log_level: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='TranscoderLogLevel',
+        raw=plex_cfg_experimental_transcoder_log_level,
+        default='',
+        hint='str',
+        order=16
+        )
+      }}"
+    _plex_cfg_experimental_transcoder_photo_file_size_limit_mib: "{{
+      {} | r_pufky.data.v3(
+        section='Experimental',
+        key='TranscoderPhotoFileSizeLimitMiB',
+        raw=plex_cfg_experimental_transcoder_photo_file_size_limit_mib,
+        default='',
+        hint='str',
+        order=16
+        )
+      }}"
 
 - name: 'Annotate | generate role settings'
   ansible.builtin.set_fact:
@@ -1334,3 +1507,4 @@
       - 'Identifiers'
       - 'Stateful'
       - 'Service'
+      - 'Experimental'

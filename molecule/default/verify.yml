@@ -106,3 +106,16 @@
           │                                                                   │
           ├───────────────────────────────────────────────────────────────────╯
           │ {{ _plex_xml.AcceptedEULA }}
+
+    # Experimental options are not rendered by default.
+    - name: 'Verify | stateful preference passed through'
+      ansible.builtin.assert:
+        quiet: true
+        that:
+          - _plex_xml.GenerateBIFFrameInterval is not defined
+        fail_msg: |
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │            GenerateBIFFrameInterval should not exist.             │
+          │                                                                   │
+          ╰───────────────────────────────────────────────────────────────────╯

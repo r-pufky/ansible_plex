@@ -1,4 +1,5 @@
 ---
+# yamllint disable rule:line-length
 ###############################################################################
 # Settings > Transcoder
 ###############################################################################
@@ -67,7 +68,13 @@ plex_cfg_transcoder_h264_background_preset: 'veryfast'
 # transcoding with this feature enabled; see our support articles for further
 # details.
 #
+# AMD iGPU's will pass encoding frames back and forth between iGPU and CPU
+# drastically reducing performance. Recommend disabling for AMD iGPU.
+#
 # Default: True.
+#
+# Reference:
+# * https://old.reddit.com/r/PleX/comments/1hbn73h/hw_transcoding_with_ryzen_igpu/
 plex_cfg_transcoder_tone_mapping: true
 
 # Tonemapping Algorithm.
@@ -75,12 +82,21 @@ plex_cfg_transcoder_tone_mapping: true
 # Algorithm to use when performing HDR tone mapping.
 #
 # Values:
-#     linear: Linear.
-#      gamma: Gamma.
-#       clip: Clip.
-#   reinhard: Reinhard.
-#      hable: Hable (default).
-#     mobius: Mobius.
+#     linear: Stretch entire reference gamut to a linear multiple of display.
+#      gamma: Fit a logarithmic transfer between the tone curves.
+#       clip: Hard-clip any out-of-range values. Use it for perfect color
+#             accuracy for in-range values, while distorting out-of-range
+#             values.
+#   reinhard: Preserve overall image brightness with a simple curve, using
+#             nonlinear contrast, which results in flattening details and
+#             degrading color accuracy.
+#      hable: Preserve both dark and bright details better than reinhard, at
+#             the cost of slightly darkening everything. Use it when detail
+#             preservation is more important than color and brightness
+#             accuracy. (default).
+#     mobius: Smoothly map out-of-range values, while retaining contrast and
+#             colors for in-range material as much as possible. Use it when
+#             color accuracy is more important than detail preservation.
 #
 # Default: 'hable'.
 plex_cfg_transcoder_tone_mapping_algorithm: 'hable'
@@ -115,8 +131,13 @@ plex_cfg_hardware_accelerated_encoders: true
 #
 # Enable transcoding using the HEVC codec if it is supported by the client.
 #
-# Default: False.
-plex_cfg_transcoder_hevc_encoding: false
+# Values:
+#          never: Never use HEVC video encoding.
+#   hevc-sources: Encode HEVC sources only.
+#         always: Always use HEVC video encoding (default).
+#
+# Default: 'always'.
+plex_cfg_transcoder_hevc_encoding: 'always'
 
 # Enable HEVC Optimization (experimental)?
 #

@@ -23,7 +23,7 @@
 # Last time Plex options were validated against a default configuration.
 plex_role_validate_date: '2025-08-25'
 plex_role_validate_release: 'trixie'
-plex_role_validate_version: '1.42.2.10156'
+plex_role_validate_version: '1.43.0.10389'
 
 # Location of plex DB.
 plex_role_db_dir: 'Plug-in Support/Databases/com.plexapp.plugins.library.db'

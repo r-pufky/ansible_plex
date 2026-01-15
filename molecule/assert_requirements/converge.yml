@@ -14,3 +14,14 @@
         test_fail_message:
           'plex_cfg_enable_ipv6 did not trigger assertion.'
         plex_cfg_enable_ipv6: true
+
+    - name: 'Converge | assert deprecated variables are detected'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'assertions.yml'
+      vars:
+        test_name: 'Converge | assert deprecated variables are detected'
+        test_role: 'r_pufky.media.plex'
+        test_fail_message:
+          'plex_cfg_transcoder_hevc_encoding did not trigger assertion.'
+        plex_cfg_transcoder_hevc_encoding: true
