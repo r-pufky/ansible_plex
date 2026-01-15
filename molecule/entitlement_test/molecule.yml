@@ -22,6 +22,10 @@ provisioner:
       callback_whitelist: 'profile_tasks, timer, yaml'
     ssh_connection:
       pipelining: false
+  inventory:
+    group_vars:
+      all:
+        repo_testing_enable: true
 platforms:
   - name: 'plex-12-entitlement_test'
     image: 'ghcr.io/hifis-net/debian-systemd:13'

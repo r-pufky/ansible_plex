@@ -30,6 +30,7 @@ provisioner:
   inventory:
     group_vars:
       all:
+        repo_testing_enable: true
         plex_srv_create_user: false
         plex_srv_user: 'plex'
         plex_srv_group: 'plex'

@@ -276,3 +276,61 @@
           - name: 'plex-update'
             state: 'absent'
             drop_in: false
+
+- name: 'Config | enable DB repair'
+  when: _plex_srv_repair_enable.raw
+  ansible.builtin.include_role:
+    name: 'r_pufky.deb.systemd'
+  vars:
+    systemd_daemon_reload_enable: true
+    systemd_services:
+      - name: 'plex-repair'
+        state: 'present'
+        drop_in: false
+        unit:
+          description: 'Automatically repair Plex Media Server DB.'
+          requires: ['plex-repair.timer']
+        service:
+          type: 'oneshot'
+          exec_start:
+            - '{{
+                _plex_srv_repair_enable._path ~ " " ~
+                _plex_srv_repair_options.data
+              }}'
+        exec:
+          user: 'root'
+          group: 'root'
+          environment:
+            - var: '{{ _plex_srv_repair_cache_age.key }}'
+              value: '{{ _plex_srv_repair_cache_age.raw }}'
+            - var: '{{ _plex_srv_repair_page_size.key }}'
+              value: '{{ _plex_srv_repair_page_size.raw }}'
+        install:
+          wanted_by: ['multi-user.target']
+    systemd_timers:
+      - name: 'plex-repair'
+        state: 'present'
+        drop_in: false
+        unit:
+          description: 'plex-repair.service timer'
+          requires: ['plex-repair.service']
+        timer:
+          unit: 'plex-repair.service'
+          on_calendar: ['{{ _plex_srv_repair_schedule.raw }}']
+        install:
+          wanted_by: ['timers.target']
+
+- name: 'Config | disable DB repair'
+  when: not _plex_srv_repair_enable.raw
+  ansible.builtin.include_role:
+    name: 'r_pufky.deb.systemd'
+  vars:
+    systemd_daemon_reload_enable: true
+    systemd_services:
+      - name: 'plex-repair'
+        state: 'absent'
+        drop_in: false
+    systemd_timers:
+      - name: 'plex-repair'
+        state: 'absent'
+        drop_in: false

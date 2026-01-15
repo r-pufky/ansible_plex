@@ -39,7 +39,7 @@ plex_role_db_dir: 'Plug-in Support/Databases/com.plexapp.plugins.library.db'
 plex_role_packages:
   - 'plexmediaserver'
   - 'python3-lxml'  # XML parsing for Preferences.xml.
-  - 'curl'  # plexupdate script.
+  - 'curl'  # plexupdate, dbrepair script.
 
 plex_role_apt_sources:
   - name: 'plexmediaserver'
@@ -51,6 +51,19 @@ plex_role_apt_sources:
     components:
       - 'main'
     signed_by: 'https://downloads.plex.tv/plex-keys/PlexSign.key'
+
+###############################################################################
+# DBRepair.sh
+###############################################################################
+# Database maintenance script.
+#
+# Reference:
+# * https://github.com/ChuckPa/DBRepair
+
+plex_role_repair_url: '{{
+    "https://github.com/ChuckPa/PlexDBRepair/releases/latest/download/" ~
+    "DBRepair.sh"
+  }}'
 
 ###############################################################################
 # Default Plex User/Group

@@ -160,6 +160,54 @@
         order=14
         )
       }}"
+    _plex_srv_repair_enable: "{{ {} | r_pufky.data.v3(
+        raw=plex_srv_repair_enable,
+        default=false,
+        _path='/usr/bin/DBRepair.sh',
+        hint='bool',
+        order=15
+        )
+      }}"
+    _plex_srv_repair_schedule: "{{ {} | r_pufky.data.v3(
+        raw=plex_srv_repair_schedule,
+        default='weekly',
+        hint='str',
+        order=16
+        )
+      }}"
+    _plex_srv_repair_cache_age: "{{ {} | r_pufky.data.v3(
+        key='DBREPAIR_CACHEAGE',
+        raw=plex_srv_repair_cache_age,
+        default=30,
+        hint='int',
+        order=17
+        )
+      }}"
+    _plex_srv_repair_page_size: "{{ {} | r_pufky.data.v3(
+        key='DBREPAIR_PAGESIZE',
+        raw=plex_srv_repair_page_size,
+        default=4096,
+        hint='int',
+        order=18
+        )
+      }}"
+    _plex_srv_repair_options: "{{ {} | r_pufky.data.v3(
+        raw=plex_srv_repair_options,
+        data=plex_srv_repair_options | join(' '),
+        default=[
+          'stop',
+          'check',
+          'repair',
+          'reindex',
+          'prune',
+          'purge',
+          'deflate',
+          'exit'
+        ],
+        hint='int',
+        order=19
+        )
+      }}"
 
 - name: 'Annotate | sanitize & annotate config defaults'
   ansible.builtin.set_fact:  # noqa jinja[spacing] readability.

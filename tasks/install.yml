@@ -94,6 +94,29 @@
             _plex_srv_arch.raw ~ ".deb"
           }}'
 
+- name: 'Install | DB repair script'
+  when: _plex_srv_repair_enable.raw
+  block:
+    - name: 'Install | query DB repair script'
+      ansible.builtin.stat:
+        path: '{{ _plex_srv_repair_enable._path }}'
+      register: _plex_repair
+
+    - name: 'Install | download DB repair script'
+      when: >
+        not _plex_repair.stat.exists and
+        not (repo_testing_enable | default(false))
+      ansible.builtin.get_url:
+        url: '{{ plex_role_repair_url }}'
+        dest: '{{ _plex_srv_repair_enable._path }}'
+        owner: 'root'
+        group: 'root'
+        mode: '0755'
+      register: _plex_download
+      until: _plex_download is succeeded
+      retries: 3
+      delay: 2
+
 - name: 'Install | check directory structure'
   ansible.builtin.stat:
     path: '{{ _plex_srv_application_support_dir._preferences }}'

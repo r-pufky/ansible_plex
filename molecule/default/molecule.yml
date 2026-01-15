@@ -28,6 +28,9 @@ provisioner:
     host_vars:
       plex-debian-13-user_data:
         plex_srv_user_data_manage_enable: true
+    group_vars:
+      all:
+        repo_testing_enable: true
 platforms:
   - name: 'plex-debian-13-default'
     image: 'ghcr.io/hifis-net/debian-systemd:13'

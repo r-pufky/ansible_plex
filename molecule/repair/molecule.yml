@@ -1,11 +1,13 @@
 ---
 ###############################################################################
-# Experimental
+# Repair
 ###############################################################################
-# Experimental options are rendered correctly.
+# DB repair script is deployed successfully.
 #
 # Tests:
-# * Experimental options that are enabled are rendered correctly.
+# * DBRepair.sh script is installed to /usr/bin/DBRepair.sh with correct
+#   permissions.
+# * Repair job and systemd timers are set.
 
 dependency:
   name: 'galaxy'
@@ -20,12 +22,11 @@ provisioner:
     ssh_connection:
       pipelining: false
   inventory:
-    group_vars:
-      all:
-        plex_cfg_experimental_generate_bif_frame_interval: 15
-        repo_testing_enable: true
+    host_vars:
+      plex-debian-13-repair:
+        plex_srv_repair_enable: true
 platforms:
-  - name: 'plex-debian-13-experimental'
+  - name: 'plex-debian-13-repair'
     image: 'ghcr.io/hifis-net/debian-systemd:13'
     systemd: 'always'
     volumes:

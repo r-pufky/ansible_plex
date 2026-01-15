@@ -1,0 +1,107 @@
+---
+###############################################################################
+# Plex DB Repair
+###############################################################################
+# Database repair utility script provided by Plex Linux engineers to automate
+# many of the DB maintenance tasks. Highly recommended.
+#
+# Script is deployed to /usr/bin/DBRepair.sh and must be executed as root user.
+#
+# Squashed NFS mounted application directories cannot enable automatic DB
+# repair without modifying and manually running the script itself.
+#
+# Reference:
+# * https://github.com/ChuckPa/DBRepair
+
+# Enable scheduled DB repairs? Default: False.
+plex_srv_repair_enable: false
+
+# Repair schedule (systemd TIME calendar format).
+#
+# Default: 'weekly' (weekly).
+#
+# Reference:
+# * https://www.freedesktop.org/software/systemd/man/latest/systemd.time.html
+plex_srv_repair_schedule: 'weekly'
+
+# Set cache age (days).
+#
+# Specify maximum age for PhotoTranscoder Cache images to be retained.
+#
+# Default: 30.
+plex_srv_repair_cache_age: 30
+
+# Set Plex SQLite binary page_size.
+#
+# Set Plex SQLite 'page_size' for both Main and Blobs databases. If not
+# present, default page size for host OS is used (typically 4096 to match OS
+# page size).
+#
+# Normal Linux (ext4, xfs) filesystems do not need this customization because
+# filesystem block size = 4096. ZFS users sometimes need to customize their
+# datasets to improve I/O performance (HDDs vs SSDs). This capability allows
+# them to compensate for some of those losses.
+#
+# Special Case:
+# * Must be a power of 2, with 1024 (2^10) as Plex default.  (per SQLite 3.12.0
+#   documentation). Any invalid value provided will be rounded up to next
+#   integral value (1024, 2048, 4096 ... 65536) This may or may not be the
+#   value you intended.  Caution is advised.
+# * May not exceed 65536 (per SQLite 3.12.0 documentation). Any value exceeding
+#   65536 will be truncated to 65536.
+#
+# Default: 4096.
+plex_srv_repair_page_size: 4096
+
+# DB repair options.
+#
+# Special Case:
+# * Always be sure to use 'exit' for script to end during scheduled tasks.
+# * Interactive commands are not recommended to use in scheduled tasks.
+#
+# Values:
+#        stop: Stop Plex Media Server before operations.
+#   automatic: Check, Repair/Optimize, and Reindex Database in one step.
+#       check: Perform integrity check of database.
+#      vacuum: Remove empty space from database without optimizing.
+#      repair: Repair/Optimize databases.
+#     reindex: Rebuild database indexes.
+#       start: Start Plex Media Server after operations.
+#      import: Import watch history from another database independent of Plex.
+#     replace: Replace current databases with newest usable backup copy
+#        show: Show log file.
+#      status: Report status of PMS (run-state and databases).
+#        undo: Undo last successful command.
+#       prune: Prune (remove) old image files (jpeg,jpg,png) from
+#              PhotoTranscoder cache.
+#       purge: Purge (delete) all temporary files left behind by PMS &
+#              transcoder.
+#     deflate: Deflate a bloated PMS main database.
+#      ignore: Ignore duplicate/constraint errors.
+#      update: Check for updates.
+#        quit: Quit immediately. Keep all temporary files.
+#        exit: Exit with cleanup options.
+#
+# Default:
+#   - 'update'
+#   - 'stop'
+#   - 'check'
+#   - 'repair'
+#   - 'reindex'
+#   - 'prune'
+#   - 'purge'
+#   - 'deflate'
+#   - 'exit'
+#
+# Reference:
+# * https://github.com/ChuckPa/DBRepair
+plex_srv_repair_options:
+  - 'update'
+  - 'stop'
+  - 'check'
+  - 'repair'
+  - 'reindex'
+  - 'prune'
+  - 'purge'
+  - 'deflate'
+  - 'exit'
