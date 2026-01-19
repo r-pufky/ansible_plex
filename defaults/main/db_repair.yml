@@ -91,6 +91,7 @@ plex_srv_repair_page_size: 4096
 #   - 'prune'
 #   - 'purge'
 #   - 'deflate'
+#   - 'start'
 #   - 'exit'
 #
 # Reference:
@@ -104,4 +105,5 @@ plex_srv_repair_options:
   - 'prune'
   - 'purge'
   - 'deflate'
+  - 'start'
   - 'exit'
