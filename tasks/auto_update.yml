@@ -1,0 +1,70 @@
+---
+###############################################################################
+# Plex Auto Update Service
+###############################################################################
+# Execute auto-update script to configure entitlements if configured. Set
+# custom plex auto-update service to check and install new plex releases when
+# enabled.
+#
+# Reference:
+# * https://github.com/mrworf/plexupdate
+# * https://github.com/linuxserver/docker-plex/blob/master/root/etc/
+
+- name: 'Auto update | processing entitlements 🗘'
+  when: plex_flg_auto_update
+  ansible.builtin.debug:
+    msg: |
+
+      ╭───────────────────────────────────────────────────────────────────╮
+      │                                                                   │
+      │       Processing entitlements. This may take a few minutes.       │
+      │                                                                   │
+      ╰───────────────────────────────────────────────────────────────────╯
+
+- name: 'Auto update | process entitlements'
+  when: plex_flg_auto_update
+  ansible.builtin.shell: '{{ plex___opt_dir ~ "/plex_update" }}'
+  args:
+    executable: '/bin/bash'
+  changed_when: false
+
+- name: 'Auto update | systemd | set plex update timer'
+  when: plex_flg_auto_update
+  ansible.builtin.template:
+    src: '{{ "systemd/" ~ item ~ ".j2" }}'
+    dest: '{{ "/etc/systemd/system/" ~ item }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  loop:
+    - 'plex_update.service'
+    - 'plex_update.timer'
+
+- name: 'Auto update | systemd | restart plex update timer'
+  when: plex_flg_auto_update
+  ansible.builtin.service:
+    name: '{{ item }}'
+    enabled: true
+    state: 'restarted'
+  loop:
+    - 'plex_update.service'
+    - 'plex_update.timer'
+
+- name: 'Auto update | systemd | stop plex update timer'
+  when: not plex_flg_auto_update
+  ansible.builtin.service:
+    name: '{{ item }}'
+    enabled: true
+    state: 'stopped'
+  loop:
+    - 'plex_update.service'
+    - 'plex_update.timer'
+
+- name: 'Auto update | systemd | remove plex update timer'
+  when: not plex_flg_auto_update
+  ansible.builtin.file:
+    path: '{{ "/etc/systemd/system/" ~ item }}'
+    state: 'absent'
+  loop:
+    - 'plex_update.service'
+    - 'plex_update.timer'

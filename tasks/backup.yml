@@ -1,0 +1,45 @@
+---
+###############################################################################
+# Backup
+###############################################################################
+
+- name: 'Backup | systemd | stop services'
+  ansible.builtin.systemd:
+    name: 'plexmediaserver.service'
+    state: 'stopped'
+  failed_when: false
+
+- name: 'Backup | fetch | Preferences.xml'
+  when: plex_flg_backup_config
+  ansible.builtin.fetch:
+    src: '{{ plex___preferences }}'
+    dest:
+      '{{ plex__backup_dir ~ "/" ~ plex__role_start ~ "_Preferences.xml" }}'
+    fail_on_missing: false
+    flat: true
+
+- name: 'Backup | fetch | databases'
+  when: plex_flg_backup_db
+  ansible.builtin.fetch:
+    src: '{{ plex___db_dir ~ "/" ~ item }}'
+    dest: '{{ plex__backup_dir ~ "/" ~ plex__role_start ~ "_" ~ item }}'
+    fail_on_missing: false
+    flat: true
+  loop:
+    - 'com.plexapp.plugins.library.blobs.db'
+    - 'com.plexapp.plugins.library.blobs.db-shm'
+    - 'com.plexapp.plugins.library.blobs.db-wal'
+    - 'com.plexapp.plugins.library.db'
+    - 'com.plexapp.plugins.library.db-shm'
+    - 'com.plexapp.plugins.library.db-wal'
+
+- name: 'Backup | systemd | start services'
+  when: plex_flg_start
+  ansible.builtin.systemd:
+    name: 'plexmediaserver.service'
+    state: 'started'
+    masked: false
+  failed_when: false
+
+- name: 'Backup | success ✔'
+  ansible.builtin.meta: 'end_host'

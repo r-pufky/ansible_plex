@@ -1,0 +1,24 @@
+---
+###############################################################################
+# Maintenance
+###############################################################################
+# Prune any old files from previous role versions. This is executed before any
+# operations with the new role version.
+
+- name: 'Maintenance | 9.0.0 | remove deprecated files'
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: 'absent'
+  loop:
+    # Moved to plex_*.
+    - '/etc/systemd/system/plex-update.service'
+    - '/etc/systemd/system/plex-update.timer'
+    - '/etc/systemd/system/plex-repair.service'
+    - '/etc/systemd/system/plex-repair.timer'
+    # Moved to /etc/plex.
+    - '{{ plex___root_dir ~ "/plexupdate" }}'
+    - '/usr/bin/DBRepair.sh'
+    # Pre 1.43.0.10467 installed plexmediaserver.service to wrong location.
+    - '/etc/systemd/system/plexmediaserver.service'
+    - '/etc/apt/sources.list.d/plex.list'
+    - '/etc/apt/sources.list.d/plexmediaserver.list'

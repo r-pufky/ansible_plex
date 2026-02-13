@@ -1,0 +1,49 @@
+---
+###############################################################################
+# DB Repair
+###############################################################################
+# Manage DB repair script configuration. Deferrable and not critical path.
+#
+# Reference:
+# * https://github.com/ChuckPa/DBRepair
+
+- name: 'DB repair | systemd | set DB repair timer'
+  when: plex_flg_db_repair
+  ansible.builtin.template:
+    src: '{{ "systemd/" ~ item ~ ".j2" }}'
+    dest: '{{ "/etc/systemd/system/" ~ item }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  loop:
+    - 'plex_repair.service'
+    - 'plex_repair.timer'
+
+- name: 'DB repair | systemd | restart DB repair timer'
+  when: plex_flg_db_repair
+  ansible.builtin.service:
+    name: '{{ item }}'
+    enabled: true
+    state: 'restarted'
+  loop:
+    - 'plex_repair.service'
+    - 'plex_repair.timer'
+
+- name: 'Auto update | systemd | stop plex update timer'
+  when: not plex_flg_db_repair
+  ansible.builtin.service:
+    name: '{{ item }}'
+    enabled: true
+    state: 'stopped'
+  loop:
+    - 'plex_repair.service'
+    - 'plex_repair.timer'
+
+- name: 'DB repair | systemd | remove DB repair timer'
+  when: not plex_flg_db_repair
+  ansible.builtin.file:
+    path: '{{ "/etc/systemd/system/" ~ item }}'
+    state: 'absent'
+  loop:
+    - 'plex_repair.service'
+    - 'plex_repair.timer'

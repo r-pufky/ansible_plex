@@ -2,15 +2,17 @@
 ###############################################################################
 # Default
 ###############################################################################
-# Default configuration is deployed successfully. Configuration should succeed
-# with and without plex_srv_user_data_manage_enable.
+# Default configuration is deployed successfully.
 #
 # Tests:
-# * plexmediaserver, plex-update services are active (configs loaded).
-# * DB cache auto grow is applied (44).
-# * Auto-generated variables are NOT the same as default values
-#   (except plex_hardware_device_path).
-# * Stateful options are NOT the same as default values.
+# * override, plex_update, plex_repair unit files correct format.
+# * plex_update, plex_repair services are active (plexmediaserver verified by
+#   role).
+# * /opt/plex/{DBRepair.sh,plex_update} exist.
+# * Backup files are copied to local controller.
+# * Service is restarted after backup completion.
+# * Preferences.xml with templated variables work.
+# * Role finishes successfully without additional tasks.
 
 dependency:
   name: 'galaxy'
@@ -25,23 +27,17 @@ provisioner:
     ssh_connection:
       pipelining: false
   inventory:
-    host_vars:
-      plex-debian-13-user_data:
-        plex_srv_user_data_manage_enable: true
     group_vars:
       all:
-        repo_testing_enable: true
+        url_inject_enable: true
+        plex_flg_preferences: true
+        test_variable: 'TEST'
+        plex_cfg_preferences: '{{
+            lookup("env", "MOLECULE_SCENARIO_DIRECTORY") ~
+            "/files/Preferences.xml"
+          }}'
 platforms:
-  - name: 'plex-debian-13-default'
-    image: 'ghcr.io/hifis-net/debian-systemd:13'
-    systemd: 'always'
-    volumes:
-      - '/sys/fs/cgroup:/sys/fs/cgroup:ro'
-    command: '/lib/systemd/systemd'
-    pre_build_image: true
-    published_ports:
-      - '32400:32400/tcp'
-  - name: 'plex-debian-13-user_data'
+  - name: 'plex_default'
     image: 'ghcr.io/hifis-net/debian-systemd:13'
     systemd: 'always'
     volumes:

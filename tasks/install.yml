@@ -1,161 +1,198 @@
 ---
+# yamllint disable rule:line-length
 ###############################################################################
-# Plex Install
+# Execute
 ###############################################################################
-# Install base plex version, check for entitlements (PlexPass) and install if
-# entitled.
+# Plex debian packaging does NOT follow Debian standards:
+# * Debian defaults, and DEBCONF options are not used.
+#     Resolution: Use overrides.conf only.
+# * systemd mask cannot be used as /etc/systemd/system/plexmediaserver.service
+#   is checked for existence (regardless of pointing to /dev/null for masked
+#   services). If this file exists the package install will hard fail.
+#     Resolution: Minimize restarts, do NOT mask.
+# * /usr/lib/systemd/system/plexmedisserver.service puts in hard start limits
+#   with StartLimitInterval=60s, StartLimitBurst=3. This mask sense with a
+#   manual install, but causes start-limit-hit issues on automated tasks which
+#   also use additional start/stop cycles for entitlements, backups, etc.
+#   within a tight timeframe.
+#     Resolution: Statically set StartLimitBurst=10 to avoid role issues.
+# * The 'plex' user must exist regardless of use or the package breaks.
+#     Resolution: Disable plex user and prevent use with role.
+# * Package will create PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR (default:
+#   /var/lib/plexmediaserver/Library/Application Support) as the only
+#   pre-condition to starting the service.
+#     Resolution: Manually create directory with plex user permissions.
+# * Package signed using SHA1 signatures (invalid in trixie as of 2026-01-01)
+#   causing the package install to fail. There was a year ramp to update keys
+#   which they failed to meet.
+#     Resolution: Remove and prevent previous repository from being setup.
 #
-# Set environment variables for Plex to use during installation and service
-# turnup. If plex_cfg_online_token is not entitled, the current version is
-# returned and installed.
+# Plex released a trixie specific script to attempt to solve issues:
+# * Removes existing debian APT sources from /etc/apt/sources.list.d/plex*
+#     Resolution: Maintenance task to remove old package remnants.
+# * Imports a new signing key from a new location
+#   https://downloads.plex.tv/plex-keys/PlexSign.v2.key
+#     Resolution: Manually manage DEB822 APT sources with new key.
+# * Package continues to use non-DEB822 APT sources on install:
+#   /etc/apt/sources.list.d/plex.list
+#     Resolution: Always check and remove non-DEB822 sources on install.
 #
-# Download and install the entitlement package manually. Package will enable
-# the same default APT repository as non-entitled plex installs.
+# See preinst and /usr/lib/plexmediaserver/lib/plexmediaserver.service defaults
+# in deb package.
+#
+# Confirm Plex application directory structure created and halt service for
+# additional role configuration.
+#
+# Reference:
+# * https://repo.plex.tv/scripts/setupRepo.sh
+# * https://forums.plex.tv/t/issue-upgrading-to-pms-1-43-0-10467-on-debian-and-rhel-based-distributions/935847/189
 
-- name: 'Install | set plex service drop-in'
-  ansible.builtin.include_role:
-    name: 'r_pufky.deb.systemd'
-  vars:
-    systemd_daemon_reload_enable: false  # Potentially not installed.
-    systemd_services:
-      - name: 'plexmediaserver'
-        state: 'present'
-        drop_in: true
-        service: {}
-        exec:
-          environment:
-            - var: 'TMPDIR'
-              value: '{{ _plex_cfg_transcoder_temp_directory.raw }}'
-            - var: 'PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR'
-              value: '{{ _plex_srv_application_support_dir.raw }}'
-            - var: 'PLEX_MEDIA_SERVER_MAX_PLUGIN_PROCS'
-              value: '{{ _plex_srv_max_plugin_processes.raw }}'
-            - var: 'PLEX_MEDIA_SERVER_MAX_STACK_SIZE'
-              value: '{{ _plex_srv_max_stack_size.raw }}'
-            - var: 'PLEX_MEDIA_SERVER_USER'
-              value: '{{ _plex_srv_user.raw }}'
-            - var: 'PLEX_USER'
-              value: '{{ _plex_srv_user.raw }}'
-            - var: 'PLEX_MEDIA_SERVER_USE_SYSLOG'
-              value: '{{ _plex_srv_use_syslog_enable._options }}'
-          user: '{{ _plex_srv_user.raw }}'
-          group: '{{ _plex_srv_group.raw }}'
+- name: '{{ "Install | account | query user " ~ plex_srv_user }}'
+  ansible.builtin.command: '{{ "id " ~ plex_srv_user }}'
+  register: plex__user_check
+  changed_when: plex__user_check.rc > 0
+  failed_when: false
 
-- name: 'Install | packages'
+- name: '{{ "Install | account | query group " ~ plex_srv_group }}'
+  ansible.builtin.command: '{{ "groups " ~ plex_srv_group }}'
+  register: plex__group_check
+  changed_when: plex__group_check.rc > 0
+  failed_when: false
+
+- name: '{{ "Install | account | create group " ~ plex_srv_group }}'
+  when: plex__group_check.rc != 0
+  ansible.builtin.group:
+    gid: '{{ plex___group.gid }}'
+    name: '{{ plex___group.name }}'
+    state: 'present'
+
+- name: '{{ "Install | account | create user " ~ plex_srv_user }}'
+  when: plex__user_check.rc != 0
+  ansible.builtin.user:
+    name: '{{ plex___user.name }}'
+    group: '{{ plex___user.group }}'
+    uid: '{{ plex___user.uid }}'
+    shell: '{{ plex___user.shell }}'
+    home: '{{ plex___user.home }}'
+    create_home: '{{ plex___user.create_home }}'
+    password: '{{ plex___user.password }}'
+    password_lock: '{{ plex___user.password_lock }}'
+    update_password: '{{ plex___user.update_password }}'
+    expires: '{{ plex___user.expires }}'
+    system: '{{ plex___user.system }}'
+
+# Pre-existing users may have a different UID/GID.
+- name: '{{ "Install | account | enumerate " ~ plex_srv_user }}'
+  ansible.builtin.user:
+    name: '{{ plex_srv_user }}'
+  check_mode: true
+  changed_when: false
+  register: plex__user_query
+
+- name: 'Install | account | parse service UID/GID'
+  ansible.builtin.set_fact:
+    plex__uid: '{{ plex__user_query.uid }}'
+    plex__gid: '{{ plex__user_query.group }}'
+
+- name: '{{ "Install | filesystem | set " ~ plex___root_dir }}'
+  ansible.builtin.file:
+    path: '{{ plex___root_dir }}'
+    owner: '{{ plex__uid }}'
+    group: '{{ plex__gid }}'
+    mode: '0755'
+    state: 'directory'
+
+- name: '{{ "Install | filesystem | set " ~ plex___opt_dir }}'
+  ansible.builtin.file:
+    path: '{{ plex___opt_dir }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+    state: 'directory'
+
+- name: '{{ "Install | filesystem | set " ~ plex__srv_tmpdir }}'
+  when: plex__srv_tmpdir != '/tmp'
+  ansible.builtin.file:
+    path: '{{ plex__srv_tmpdir }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+    state: 'directory'
+
+- name: 'Install | filesystem | set plex_update'
+  ansible.builtin.template:
+    src: 'plex_update.j2'
+    dest: '{{ plex___opt_dir ~ "/plex_update" }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+
+- name: 'Install | filesystem | set DBRepair.sh'
+  when: not (url_inject_enable | default(false))
+  ansible.builtin.get_url:
+    url: '{{ plex___repair_url }}'
+    dest: '{{ plex___opt_dir ~ "/DBRepair.sh" }}'
+    force: false
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  register: plex__download
+  until: plex__download is succeeded
+
+- name: 'Install | filesystem | add to search path'
+  ansible.builtin.file:
+    src: '{{ plex___opt_dir ~ "/" ~ item }}'
+    path: '{{ plex___bin_dir ~ "/" ~ item }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+    state: 'link'
+  loop:
+    - 'plex_update'
+    - 'DBRepair.sh'
+
+- name: 'Install | systemd | create plex service drop-in'
+  ansible.builtin.file:
+    path: '/etc/systemd/system/plexmediaserver.service.d'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+    state: 'directory'
+
+- name: 'Install | systemd | set plex service drop-in'
+  ansible.builtin.template:
+    src: 'systemd/override.conf.j2'
+    dest: '/etc/systemd/system/plexmediaserver.service.d/override.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
+- name: 'Install | install packages'
   ansible.builtin.include_role:
     name: 'r_pufky.deb.apt'
   vars:
     apt_packages:
-      - '{{ plex_role_packages }}'
-    apt_sources: '{{ plex_role_apt_sources }}'
+      - '{{ plex___packages }}'
+    apt_sources: '{{ plex___apt_sources }}'
     apt_package_update_cache: true
 
-- name: 'Install | entitlements'
-  when: _plex_cfg_online_token.raw | length > 0
-  block:
-    - name: 'Install | entitlements | check installed packages'
-      ansible.builtin.package_facts:  # Requires ansible.posix.
+- name: 'Install | account | lock package user'
+  when: plex___user != 'plex'
+  ansible.builtin.user:
+    name: 'plex'
+    password: '!'
+    password_lock: true
 
-    - name: 'Install | entitlements | query plexpass entitlements'
-      ansible.builtin.uri:
-        url: '{{
-            "https://plex.tv/downloads/details/5?distro=debian&build=linux-" ~
-            _plex_srv_arch_generic.raw ~
-            "&channel=8&X-Plex-Token=" ~
-            _plex_cfg_online_token.raw
-          }}'
-        method: 'GET'
-        return_content: true
-      register: _plex_entitlement
-      # TODO(role): disabled until future ansible data tagging update.
-      # no_log: true  # Lifetime API access token.
+- name: 'Install | filesystem | remove non DEB822 plex apt sources'
+  ansible.builtin.file:
+    path: '{{ "/etc/apt/sources.list.d/" ~ item }}'
+    state: 'absent'
+  loop:
+    - 'plex.list'
+    - 'plexmediaserver.list'
 
-    - name: 'Install | entitlements | determine plexpass version'
-      ansible.builtin.set_fact:
-        _plex_pass_version: "{{
-            (_plex_entitlement.content |
-             regex_findall('version=\"([\\w\\.-]+)\"'))[1]
-          }}"
-
-    - name: 'Install | entitlements | determine installed version'
-      ansible.builtin.set_fact:
-        _plex_installed_version:
-          '{{ ansible_facts.packages["plexmediaserver"][0].version }}'
-
-    # Entitlements must be manually installed.
-    - name: 'Install | entitlements | upgrade to plexpass version'
-      when: _plex_installed_version != _plex_pass_version
-      ansible.builtin.apt:
-        deb: '{{
-            "https://downloads.plex.tv/plex-media-server-new/" ~
-            _plex_pass_version ~
-            "/debian/plexmediaserver_" ~
-            _plex_pass_version ~ "_" ~
-            _plex_srv_arch.raw ~ ".deb"
-          }}'
-
-- name: 'Install | DB repair script'
-  when: _plex_srv_repair_enable.raw
-  block:
-    - name: 'Install | query DB repair script'
-      ansible.builtin.stat:
-        path: '{{ _plex_srv_repair_enable._path }}'
-      register: _plex_repair
-
-    - name: 'Install | download DB repair script'
-      when: >
-        not _plex_repair.stat.exists and
-        not (repo_testing_enable | default(false))
-      ansible.builtin.get_url:
-        url: '{{ plex_role_repair_url }}'
-        dest: '{{ _plex_srv_repair_enable._path }}'
-        owner: 'root'
-        group: 'root'
-        mode: '0755'
-      register: _plex_download
-      until: _plex_download is succeeded
-      retries: 3
-      delay: 2
-
-- name: 'Install | check directory structure'
-  ansible.builtin.stat:
-    path: '{{ _plex_srv_application_support_dir._preferences }}'
-  register: _plex_install_structure
-
-- name: 'Install | init first run'
-  when: not _plex_install_structure.stat.exists
-  block:
-    - name: 'Install | init first run | poll service 🗘'
-      ansible.builtin.debug:
-        msg: |
-          ╭───────────────────────────────────────────────────────────────────╮
-          │                                                                   │
-          │         Initial Plex run to generate directory structure.         │
-          │                                                                   │
-          ├───────────────────────────────────────────────────────────────────╯
-          │ Max 30 seconds.
-
-    - name: 'Install | init first run | start services'
-      ansible.builtin.systemd:
-        name: '{{ item }}'
-        state: 'started'
-      failed_when: false
-      loop:
-        - 'plexmediaserver.service'
-
-    - name: 'Install | init first run | check directory structure'
-      ansible.builtin.wait_for:
-        path: '{{ _plex_srv_application_support_dir._preferences }}'
-        msg: 'Plex did not create initial directory layout.'
-        delay: 15  # Initial plex run downloads external plugins, etc.
-        sleep: 3
-        timeout: 30
-        state: 'present'
-
-- name: 'Install | stop services'
+- name: 'Install | systemd | stop services'
   ansible.builtin.systemd:
-    name: '{{ item }}'
+    name: 'plexmediaserver.service'
     state: 'stopped'
   failed_when: false
-  loop:
-    - 'plexmediaserver.service'

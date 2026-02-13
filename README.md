@@ -1,106 +1,83 @@
 # Plex
 Plex Media Server supporting PlexPass entitlements.
 
-## Requirements
-[supported platforms](https://github.com/r-pufky/ansible_plex/blob/main/meta/main.yml)
+## [Requirements](https://github.com/r-pufky/ansible_plex/tree/main/meta/main.yml)
+**galaxy-ng** roles cannot be used independently. Part of
+[r_pufky.media](https://github.com/r-pufky/ansible_collection_media)
+collection.
+
+Install size: ~250MB
 
 ## Role Variables
-[defaults](https://github.com/r-pufky/ansible_plex/tree/main/defaults/main)
+Detailed variable use documented in defaults. See usage for role operation.
 
-## Ports
-All ports and protocols have been defined for the role.
+* [defaults](https://github.com/r-pufky/ansible_plex/tree/main/defaults/main/main.yml) -
+  User configurable options.
 
-[defaults/ports.yml](https://github.com/r-pufky/ansible_plex/blob/main/defaults/main/ports.yml)
+* [vars](https://github.com/r-pufky/ansible_plex/tree/main/vars/main.yml) -
+  Role default options. May be referenced in defaults.
 
-## Dependencies
-**galaxy-ng** roles cannot be used independently. Part of
-[r_pufky.media](https://github.com/r-pufky/ansible_collection_media) collection.
+* [ports](https://github.com/r-pufky/ansible_plex/blob/main/defaults/main/ports.yml) -
+  Ports are defined to aid in managing ports in external roles. They are
+  **not** managed by the role unless explicitly stated.
 
-## New Plex Installation
-Read defaults documentation.
-[Additional documentation](http://r-pufky.github.io/r-pufky/docs/media/plex).
+## Usage
+[Additional documentation](http://r-pufky.github.io/r-pufky/docs/media/plex)
+including troubleshooting and config file variables.
 
+### Feature Flags
+Tasks are gated by feature flags and executed in the following order.
 
-### Plex Online Token
-Obtain your `plex_cfg_online_token` via [this support article.](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/)
+ Step | Flag                        | Notes
+------|-----------------------------|-------
+ 1    | plex_flg_backup_config      | Backup existing config and exit.
+ 2    | plex_flg_backup_db          | Backup existing databases and exit.
+ 3    | plex_flg_maintenance        | Preform role maintenance tasks.
+ 4    | plex_flg_install            | Install required packages, users, etc.
+ 5    | plex_flg_preferences        | Install user-defined config.
+ 6    | plex_flg_start              | Start plex service.
+ 7    | plex_flg_auto_update        | Configure automatic plex update checks.
+ 8    | plex_flg_db_repair          | Configure automatic DB repair.
+ 9    | plex_flg_validate           | Validate install.
 
-Alternatively, the initial manual setup process to be run locally. Use a SSH
-tunnel to access the server-side configuration page; if it cannot be accessed
-locally.
+## Example Playbooks
 
-``` bash
-ssh -L 32400:localhost:32400 {plex_host}
-```
-
-Connect to http://localhost:32400/web and run through configuration steps:
-* Select media libraries to use.
-* Sign-in on server (upper right --> sign-in)
-* Select server and claim (claim now --> claim server)
-* Once claimed, the access token and configured preferences are located in
-  `Preferences.xml`.
-
-### Plex auto-generated hardware values
-Plex generates unique UUID's per installation to uniquely identify the server.
-
-Retention of auto-generated values enables Plex role usage without needing to
-care about the unique per-machine identifiers for Plex configurations while
-still applying desired configuration state. This can be left on and the
-auto-generated values will always be used.
-
-If you do **not** have a pre-existing configuration, enable retention of
-auto-generated values, execute the role, and place auto-generated values into
-the host config:
+### New Deployments
+Deploy role. [Manually sign-in to Plex to generate entitlement token](https://r-pufky.github.io/docs/media/plex).
 
 ``` yaml
-- name: 'New Plex installation'
+- name: 'New Plex Deployment'
+  ansible.builtin.include_role:
+    name: 'r_pufky.media.plex'
+```
+
+Once configured take a backup of Plex configuration.
+
+``` yaml
+- name: 'Backup Plex configuration'
   ansible.builtin.include_role:
     name: 'r_pufky.media.plex'
   vars:
-    plex_srv_keep_auto_generated_values: true
+    plex_flg_backup_config: true
+    plex_flg_backup_db: true
+    plex_cfg_backup_dir: 'host_vars/plex/data'
 ```
 
-`{plex_srv_application_support_dir}/Plex Media Server/Preferences.xml`
-``` xml
-<Preferences MachineIdentifier="..." ProcessedMachineIdentifier="..." AnonymousMachineIdentifier="..." HardwareDevicePath="..." .../>
-```
+See [Existing Deployments](#existing-deployments) for reproducible
+deployments.
 
-host_vars/plex.example.com/vars/plex.yml
+### Existing Deployments
+Configuration can optionally be templated and saved on the ansible controller
+to make future Plex deployments reproducible. Static files may also be used if
+there is no concern about secrets leaking.
+
 ``` yaml
-plex_srv_keep_auto_generated_values: false
-plex_cfg_machine_identifier: '...'
-plex_cfg_processed_machine_identifier: '...'
-plex_cfg_anonymous_machine_identifier: '...'
-plex_cfg_hardware_device_path: '...'
-```
-
-This will enable idempotent role application on different machines.
-
-## Example Playbook
-host_vars/plex.example.com/vars/plex.yml
-``` yaml
-plex_cfg_online_username: 'example'
-plex_cfg_online_mail: 'example@example.com'
-plex_cfg_online_token: '{{ vault_plex_cfg_online_token }}'
-plex_srv_keep_auto_generated_values: false
-plex_cfg_machine_identifier: '{{ vault_plex_cfg_machine_identifier }}'
-plex_cfg_processed_machine_identifier: '{{ vault_plex_cfg_processed_machine_identifier }}'
-plex_cfg_anonymous_machine_identifier: '{{ vault_plex_cfg_anonymous_machine_identifier }}'
-plex_cfg_online_home: true
-plex_cfg_publish_server_on_plex_online_key: '1'
-plex_srv_transcode_memory: '1G'
-plex_cfg_transcoder_temp_directory: '/tmp'
-plex_cfg_transcoder_tone_mapping: true
-plex_cfg_hardware_accelerated_codecs: true
-plex_cfg_hardware_accelerated_encoders: true
-plex_cfg_transcoder_hevc_encoding: true
-plex_cfg_transcoder_hevc_optimize: true
-```
-
-Configure Plex server.
-``` yaml
-- name: 'Manage Plex'
+- name: 'Deploy pre-configured Plex service'
   ansible.builtin.include_role:
     name: 'r_pufky.media.plex'
+  vars:
+    plex_flg_preferences: true
+    plex_cfg_preferences: 'host_vars/plex/Preferences.xml.j2'
 ```
 
 ## Development
@@ -111,22 +88,26 @@ Run all unit tests:
 molecule test --all
 ```
 
+Testing variables:
+ Variable                     | type | Description
+------------------------------|------|-------------
+ url_inject_enable            | bool | Disable **get_url** to inject files locally.
+
 ### Releases
-Release format: **{OS}-{SERVICE}-{ROLE}**
+Semantic versioning focused on service deployment with templated configuration
+to minimize role churn due to inconsistent and rapid rolling release cycle.
 
-Each type inherits the versioning system used; defaulting to schematic
-versioning.
-
-`12-2.0.3-1.0.0`
-
-* 12 - Debian 12 (bookworm).
-* 2.0.3 - Service/app version.
-* 1.0.0 - Role version.
-
-Releases are branched on Debian releases:
-
-* **[13.x.x](https://github.com/r-pufky/ansible_plex)**: 13 Trixie.
-* **[12.x.x](https://github.com/r-pufky/ansible_plex/tree/12.x)**: 12 Bookworm.
+ Release | Debian | Ansible | Plex          | Notes
+---------|--------|---------|---------------|-------
+ 9.x.x   | 13     | 2.20    | 1.43.0.10467+ | Ansible 2.20, feature flags, and semantic versioning.
+ 8.x.x   | 13     | 2.18    | 1.43.0.10389  | Last 'fully managed' config.
+ 7.x.x   | 13     | 2.18    | 1.42.2.10156  | Data annotations V3.
+ 6.x.x   | 13     | 2.18    | 1.42.1.10060  | Migrate to Debian Trixie.
+ 5.x.x   | 12     | 2.18    | 1.42.1.10060  | Data annotations V2.
+ 4.x.x   | 12     | 2.18    | 1.41.8.9834   | Data annotations.
+ 3.x.x   | 12     | 2.18    | 1.41.7.9799   | Use common role libraries.
+ 2.x.x   | 12     | 2.18    | 1.41.4.9399   | Ansible 2.18 support.
+ 1.x.x   | 12     | 2.12    | 1.25.4.5487   | Migration from private repository.
 
 ### Issues
 Create a bug and provide as much information as possible.

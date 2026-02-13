@@ -1,11 +1,96 @@
 ---
-# yamllint disable rule:line-length
 ###############################################################################
-# Plex Service Configuration
+# Feature Flags
 ###############################################################################
-# Install size: ~223MB
-#       Plex: ~222MB.
-#   Packages: ~1MB.
+# Executed in numerical order.
+
+# 1. Backup config to plex_cfg_backup_dir?
+#
+# Enabling will only process plex_flg_backup_* and exit role. Location created
+# if non-existent. Service stopped for backup and restarted.
+#
+# Default: False.
+plex_flg_backup_config: false
+
+# 2. Backup DB to plex_cfg_backup_dir?
+#
+# Enabling will only process plex_flg_backup_* and exit role. Location created
+# if non-existent. Service stopped for backup and restarted.
+#
+# Default: False.
+plex_flg_backup_db: false
+
+# 3. Run maintenance tasks?
+#
+# Prunes deprecated and old role files.
+#
+# Default: True.
+plex_flg_maintenance: true
+
+# 4. Install application?
+#
+# Creates required directories, checks/creates users, installs packages,
+# scripts, and services. Stops existing service for re-configuration.
+#
+# Default: True.
+plex_flg_install: true
+
+# 5. Set Preferences.xml?
+#
+# File set using plex_cfg_preferences.
+#
+# Default: False.
+plex_flg_preferences: false
+
+# 6. Start Plex service after configuration?
+#
+# Started after configuration. Allows Plex to write or correct any invalid
+# configuration files.
+#
+# Default: True.
+plex_flg_start: true
+
+# 7. Enable scheduled auto updates?
+#
+# Schedule based on plex_update_schedule. Entitlement upgrades are done in
+# this step.
+#
+# Default: True.
+plex_flg_auto_update: true
+
+# 8. Enable scheduled DB repairs?
+#
+# Schedule based on plex_repair_schedule.
+#
+# Default: True.
+plex_flg_db_repair: true
+
+# 11. Enable validation?
+#
+# Verify service running after role application or fail.
+#
+# Default: True.
+plex_flg_validate: true
+
+###############################################################################
+# Service
+###############################################################################
+
+# User that Plex will run under.
+#
+# 'media' will automatically be created using vars/main.yml if required. All
+# other accounts are checked for existence.
+#
+# Default: 'media'.
+plex_srv_user: 'media'
+
+# Group that Plex will run under.
+#
+# 'media' will automatically be created using vars/main.yml if required. All
+# other accounts are checked for existence.
+#
+# Default: 'media'.
+plex_srv_group: 'media'
 
 # Maximum number of plugins to run at once. Default: 6.
 plex_srv_max_plugin_processes: 6
@@ -13,194 +98,161 @@ plex_srv_max_plugin_processes: 6
 # Maximum plex process CPU stack size (bytes). Default: 3000.
 plex_srv_max_stack_size: 3000
 
-# Plex metadata storage location.
+# Temporary file location.
 #
-# Default: '/var/lib/plexmediaserver/Library/Application Support'.
+# Default location used for transcoding and service files / auto updates.
+# Automatically created with service user permissions if needed.
 #
-# Reference:
-# * https://community.synology.com/enu/forum/17/post/115743
-plex_srv_application_support_dir:
-  '/var/lib/plexmediaserver/Library/Application Support'
+# Default: '/tmp'.
+plex_srv_tmpdir: '/tmp'
 
-# Recursively set metadata permissions?
-#
-# Plex installations with large media and metadata caches will be excessively
-# slow.
-#
-# Default: False.
-plex_srv_permissions_recursive_enable: false
-
-# Enable syslog instead of logging to 'Plex Media Server.log'. Default: True.
+# Enable syslog instead of logging to 'Plex Media Server.log'? Default: True.
 plex_srv_use_syslog_enable: true
 
-# Specific platform architecture.
-#
-# Values:
-#    i386: 32bit x86 (compatibility).
-#    i686: 32bit x86 (modern).
-#   amd64: 64bit x86 (default).
-#
-# Default: 'amd64'.
-plex_srv_arch: 'amd64'
-
-# Generic platform architecture.
-#
-# Values:
-#   x86_32: 32bit x86.
-#   x86_64: 64bit x86 (default).
-#
-# Default: 'x86_64'.
-plex_srv_arch_generic: 'x86_64'
-
-# Keep auto-generated Plex values?
-#
-# Some options, like UUID's, are auto-generated on initial Plex install and are
-# unknown during initial configuration; enabling this will keep those values
-# instead of over-writing them; effectively allowing for managed configurations
-# on brand new one-off installs. Affected options are explicitly stated or can
-# be found in plex_role_auto_options.
-#
-# Values:
-#   True: Auto generated Plex values are kept regardless of defaults (plex_)
-#         value.
-#  False: Overwrite auto generated Plex values with corresponding defaults
-#         (plex_) value.
-#
-# Default: True.
-plex_srv_keep_auto_generated_values: true
-
-# Enable automatic updates?
-#
-# Installs systemd.timer that automatically checks for and installs Plex
-# updates every day at 0400 using the current entitlement token.
-#
-# Default: True.
-plex_srv_auto_update_enable: true
-
-# Automatically adjust DB cache size?
-#
-# Increase plex_cfg_database_cache_size to actual DB size + 10%. Minimum value
-# will never be below plex_cfg_database_cache_size.
-#
-# Default: True.
-plex_srv_auto_grow_db_cache_size_enable: true
-
 ###############################################################################
-# Plex User
+# Config
 ###############################################################################
 
-# User that Plex will run under.
+# Role backup location.
 #
-# Enable plex_srv_create_user if this account is not externally managed.
+# All backup operations for a given role execution are stored locally on
+# ansible controller with the format 'YYYY-MM-DDTHHMMSS_{FILE}'.
 #
-# Default: 'media'.
-plex_srv_user: 'media'
+# plex_cfg_backup_dir: 'data/plex'
+#
+# Default: ''
+plex_cfg_backup_dir: ''
 
-# Group that Plex will run under.
+# Plex Preferences.xml to set.
 #
-# Enable plex_srv_create_user if this group is not externally managed.
+# Ansible controller path to source Preferences.xml (treated as a jinja2
+# template allowing for ansible variable interpretation). Overwrites existing
+# Preferences.xml.
 #
-# Default: 'media'.
-plex_srv_group: 'media'
-
-# Create plex_srv_user, plex_srv_group if not detected?
+# plex_cfg_preferences: 'host_vars/plex.example.com/Preferences.xml'
 #
-# Applied via r_pufky.deb.users, see vars/main.yml for default user attributes.
-#
-# Default: True.
-plex_srv_create_user: true
-
-# Enable user management of data/media files?
-#
-# Use plex_srv_user to execute data/media management commands. Role
-# applies media permissions using 'root' by default. For mounted data locations
-# (NFS with squashed mounts, mapped container mounts, etc) the local root user
-# will not have sufficient privileges to modify these files.
-#
-# Applies to:
-# * plex_srv_application_support_dir
-#
-# Default: False.
-plex_srv_user_data_manage_enable: false
+# Default: '' (disabled).
+plex_cfg_preferences: ''
 
 ###############################################################################
-# Miscellaneous Section
+# Auto updates
 ###############################################################################
-# Configuration options here are not found directly in the server UI. These are
-# generally updated automatically during Plex usage, but may be set after the
-# initial Plex configuration if desired (e.g. for UUID's this will persist your
-# instance without re-authentication across reinstalls, or for user auth
-# tokens).
+# Automatic update script to check for and install updates. Updates will use
+# Plex token and update channel from Preferences.xml. When enabled entitlements
+# will be checked during role execution. Highly recommended.
 #
-# Access token and configured preferences settings are located in
-# plex_srv_application_support_dir/Plex Media Server/Preferences.xml.
-#
-# Be sure to use vault to encrypt sensitive tokens & identifiers.
+# Script deployed to /etc/plex/plex_update and must be executed as root user.
 
-# Plex username. Default: ''.
-plex_cfg_online_username: ''
-
-# Plex user email. Default: ''.
-plex_cfg_online_mail: ''
-
-# Plex user access token.
+# Update schedule (systemd TIME calendar format).
 #
-# Obtain your token via the reference below.
-#
-# Alternatively, the initial manual setup process to be run locally. Use a SSH
-# tunnel to access the server-side configuration page; if it cannot be accessed
-# locally.
-#
-# ssh -L 32400:localhost:32400 {plex_cfg_host}
-#
-# Connect to http://localhost:32400/web and run through configuration steps:
-# 1. Select media libraries to use.
-# 1. Sign-in on server (upper right --> sign-in).
-# 1. Select server and claim (claim now --> claim server).
-# 1. Once claimed, the access token and configured preferences are located in
-#    `Preferences.xml` per [Plex Preferences](#plex-preferences).
-#
-# Default: ''.
+# Default: 'weekly' (weekly).
 #
 # Reference:
-# * https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
-plex_cfg_online_token: ''
+# * https://www.freedesktop.org/software/systemd/man/latest/systemd.time.html
+plex_update_schedule: 'weekly'
 
-# Use this server as user home (default) server? Default: True.
-plex_cfg_online_home: true
+###############################################################################
+# Plex DB Repair
+###############################################################################
+# Database repair utility script provided by Plex Linux engineers to automate
+# many of the DB maintenance tasks. Highly recommended.
+#
+# Script deployed to /etc/plex/DBRepair.sh and must be executed as root user.
+#
+# Squashed NFS mounted application directories cannot enable automatic DB
+# repair without modifying and manually running the script itself.
+#
+# Reference:
+# * https://github.com/ChuckPa/DBRepair
 
-# Machine UUID to identify machine hardware.
+# Repair schedule (systemd TIME calendar format).
+#
+# Default: 'weekly' (weekly).
+#
+# Reference:
+# * https://www.freedesktop.org/software/systemd/man/latest/systemd.time.html
+plex_repair_schedule: 'weekly'
+
+# Set cache age (days).
+#
+# Specify maximum age for PhotoTranscoder Cache images to be retained.
+#
+# Default: 30.
+plex_repair_cache_age: 30
+
+# Set Plex SQLite binary page_size.
+#
+# Set Plex SQLite 'page_size' for both Main and Blobs databases. If not
+# present, default page size for host OS is used (typically 4096 to match OS
+# page size).
+#
+# Normal Linux (ext4, xfs) filesystems do not need this customization because
+# filesystem block size = 4096. ZFS users sometimes need to customize their
+# datasets to improve I/O performance (HDDs vs SSDs). This capability allows
+# them to compensate for some of those losses.
 #
 # Special Case:
-#   * Honors plex_cfg_keep_auto_generated_values_enable.
+# * Must be a power of 2, with 1024 (2^10) as Plex default.  (per SQLite 3.12.0
+#   documentation). Any invalid value provided will be rounded up to next
+#   integral value (1024, 2048, 4096 ... 65536) This may or may not be the
+#   value you intended. Caution is advised.
+# * May not exceed 65536 (per SQLite 3.12.0 documentation). Any value exceeding
+#   65536 will be truncated to 65536.
 #
-# Values:
-#   {UUIDv4}: UUIDv4a, generated random data.
-#         '': '' or auto-generated Plex value (default).
-#
-# Default: ''.
-plex_cfg_machine_identifier: ''
+# Default: 4096.
+plex_repair_page_size: 4096
 
-# Plex Client ID used to claim plex server.
+# DB repair options.
 #
 # Special Case:
-#   * Honors plex_cfg_keep_auto_generated_values_enable.
+# * Always be sure to use 'exit' for script to end during scheduled tasks.
+# * Interactive commands are not recommended to use in scheduled tasks.
 #
 # Values:
-#   {SHA1}: SHA1 generated hash of plex_cfg_machine_identifier.
-#       '': '' or auto-generated Plex value (default).
+#        stop: Stop Plex Media Server before operations.
+#   automatic: Check, Repair/Optimize, and Reindex Database in one step.
+#       check: Perform integrity check of database.
+#      vacuum: Remove empty space from database without optimizing.
+#      repair: Repair/Optimize databases.
+#     reindex: Rebuild database indexes.
+#       start: Start Plex Media Server after operations.
+#      import: Import watch history from another database independent of Plex.
+#     replace: Replace current databases with newest usable backup copy
+#        show: Show log file.
+#      status: Report status of PMS (run-state and databases).
+#        undo: Undo last successful command.
+#       prune: Prune (remove) old image files (jpeg,jpg,png) from
+#              PhotoTranscoder cache.
+#       purge: Purge (delete) all temporary files left behind by PMS &
+#              transcoder.
+#     deflate: Deflate a bloated PMS main database.
+#      ignore: Ignore duplicate/constraint errors.
+#      update: Check for updates.
+#        quit: Quit immediately. Keep all temporary files.
+#        exit: Exit with cleanup options.
 #
-# Default: ''.
-plex_cfg_processed_machine_identifier: ''
-
-# Anonymous UUID to identify plex server.
+# Default:
+#   - 'update'
+#   - 'stop'
+#   - 'check'
+#   - 'repair'
+#   - 'reindex'
+#   - 'prune'
+#   - 'purge'
+#   - 'deflate'
+#   - 'start'
+#   - 'exit'
 #
-# Special Case:
-#   * Honors plex_cfg_keep_auto_generated_values_enable.
-#
-# Values:
-#   {UUIDv4}: UUIDv4a, generated random data.
-#         '': '' or auto-generated Plex value (default).
-#
-# Default: ''.
-plex_cfg_anonymous_machine_identifier: ''
+# Reference:
+# * https://github.com/ChuckPa/DBRepair
+plex_repair_options:
+  - 'update'
+  - 'stop'
+  - 'check'
+  - 'repair'
+  - 'reindex'
+  - 'prune'
+  - 'purge'
+  - 'deflate'
+  - 'start'
+  - 'exit'

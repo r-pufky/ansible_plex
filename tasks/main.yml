@@ -1,11 +1,34 @@
 ---
-- name: 'Annotate'
-  ansible.builtin.import_tasks: 'annotate.yml'
 - name: 'Prep'
   ansible.builtin.import_tasks: 'prep.yml'
+
+- name: 'Backup'
+  when: plex_flg_backup_config or plex_flg_backup_db
+  ansible.builtin.import_tasks: 'backup.yml'
+
+- name: 'Maintenance'
+  when: plex_flg_maintenance
+  ansible.builtin.import_tasks: 'maintenance.yml'
+
 - name: 'Install'
+  when: plex_flg_install
   ansible.builtin.import_tasks: 'install.yml'
+
 - name: 'Config'
   ansible.builtin.import_tasks: 'config.yml'
-- name: 'Validate'
-  ansible.builtin.import_tasks: 'validate.yml'
+
+- name: 'Auto update'
+  ansible.builtin.import_tasks: 'auto_update.yml'
+
+- name: 'DB repair'
+  ansible.builtin.import_tasks: 'db_repair.yml'
+
+- name: 'Validate | assert services running'
+  when: plex_flg_validate
+  ansible.builtin.service:
+    name: 'plexmediaserver.service'
+    state: 'started'
+  register: plex__service
+  delay: 15
+  retries: 3
+  until: plex__service.status.ActiveState == 'active'

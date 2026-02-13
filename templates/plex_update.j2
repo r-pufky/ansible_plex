@@ -1,0 +1,71 @@
+#!/bin/bash
+#
+# Update Plex service using entitlement token and update channel from
+# Preferences.xml settings. Use service user for Preferences.xml read to enable
+# squashed NFS filesystem reads.
+#
+# An entitlement token without PlexPass will just return the latest public
+# release. Entitlements must always be downloaded and installed manually. Must
+# be run as root to install new packages.
+#
+# Butler Update Channel:
+#   0: Stable (default).
+#   8: Beta.
+#
+# Exit Codes:
+#   0: Success - plex on most current release.
+#   1: Failure - missing Preferences.xml.
+#   2: Failure - incomplete download.
+#
+# Reference:
+# * https://github.com/linuxserver/docker-plex/blob/master/root/etc/s6-overlay/s6-rc.d/init-plex-update/run
+# * https://github.com/mrworf/plexupdate
+
+PLEX_USER="{{ plex_srv_user }}"
+PLEX_CFG="{{ plex___preferences }}"
+PLEX_RELEASE_URL="https://plex.tv/downloads/details/5?distro=debian"
+PLEX_PKG_BASE="https://downloads.plex.tv/plex-media-server-new"
+PLEX_TMP="{{ plex__srv_tmpdir }}"
+
+PLEX_DEB_ARCH=$(dpkg --print-architecture)
+PLEX_CPU_ARCH=$([[ $(uname -m) == 'x86_64' ]] && echo 'x86_64' || echo 'x86_32')
+PLEX_INSTALLED_VERSION=$(dpkg-query --show --showformat='${Version}' plexmediaserver)
+
+CMD="[ ! -e \"${PLEX_CFG}\" ]"
+if su "${PLEX_USER}" -s /bin/bash -c "${CMD}"; then
+  echo "No preference file located: ${PLEX_CFG}"
+  exit 1
+fi
+
+CMD="xmlstarlet sel -t -v 'Preferences/@ButlerUpdateChannel' '${PLEX_CFG}'"
+PLEX_UPDATE_CHANNEL=$(su "${PLEX_USER}" -s /bin/bash -c "${CMD} || echo '0'")
+
+CMD="xmlstarlet sel -t -v 'Preferences/@PlexOnlineToken' '${PLEX_CFG}'"
+PLEX_TOKEN=$(su "${PLEX_USER}" -s /bin/bash -c "${CMD} || echo 'no-entitlement-token'")
+
+PLEX_ENTITLEMENT_URL="${PLEX_RELEASE_URL}&build=linux-${PLEX_CPU_ARCH}"
+PLEX_ENTITLEMENT_URL+="&channel=${PLEX_UPDATE_CHANNEL}"
+PLEX_ENTITLEMENT_URL+="&X-Plex-Token=${PLEX_TOKEN}"
+PLEX_LATEST=$(curl --silent "${PLEX_ENTITLEMENT_URL}" | grep --only-matching --perl-regexp 'version="\K[^"]+' | tail --lines 1 )
+if [[ "${PLEX_LATEST}" == "${PLEX_INSTALLED_VERSION}" ]]; then
+  exit 0
+fi
+
+PLEX_PKG="plexmediaserver_${PLEX_LATEST}_${PLEX_DEB_ARCH}.deb"
+PLEX_PKG_URL="${PLEX_PKG_BASE}/${PLEX_LATEST}/debian/${PLEX_PKG}"
+PLEX_DEB="${PLEX_TMP}/${PLEX_PKG}"
+
+rm -f "${PLEX_TMP}/plexmediaserver_*.deb"
+curl --silent --output-dir "${PLEX_TMP}" -O "${PLEX_PKG_URL}"
+CURL_EXIT_CODE=$?
+
+# Verify non-partial download
+if [[ "${CURL_EXIT_CODE}" -gt "0" ]] || [[ $(stat --format %s "${PLEX_DEB}") -lt 10000 ]]; then
+  echo 'Package download failed.'
+  exit 2
+else
+  dpkg --install --force-confold "${PLEX_DEB}"
+  systemctl restart plexmediaserver.service
+  rm -f "${PLEX_TMP}/plexmediaserver_*.deb"
+  exit 0
+fi

@@ -1,0 +1,14 @@
+[Unit]
+Description=Automatically update Plex Media Server.
+Requires=plex_update.timer
+
+[Service]
+Type=oneshot
+ExecStart="{{ plex___opt_dir ~ '/plex_update' }}"
+SuccessExitStatus=0
+SuccessExitStatus=1
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

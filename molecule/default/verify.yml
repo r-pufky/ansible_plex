@@ -3,119 +3,167 @@
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: >
-        Default | verify |
-        /etc/systemd/system/plexmediaserver.service.d/override.conf
+    - name: 'Verify | systemd units'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
         tasks_from: 'copy.yml'
       vars:
-        test_name: >
-          Default | verify |
-          /etc/systemd/system/plexmediaserver.service.d/override.conf
-        test_src: 'files/override.conf'
-        test_file:
-          '/etc/systemd/system/plexmediaserver.service.d/override.conf'
+        test_name:
+          '{{ "Verify | systemd units | /etc/systemd/system/" ~ item }}'
+        test_src: '{{ "files/" ~ item }}'
+        test_file: '{{ "/etc/systemd/system/" ~ item }}'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0644'
         test_diff: true
+      loop:
+        - 'plexmediaserver.service.d/override.conf'
+        - 'plex_update.service'
+        - 'plex_update.timer'
+        - 'plex_repair.service'
+        - 'plex_repair.timer'
 
-    - name: 'Verify | gather plex-update.timer status'
-      ansible.builtin.command: 'systemctl status plex-update.timer'
+    - name: 'Verify | gather plex_update.timer status'
+      ansible.builtin.command: 'systemctl status plex_update.timer'
       register: _test_plex_timer_status
       changed_when: false
 
-    - name: 'Verify | assert plex-update.timer active'
+    - name: 'Verify | assert plex_update.timer active'
       ansible.builtin.assert:
         quiet: true
         that:
           - _test_plex_timer_status.rc == 0
           - '"Active: active" in _test_plex_timer_status.stdout'
         fail_msg: |
+
           ╭───────────────────────────────────────────────────────────────────╮
           │                                                                   │
-          │               plex-update.timer should be enabled.                │
+          │               plex_update.timer should be enabled.                │
           │                                                                   │
           ╰───────────────────────────────────────────────────────────────────╯
 
-    - name: 'Verify | /etc/systemd/system/plex-update.timer'
+    - name: 'Verify | gather plex_repair.timer status'
+      ansible.builtin.command: 'systemctl status plex_repair.timer'
+      register: _test_plex_timer_status
+      changed_when: false
+
+    - name: 'Verify | assert plex_repair.timer active'
+      ansible.builtin.assert:
+        quiet: true
+        that:
+          - _test_plex_timer_status.rc == 0
+          - '"Active: active" in _test_plex_timer_status.stdout'
+        fail_msg: |
+
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │               plex_repair.timer should be enabled.                │
+          │                                                                   │
+          ╰───────────────────────────────────────────────────────────────────╯
+
+    - name: 'Verify | /opt/plex'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
-        tasks_from: 'copy.yml'
+        tasks_from: 'file.yml'
       vars:
-        test_name: 'Verify | /etc/systemd/system/plex-update.timer'
-        test_src: 'files/plex-update.timer'
-        test_file: '/etc/systemd/system/plex-update.timer'
+        test_name: '{{ "Verify | /opt/plex/" ~ item }}'
+        test_file: '{{ "/opt/plex/" ~ item }}'
         test_owner: 'root'
         test_group: 'root'
-        test_mode: '0644'
+        test_mode: '0755'
+        test_state: 'file'
         test_diff: true
+      loop:
+        - 'plex_update'
+        - 'DBRepair.sh'
 
-    - name: 'Verify | query current plex configuration'
+    - name: 'Verify | query Preferences.xml'
       community.general.xml:
         path: '{{
-            "/var/lib/plexmediaserver/Library/" ~
-            "Application Support/" ~
-            "Plex Media Server/" ~
-            "Preferences.xml"
+            "/var/lib/plexmediaserver/Library/Application Support/" ~
+            "Plex Media Server/Preferences.xml"
           }}'
         content: 'attribute'
         xpath: '/Preferences'
-      register: _plex_xml_raw
+      register: _test_plex_xml_raw
 
-    - name: 'Verify | parse current plex configuration'
+    - name: 'Verify | parse Preferences.xml'
       ansible.builtin.set_fact:
-        _plex_xml: '{{ _plex_xml_raw.matches[0].Preferences }}'
+        _test_plex_xml: '{{ _test_plex_xml_raw.matches[0].Preferences }}'
 
-    - name: 'Verify | DB auto grow size'
+    - name: 'Verify | assert Preferences.xml TestVariable'
       ansible.builtin.assert:
         quiet: true
         that:
-          - _plex_xml.DatabaseCacheSize == '44'
+          - _test_plex_xml.TestVariable == 'TEST'
         fail_msg: |
+
           ╭───────────────────────────────────────────────────────────────────╮
           │                                                                   │
-          │               DatabaseCacheSize should grow to 44.                │
+          │                  TestVariable should be 'TEST'.                   │
           │                                                                   │
           ├───────────────────────────────────────────────────────────────────╯
-          │ {{ _plex_xml.DatabaseCacheSize }}
+          │ {{ _test_plex_xml.TestVariable }}
 
-    - name: 'Verify | auto-generated preference passed through'
+- name: 'Verify'
+  hosts: 'localhost'
+  gather_facts: false
+  tasks:
+    - name: 'Verify | query backup Preferences.xml'
+      ansible.builtin.find:
+        path: '/tmp/ansible_plex_test'
+        patterns: '*_Preferences.xml'
+      register: _test_plex_backup_preferences
+
+    - name: 'Verify | assert backup Preferences.xml'
       ansible.builtin.assert:
         quiet: true
         that:
-          - _plex_xml.MachineIdentifier != ''
+          - _test_plex_backup_preferences.matched >= 1
         fail_msg: |
+
           ╭───────────────────────────────────────────────────────────────────╮
           │                                                                   │
-          │      MachineIdentifier should have an auto-generated value.       │
+          │                  Preferences.xml not backed up.                   │
           │                                                                   │
           ╰───────────────────────────────────────────────────────────────────╯
 
-    # Stateful will override the user configured value.
-    - name: 'Verify | stateful preference passed through'
-      ansible.builtin.assert:
-        quiet: true
-        that:
-          - _plex_xml.AcceptedEULA == '1'
-        fail_msg: |
-          ╭───────────────────────────────────────────────────────────────────╮
-          │                                                                   │
-          │           AcceptedEULA should be a stateful value (1).            │
-          │                                                                   │
-          ├───────────────────────────────────────────────────────────────────╯
-          │ {{ _plex_xml.AcceptedEULA }}
+    - name: 'Verify | query backup com.plexapp.plugins.library.db'
+      ansible.builtin.find:
+        path: '/tmp/ansible_plex_test'
+        patterns: '*_com.plexapp.plugins.library.db'
+        file_type: 'file'
+      register: _test_plex_backup_db
 
-    # Experimental options are not rendered by default.
-    - name: 'Verify | stateful preference passed through'
+    - name: 'Verify | assert backup com.plexapp.plugins.library.db'
       ansible.builtin.assert:
         quiet: true
         that:
-          - _plex_xml.GenerateBIFFrameInterval is not defined
+          - _test_plex_backup_db.matched >= 1
         fail_msg: |
+
           ╭───────────────────────────────────────────────────────────────────╮
           │                                                                   │
-          │            GenerateBIFFrameInterval should not exist.             │
+          │          com.plexapp.plugins.library.db* not backed up.           │
+          │                                                                   │
+          ╰───────────────────────────────────────────────────────────────────╯
+
+    - name: 'Verify | query backup com.plexapp.plugins.library.blobs'
+      ansible.builtin.find:
+        path: '/tmp/ansible_plex_test'
+        patterns: '*_com.plexapp.plugins.library.blobs.db'
+        file_type: 'file'
+      register: _test_plex_backup_blob
+
+    - name: 'Verify | assert backup com.plexapp.plugins.library.blobs'
+      ansible.builtin.assert:
+        quiet: true
+        that:
+          - _test_plex_backup_blob.matched >= 1
+        fail_msg: |
+
+          ╭───────────────────────────────────────────────────────────────────╮
+          │                                                                   │
+          │        com.plexapp.plugins.library.blobs.* not backed up.         │
           │                                                                   │
           ╰───────────────────────────────────────────────────────────────────╯

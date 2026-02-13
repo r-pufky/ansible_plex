@@ -1,12 +1,52 @@
 ---
 - name: 'Prepare'
-  hosts: 'plex-debian-13-user_data'
+  hosts: 'localhost'
   gather_facts: false
   tasks:
-    - name: 'Prepare | simulate user media restriction'
+    - name: 'Prepare | create cache'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'create_cache.yml'
+      vars:
+        test_name: 'Prepare cache'
+
+    - name: 'Prepare | cache DBRepair.sh'
+      ansible.builtin.include_role:
+        name: 'r_pufky.lib.tests'
+        tasks_from: 'cache_url.yml'
+      vars:
+        test_name: 'Prepare | cache DBRepair.sh'
+        test_dest: 'DBRepair.sh'
+        test_url: '{{
+            "https://github.com/ChuckPa/DBRepair/releases/latest/download/" ~
+            "DBRepair.sh"
+          }}'
+        test_mode: '0640'
+
+- name: 'Prepare'
+  hosts: 'all'
+  gather_facts: false
+  tasks:
+    - name: 'Prepare | stage directories'
       ansible.builtin.file:
-        path: '/var/lib/plexmediaserver/Library/Application Support'
-        owner: 5555
-        group: 5555
+        path: '/opt/plex'
+        owner: 'root'
+        group: 'root'
         mode: '0755'
         state: 'directory'
+
+    - name: 'Prepare | stage DBRepair.sh'
+      ansible.builtin.copy:
+        src: '{{
+            lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
+            "/molecule/cache/DBRepair.sh"
+          }}'
+        dest: '/opt/plex/DBRepair.sh'
+        owner: 'root'
+        group: 'root'
+        mode: '0755'
+
+    - name: 'Prepare | inject python3-lxml for community.general.xml testing'
+      ansible.builtin.apt:
+        name: 'python3-lxml'
+        state: 'present'

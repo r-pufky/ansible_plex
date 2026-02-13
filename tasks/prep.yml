@@ -1,90 +1,57 @@
 ---
 ###############################################################################
-# Prep Plex
+# Pre Execution Tasks
 ###############################################################################
-# Plex install from deb packages are categorically broken. There are no debconf
-# options.
-#
-# /etc/default/plexmediaserver no longer honored on installation. Explicitly
-# set systemd drop-in before service exists. The installation script checks for
-# the existence of this and uses those values while installing.
-#
-# Do not remove the default (plex) user as this will put APT in a broken
-# state. Instead ensure the account is fully locked.
-#
-# See preinst and /usr/lib/plexmediaserver/lib/plexmediaserver.default in deb
-# package.
-#
-# Prepare system for pre-configured package install.
 
-- name: 'Prep | manage users'
-  when: _plex_srv_create_user.raw
-  ansible.builtin.include_role:
-    name: 'r_pufky.deb.users'
-    tasks_from: 'role_account_add.yml'
-  vars:
-    users_role_user: '{{ plex_role_user }}'
-    users_role_group: '{{ plex_role_group }}'
-
-- name: 'Prep | enumerate system user {{ _plex_srv_user.raw }}'
-  ansible.builtin.user:
-    name: '{{ _plex_srv_user.raw }}'
-  check_mode: true
-  changed_when: false
-  register: _plex_srv_user_query
-
-- name: 'Prep | parse system user UID/GID'
+- name: 'Prep | record start time'
   ansible.builtin.set_fact:
-    _plex_srv_user: '{{
-        _plex_srv_user |
-        combine({"_uid": _plex_srv_user_query.uid})
-      }}'
-    _plex_srv_group: '{{
-        _plex_srv_group |
-        combine({"_gid": _plex_srv_user_query.group})
-      }}'
+    plex__role_start: '{{ now(utc=True, fmt="%Y-%m-%dT%H%M%S") }}'
+    plex__backup_dir: "{{ plex_cfg_backup_dir | regex_replace('\\/$', '') }}"
+    plex__srv_tmpdir: "{{ plex_srv_tmpdir | regex_replace('\\/$', '') }}"
 
-- name: 'Prep | set {{ _plex_srv_application_support_dir.raw }}'
+- name: 'Prep | assert | service user'
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - plex___user != 'plex'
+      - plex___group != 'plex'
+    fail_msg: |
+
+      ╭───────────────────────────────────────────────────────────────────╮
+      │                                                                   │
+      │            Plex service user/group must NOT be 'plex'.            │
+      │                                                                   │
+      ├───────────────────────────────────────────────────────────────────╯
+      │ Create a custom user before executing this role or use 'media' to
+      │ automatically create a service user for Plex.
+      │
+      │ plex___user: {{ plex___user }}
+      │ plex___group: {{ plex___group }}
+
+- name: 'Prep | assert | backup location'
+  when: plex_flg_backup_config or plex_flg_backup_db
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - plex_cfg_backup_dir | length > 0
+    fail_msg: |
+
+      ╭───────────────────────────────────────────────────────────────────╮
+      │                                                                   │
+      │                     Backup location not set.                      │
+      │                                                                   │
+      ├───────────────────────────────────────────────────────────────────╯
+      │ Backups enabled but no backup location defined.
+      │
+      │ plex_cfg_backup_dir: {{ plex_cfg_backup_dir }}
+      │ plex_flg_backup_config: {{ plex_flg_backup_config }}
+      │ plex_flg_backup_db: {{ plex_flg_backup_db }}
+
+- name: 'Prep | filesystem | set backup location'
+  when: plex__backup_dir | length > 0 and plex__backup_dir != '/tmp'
+  delegate_to: 'localhost'
+  run_once: true
   ansible.builtin.file:
-    path: '{{ _plex_srv_application_support_dir.raw }}'
-    owner: '{{ _plex_srv_user._uid }}'
-    group: '{{ _plex_srv_group._gid }}'
-    mode: '0755'
-    recurse: '{{ _plex_srv_permissions_recursive_enable.raw }}'
-    state: 'directory'
-  changed_when: false  # https://github.com/ansible/ansible/issues/32636
-  become: true
-  become_user: '{{
-      _plex_srv_user.raw
-      if _plex_srv_user_data_manage_enable.raw else
-      "root"
-    }}'
-
-- name: 'Prep | grow DB cache'
-  when: _plex_srv_auto_grow_db_cache_size_enable.raw
-  block:
-    - name: 'Prep | grow DB cache | query size'
-      ansible.builtin.stat:
-        path: '{{
-            _plex_srv_application_support_dir._db_dir
-          }}'
-      register: _plex_db
-
-    # cache_size in MB, stat.size in KB.
-    - name: 'Prep | grow DB cache | calculate grow size'
-      ansible.builtin.set_fact:
-        _plex_db_grow_size: '{{
-            (_plex_cfg_database_cache_size.raw | int * 0.1) | int
-            if not _plex_db.stat.exists else
-            ([_plex_db.stat.size, 4194304] | max / 1048576 * 1.1) | int
-          }}'
-
-    - name: 'Prep | set auto grow DB cache size'
-      ansible.builtin.set_fact:
-        _plex_cfg_database_cache_size: '{{
-          _plex_cfg_database_cache_size |
-          combine({"raw":
-              _plex_cfg_database_cache_size.raw |
-              int + _plex_db_grow_size |
-              int})
-          }}'
+    path: '{{ plex__backup_dir }}'
+    mode: '0750'
+    state: directory

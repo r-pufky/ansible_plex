@@ -1,0 +1,14 @@
+[Unit]
+Description=Automatically repair Plex Media Server DB.
+Requires=plex_repair.timer
+
+[Service]
+Type=oneshot
+ExecStart={{ plex___opt_dir ~ "/DBRepair.sh" ~ ' ' ~ plex_repair_options | join(' ') }}
+User=root
+Group=root
+Environment="DBREPAIR_CACHEAGE={{ plex_repair_cache_age }}"
+Environment="DBREPAIR_PAGESIZE={{ plex_repair_page_size }}"
+
+[Install]
+WantedBy=multi-user.target

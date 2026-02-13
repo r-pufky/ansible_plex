@@ -1,0 +1,11 @@
+[Service]
+User={{ plex_srv_user }}
+Group={{ plex_srv_group }}
+StartLimitBurst=10
+Environment="TMPDIR={{ plex__srv_tmpdir }}"
+Environment="PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR={{ plex___install_dir }}"
+Environment="PLEX_MEDIA_SERVER_MAX_PLUGIN_PROCS={{ plex_srv_max_plugin_processes }}"
+Environment="PLEX_MEDIA_SERVER_MAX_STACK_SIZE={{ plex_srv_max_stack_size }}"
+Environment="PLEX_MEDIA_SERVER_USER={{ plex_srv_user }}"
+Environment="PLEX_USER={{ plex_srv_user }}"
+Environment="PLEX_MEDIA_SERVER_USE_SYSLOG={{ plex_srv_use_syslog_enable | lower }}"

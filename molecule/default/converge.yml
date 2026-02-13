@@ -7,8 +7,10 @@
       ansible.builtin.include_role:
         name: 'r_pufky.media.plex'
 
-    - name: 'Converge | apply r_pufky.media.plex (stateful)'
+    - name: 'Converge | apply r_pufky.media.plex (backup)'
       ansible.builtin.include_role:
         name: 'r_pufky.media.plex'
       vars:
-        plex_cfg_accepted_eula: false
+        plex_flg_backup_config: true
+        plex_flg_backup_db: true
+        plex_cfg_backup_dir: '/tmp/ansible_plex_test'

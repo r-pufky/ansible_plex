@@ -8,49 +8,52 @@
 # * Branch for new Debian releases.
 # * KEEP a separate change log as changes are made.
 # * Use bare-metal docs to validate package/process changes.
-# * Update role defaults (includes updating defaults, tasks):
-#   * Use configuration docs to add new variables.
-#   * Use defaults to remove any changed/deprecated variables.
-#   * Show advanced options in UI, compare to existing config files.
-#   * Set advanced options to reveal additional variables.
+# * Update defaults.
 # * Update tests for any changes.
-# * Standard role validation testing (yamllint, ansible-lint, to-do, no-qa).
-# * Tag with OS-APP-ROLE version.
+# * Standard validation testing (yamllint, ansible-lint, to-do, no-qa).
+# * Tag version.
 #
 # Reference:
 # * https://forums.plex.tv/t/plex-media-server/30447
 
 # Last time Plex options were validated against a default configuration.
-plex_role_validate_date: '2025-08-25'
-plex_role_validate_release: 'trixie'
-plex_role_validate_version: '1.43.0.10389'
+plex___validate_date: '2026-02-13'
+plex___validate_release: 'trixie'
+plex___validate_version: '1.43.0.10467'
 
-# Location of plex DB.
-plex_role_db_dir: 'Plug-in Support/Databases/com.plexapp.plugins.library.db'
+plex___bin_dir: '/usr/local/bin'
+plex___opt_dir: '/opt/plex'
+plex___install_dir: '/var/lib/plexmediaserver/Library/Application Support'
+plex___root_dir: '{{ plex___install_dir ~ "/Plex Media Server" }}'
+plex___db_dir: '{{ plex___root_dir ~ "/Plug-in Support/Databases" }}'
+plex___preferences: '{{ plex___root_dir ~ "/Preferences.xml" }}'
 
 ###############################################################################
 # APT Packages
 ###############################################################################
-# Obtained from manual package install and checking plexmediaserver.list.
+# Obtained from manual package install. Plex 1.43.0.10467 changed APT
+# repository to a new location with updated keys to attempt to fix key signing
+# issues and old package issues. See install.yml.
 #
 # Reference:
+# * https://repo.plex.tv/scripts/setupRepo.sh
 # * https://support.plex.tv/articles/200288586-installation/
 
-plex_role_packages:
-  - 'plexmediaserver'
-  - 'python3-lxml'  # XML parsing for Preferences.xml.
+plex___packages:
   - 'curl'  # plexupdate, dbrepair script.
+  - 'plexmediaserver'
+  - 'xmlstarlet'  # Bash XML parsing for auto update.
 
-plex_role_apt_sources:
+plex___apt_sources:
   - name: 'plexmediaserver'
     types:
       - 'deb'
-    uris: 'https://downloads.plex.tv/repo/deb'
+    uris: 'https://repo.plex.tv/deb'
     suites:
       - 'public'
     components:
       - 'main'
-    signed_by: 'https://downloads.plex.tv/plex-keys/PlexSign.key'
+    signed_by: 'https://downloads.plex.tv/plex-keys/PlexSign.v2.key'
 
 ###############################################################################
 # DBRepair.sh
@@ -60,7 +63,7 @@ plex_role_apt_sources:
 # Reference:
 # * https://github.com/ChuckPa/DBRepair
 
-plex_role_repair_url: '{{
+plex___repair_url: '{{
     "https://github.com/ChuckPa/PlexDBRepair/releases/latest/download/" ~
     "DBRepair.sh"
   }}'
@@ -69,11 +72,11 @@ plex_role_repair_url: '{{
 # Default Plex User/Group
 ###############################################################################
 
-plex_role_group:
+plex___group:
   name: 'media'
   gid: 5555
 
-plex_role_user:
+plex___user:
   name: 'media'
   group: 'media'
   uid: 5555
