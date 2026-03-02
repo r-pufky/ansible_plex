@@ -4,21 +4,22 @@
 ###############################################################################
 # Prune any old files from previous role versions. This is executed before any
 # operations with the new role version.
+#
+# Use shell command to increase execution speed for multiple directories.
 
+# 9.0.0 changed role structure:
+# * Services moved to plex_*.
+# * plexupdate, DBRepair moved to /etc/plex.
+# * Pre 1.43.0.10467 installed plexmediaserver.service to wrong location.
 - name: 'Maintenance | 9.0.0 | remove deprecated files'
-  ansible.builtin.file:
-    path: '{{ item }}'
-    state: 'absent'
-  loop:
-    # Moved to plex_*.
-    - '/etc/systemd/system/plex-update.service'
-    - '/etc/systemd/system/plex-update.timer'
-    - '/etc/systemd/system/plex-repair.service'
-    - '/etc/systemd/system/plex-repair.timer'
-    # Moved to /etc/plex.
-    - '{{ plex___root_dir ~ "/plexupdate" }}'
-    - '/usr/bin/DBRepair.sh'
-    # Pre 1.43.0.10467 installed plexmediaserver.service to wrong location.
-    - '/etc/systemd/system/plexmediaserver.service'
-    - '/etc/apt/sources.list.d/plex.list'
-    - '/etc/apt/sources.list.d/plexmediaserver.list'
+  ansible.builtin.shell: >-
+    rm -f /etc/systemd/system/plex-update.* &&
+    rm -f /etc/systemd/system/plex-repair.* &&
+    rm -f {{ plex___app._root_dir ~ "/plexupdate" }} &&
+    rm -f /usr/bin/DBRepair.sh &&
+    rm -f /etc/systemd/system/plexmediaserver.service &&
+    rm -f /etc/apt/sources.list.d/plex.list &&
+    rm -f /etc/apt/sources.list.d/plexmediaserver.list
+  args:
+    executable: '/bin/bash'
+    removes: '/etc/systemd/system/plex-update.service'

@@ -4,11 +4,11 @@ Requires=plex_repair.timer
 
 [Service]
 Type=oneshot
-ExecStart={{ plex___opt_dir ~ "/DBRepair.sh" ~ ' ' ~ plex_repair_options | join(' ') }}
+ExecStart={{ plex___app._opt_dir ~ "/DBRepair.sh" ~ ' ' ~ plex__repair._options | join(' ') }}
 User=root
 Group=root
-Environment="DBREPAIR_CACHEAGE={{ plex_repair_cache_age }}"
-Environment="DBREPAIR_PAGESIZE={{ plex_repair_page_size }}"
+Environment="DBREPAIR_CACHEAGE={{ plex__repair._cache_age }}"
+Environment="DBREPAIR_PAGESIZE={{ plex__repair._page_size }}"
 
 [Install]
 WantedBy=multi-user.target

@@ -15,15 +15,17 @@
 - name: 'Config | filesystem | set Preferences.xml'
   when: plex_flg_preferences
   ansible.builtin.template:
-    src: '{{ plex_cfg_preferences }}'
-    dest: '{{ plex___preferences }}'
-    owner: '{{ plex__uid }}'
-    group: '{{ plex__gid }}'
+    src: '{{ plex__cfg._preferences }}'
+    dest: '{{ plex___app._cfg }}'
+    owner: '{{ plex__cfg._uid }}'
+    group: '{{ plex__cfg._gid }}'
     mode: '0600'
   become: true
-  become_user: '{{ plex_srv_user }}'
+  become_user: '{{ plex__srv._user }}'
 
-- name: 'Config | systemd | start services'
+# Always enable and reload as this is the first time the service is touched
+# after install step.
+- name: 'Config | systemd | start plexmediaserver.service'
   when: plex_flg_start
   ansible.builtin.systemd:
     name: 'plexmediaserver.service'

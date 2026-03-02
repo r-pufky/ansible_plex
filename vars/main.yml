@@ -11,22 +11,16 @@
 # * Update defaults.
 # * Update tests for any changes.
 # * Standard validation testing (yamllint, ansible-lint, to-do, no-qa).
-# * Tag version.
 #
 # Reference:
 # * https://forums.plex.tv/t/plex-media-server/30447
 
-# Last time Plex options were validated against a default configuration.
-plex___validate_date: '2026-02-13'
-plex___validate_release: 'trixie'
-plex___validate_version: '1.43.0.10467'
+plex___release: "{{ {} | r_pufky.data.v3(
 
-plex___bin_dir: '/usr/local/bin'
-plex___opt_dir: '/opt/plex'
-plex___install_dir: '/var/lib/plexmediaserver/Library/Application Support'
-plex___root_dir: '{{ plex___install_dir ~ "/Plex Media Server" }}'
-plex___db_dir: '{{ plex___root_dir ~ "/Plug-in Support/Databases" }}'
-plex___preferences: '{{ plex___root_dir ~ "/Preferences.xml" }}'
+    _date='2026-02-27',
+    _debian='trixie',
+    _app='1.43.0.10467',
+  ) }}"
 
 ###############################################################################
 # APT Packages
@@ -54,6 +48,29 @@ plex___apt_sources:
     components:
       - 'main'
     signed_by: 'https://downloads.plex.tv/plex-keys/PlexSign.v2.key'
+
+###############################################################################
+# Plex
+###############################################################################
+
+plex___app: "{{ {} | r_pufky.data.v3(
+
+    _bin_dir='/usr/local/bin',
+    _opt_dir='/opt/plex',
+    _live_dir='/var/lib/plexmediaserver/Library/Application Support',
+    _root_dir=(
+      '/var/lib/plexmediaserver/Library/Application Support/' ~
+      'Plex Media Server'
+    ),
+    _db_dir=(
+      '/var/lib/plexmediaserver/Library/Application Support/' ~
+      'Plex Media Server/Plug-in Support/Databases'
+    ),
+    _cfg=(
+      '/var/lib/plexmediaserver/Library/Application Support/' ~
+      'Plex Media Server/Preferences.xml'
+    ),
+  ) }}"
 
 ###############################################################################
 # DBRepair.sh

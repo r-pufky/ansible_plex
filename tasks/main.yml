@@ -23,12 +23,6 @@
 - name: 'DB repair'
   ansible.builtin.import_tasks: 'db_repair.yml'
 
-- name: 'Validate | assert services running'
+- name: 'Validate'
   when: plex_flg_validate
-  ansible.builtin.service:
-    name: 'plexmediaserver.service'
-    state: 'started'
-  register: plex__service
-  delay: 15
-  retries: 3
-  until: plex__service.status.ActiveState == 'active'
+  ansible.builtin.import_tasks: 'validate.yml'

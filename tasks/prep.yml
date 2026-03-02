@@ -5,53 +5,119 @@
 
 - name: 'Prep | record start time'
   ansible.builtin.set_fact:
-    plex__role_start: '{{ now(utc=True, fmt="%Y-%m-%dT%H%M%S") }}'
-    plex__backup_dir: "{{ plex_cfg_backup_dir | regex_replace('\\/$', '') }}"
-    plex__srv_tmpdir: "{{ plex_srv_tmpdir | regex_replace('\\/$', '') }}"
+    plex__srv: "{{ {} | r_pufky.data.v3(
 
-- name: 'Prep | assert | service user'
+      _user=plex_srv_user,
+      _group=plex_srv_group,
+      _max_plugin_processes=plex_srv_max_plugin_processes,
+      _max_stack_size=plex_srv_max_stack_size,
+      _tmpdir=plex_srv_tmpdir | regex_replace('\\/$', ''),
+      _use_syslog_enable=plex_srv_use_syslog_enable,
+      ) }}"
+    plex__cfg: "{{ {} | r_pufky.data.v3(
+
+        _start=now(utc=True, fmt='%Y-%m-%dT%H%M%S'),
+        _backup_dir=plex_cfg_backup_dir | regex_replace('\\/$', ''),
+        _preferences=plex_cfg_preferences,
+      ) }}"
+    plex__auto: "{{ {} | r_pufky.data.v3(
+
+        _update_schedule=plex_update_schedule,
+      ) }}"
+    plex__repair: "{{ {} | r_pufky.data.v3(
+
+        _schedule=plex_repair_schedule,
+        _cache_age=plex_repair_cache_age,
+        _page_size=plex_repair_page_size,
+        _options=plex_repair_options,
+      ) }}"
+
+
+- name: 'Prep | assert | service user is not plex'
   ansible.builtin.assert:
     quiet: true
     that:
-      - plex___user != 'plex'
-      - plex___group != 'plex'
+      - plex__srv._user != 'plex'
+      - plex__srv._group != 'plex'
     fail_msg: |
 
-      ╭───────────────────────────────────────────────────────────────────╮
-      │                                                                   │
-      │            Plex service user/group must NOT be 'plex'.            │
-      │                                                                   │
-      ├───────────────────────────────────────────────────────────────────╯
-      │ Create a custom user before executing this role or use 'media' to
-      │ automatically create a service user for Plex.
-      │
-      │ plex___user: {{ plex___user }}
-      │ plex___group: {{ plex___group }}
+      ✘ Plex service user/group must NOT be 'plex'.
+      Create a custom user before executing this role or use 'media' to
+      automatically create a service user for Plex.
 
-- name: 'Prep | assert | backup location'
+      plex___user: {{ plex__srv._user }}
+      plex___group: {{ plex__srv._group }}
+
+- name: 'Prep | assert | backup enabled and location defined'
   when: plex_flg_backup_config or plex_flg_backup_db
   ansible.builtin.assert:
     quiet: true
     that:
-      - plex_cfg_backup_dir | length > 0
+      - plex__cfg._backup_dir | length > 0
     fail_msg: |
 
-      ╭───────────────────────────────────────────────────────────────────╮
-      │                                                                   │
-      │                     Backup location not set.                      │
-      │                                                                   │
-      ├───────────────────────────────────────────────────────────────────╯
-      │ Backups enabled but no backup location defined.
-      │
-      │ plex_cfg_backup_dir: {{ plex_cfg_backup_dir }}
-      │ plex_flg_backup_config: {{ plex_flg_backup_config }}
-      │ plex_flg_backup_db: {{ plex_flg_backup_db }}
+      ✘ Backup location not set.
+      Backups enabled but no backup location defined.
+
+      plex_flg_backup_config: {{ plex_flg_backup_config }}
+      plex_flg_backup_db: {{ plex_flg_backup_db }}
+      plex_cfg_backup_dir: {{ plex__cfg._backup_dir }}
 
 - name: 'Prep | filesystem | set backup location'
-  when: plex__backup_dir | length > 0 and plex__backup_dir != '/tmp'
+  when: plex__cfg._backup_dir | length > 0 and plex__cfg._backup_dir != '/tmp'
   delegate_to: 'localhost'
   run_once: true
   ansible.builtin.file:
-    path: '{{ plex__backup_dir }}'
+    path: '{{ plex__cfg._backup_dir }}'
     mode: '0750'
     state: directory
+
+- name: '{{ "Prep | account | query user " ~ plex__srv._user }}'
+  ansible.builtin.command: '{{ "id " ~ plex__srv._user }}'
+  failed_when: false
+  register: plex__user_check
+  changed_when: plex__user_check.rc > 0
+
+- name: '{{ "Prep | account | query group " ~ plex__srv._group }}'
+  ansible.builtin.command: '{{ "groups " ~ plex__srv._group }}'
+  failed_when: false
+  register: plex__group_check
+  changed_when: plex__group_check.rc > 0
+
+- name: '{{ "Prep | account | create group " ~ plex__srv._group }}'
+  when: plex__group_check.rc != 0
+  ansible.builtin.group:
+    gid: '{{ plex___group.gid }}'
+    name: '{{ plex___group.name }}'
+    state: 'present'
+
+- name: '{{ "Prep | account | create user " ~ plex__srv._user }}'
+  when: plex__user_check.rc != 0
+  ansible.builtin.user:
+    name: '{{ plex___user.name }}'
+    group: '{{ plex___user.group }}'
+    uid: '{{ plex___user.uid }}'
+    shell: '{{ plex___user.shell }}'
+    home: '{{ plex___user.home }}'
+    create_home: '{{ plex___user.create_home }}'
+    password: '{{ plex___user.password }}'
+    password_lock: '{{ plex___user.password_lock }}'
+    update_password: '{{ plex___user.update_password }}'
+    expires: '{{ plex___user.expires }}'
+    system: '{{ plex___user.system }}'
+
+# Pre-existing users may have a different UID/GID.
+- name: '{{ "Prep | account | enumerate " ~ plex__srv._user }}'
+  ansible.builtin.user:
+    name: '{{ plex__srv._user }}'
+  check_mode: true
+  changed_when: false
+  register: plex__user_query
+
+- name: 'Prep | fact | parse service UID/GID'
+  ansible.builtin.set_fact:
+    plex__cfg: "{{ plex__cfg | r_pufky.data.v3(
+
+        _uid=plex__user_query.uid,
+        _gid=plex__user_query.group,
+      ) }}"

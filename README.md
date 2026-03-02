@@ -18,8 +18,7 @@ Detailed variable use documented in defaults. See usage for role operation.
   Role default options. May be referenced in defaults.
 
 * [ports](https://github.com/r-pufky/ansible_plex/blob/main/defaults/main/ports.yml) -
-  Ports are defined to aid in managing ports in external roles. They are
-  **not** managed by the role unless explicitly stated.
+  Ports are **not** managed (defined for external use).
 
 ## Usage
 [Additional documentation](http://r-pufky.github.io/r-pufky/docs/media/plex)
@@ -28,17 +27,17 @@ including troubleshooting and config file variables.
 ### Feature Flags
 Tasks are gated by feature flags and executed in the following order.
 
- Step | Flag                        | Notes
-------|-----------------------------|-------
- 1    | plex_flg_backup_config      | Backup existing config and exit.
- 2    | plex_flg_backup_db          | Backup existing databases and exit.
- 3    | plex_flg_maintenance        | Preform role maintenance tasks.
- 4    | plex_flg_install            | Install required packages, users, etc.
- 5    | plex_flg_preferences        | Install user-defined config.
- 6    | plex_flg_start              | Start plex service.
- 7    | plex_flg_auto_update        | Configure automatic plex update checks.
- 8    | plex_flg_db_repair          | Configure automatic DB repair.
- 9    | plex_flg_validate           | Validate install.
+ Step | Flag                   | Notes
+------|------------------------|-------
+ 1    | plex_flg_backup_config | Backup existing config and exit.
+ 2    | plex_flg_backup_db     | Backup existing databases and exit.
+ 3    | plex_flg_maintenance   | Preform role maintenance tasks.
+ 4    | plex_flg_install       | Install required packages, users, etc.
+ 5    | plex_flg_preferences   | Install user-defined config.
+ 6    | plex_flg_start         | Start plex service.
+ 7    | plex_flg_auto_update   | Configure automatic plex update checks.
+ 8    | plex_flg_db_repair     | Configure automatic DB repair.
+ 9    | plex_flg_validate      | Validate install.
 
 ## Example Playbooks
 
@@ -89,13 +88,14 @@ molecule test --all
 ```
 
 Testing variables:
- Variable                     | type | Description
-------------------------------|------|-------------
- url_inject_enable            | bool | Disable **get_url** to inject files locally.
+ Variable          | type | Description
+-------------------|------|-------------
+ url_inject_enable | bool | Disable **get_url** to inject files locally.
 
 ### Releases
-Semantic versioning focused on service deployment with templated configuration
-to minimize role churn due to inconsistent and rapid rolling release cycle.
+[Semantic versioning](https://semver.org/spec/v2.0.0) focused on service
+deployment with templated configuration to minimize role churn due to
+inconsistent and rapid rolling release cycle.
 
  Release | Debian | Ansible | Plex          | Notes
 ---------|--------|---------|---------------|-------

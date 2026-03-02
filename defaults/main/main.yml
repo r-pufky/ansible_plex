@@ -65,9 +65,9 @@ plex_flg_auto_update: true
 # Default: True.
 plex_flg_db_repair: true
 
-# 11. Enable validation?
+# 9. Verify service running?
 #
-# Verify service running after role application or fail.
+# Start services after role application and verify running or fail.
 #
 # Default: True.
 plex_flg_validate: true

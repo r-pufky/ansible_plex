@@ -47,82 +47,35 @@
 # * https://repo.plex.tv/scripts/setupRepo.sh
 # * https://forums.plex.tv/t/issue-upgrading-to-pms-1-43-0-10467-on-debian-and-rhel-based-distributions/935847/189
 
-- name: '{{ "Install | account | query user " ~ plex_srv_user }}'
-  ansible.builtin.command: '{{ "id " ~ plex_srv_user }}'
-  register: plex__user_check
-  changed_when: plex__user_check.rc > 0
-  failed_when: false
-
-- name: '{{ "Install | account | query group " ~ plex_srv_group }}'
-  ansible.builtin.command: '{{ "groups " ~ plex_srv_group }}'
-  register: plex__group_check
-  changed_when: plex__group_check.rc > 0
-  failed_when: false
-
-- name: '{{ "Install | account | create group " ~ plex_srv_group }}'
-  when: plex__group_check.rc != 0
-  ansible.builtin.group:
-    gid: '{{ plex___group.gid }}'
-    name: '{{ plex___group.name }}'
-    state: 'present'
-
-- name: '{{ "Install | account | create user " ~ plex_srv_user }}'
-  when: plex__user_check.rc != 0
-  ansible.builtin.user:
-    name: '{{ plex___user.name }}'
-    group: '{{ plex___user.group }}'
-    uid: '{{ plex___user.uid }}'
-    shell: '{{ plex___user.shell }}'
-    home: '{{ plex___user.home }}'
-    create_home: '{{ plex___user.create_home }}'
-    password: '{{ plex___user.password }}'
-    password_lock: '{{ plex___user.password_lock }}'
-    update_password: '{{ plex___user.update_password }}'
-    expires: '{{ plex___user.expires }}'
-    system: '{{ plex___user.system }}'
-
-# Pre-existing users may have a different UID/GID.
-- name: '{{ "Install | account | enumerate " ~ plex_srv_user }}'
-  ansible.builtin.user:
-    name: '{{ plex_srv_user }}'
-  check_mode: true
-  changed_when: false
-  register: plex__user_query
-
-- name: 'Install | account | parse service UID/GID'
-  ansible.builtin.set_fact:
-    plex__uid: '{{ plex__user_query.uid }}'
-    plex__gid: '{{ plex__user_query.group }}'
-
-- name: '{{ "Install | filesystem | set " ~ plex___root_dir }}'
+- name: '{{ "Install | filesystem | set " ~ plex___app._root_dir }}'
   ansible.builtin.file:
-    path: '{{ plex___root_dir }}'
-    owner: '{{ plex__uid }}'
-    group: '{{ plex__gid }}'
+    path: '{{ plex___app._root_dir }}'
+    owner: '{{ plex__cfg._uid }}'
+    group: '{{ plex__cfg._gid }}'
     mode: '0755'
     state: 'directory'
 
-- name: '{{ "Install | filesystem | set " ~ plex___opt_dir }}'
+- name: '{{ "Install | filesystem | set " ~ plex___app._opt_dir }}'
   ansible.builtin.file:
-    path: '{{ plex___opt_dir }}'
+    path: '{{ plex___app._opt_dir }}'
     owner: 'root'
     group: 'root'
     mode: '0755'
     state: 'directory'
 
-- name: '{{ "Install | filesystem | set " ~ plex__srv_tmpdir }}'
-  when: plex__srv_tmpdir != '/tmp'
+- name: '{{ "Install | filesystem | set " ~ plex__srv._tmpdir }}'
+  when: plex__srv._tmpdir != '/tmp'
   ansible.builtin.file:
-    path: '{{ plex__srv_tmpdir }}'
-    owner: 'root'
-    group: 'root'
+    path: '{{ plex__srv._tmpdir }}'
+    owner: '{{ plex__cfg._uid }}'
+    group: '{{ plex__cfg._gid }}'
     mode: '0755'
     state: 'directory'
 
 - name: 'Install | filesystem | set plex_update'
   ansible.builtin.template:
     src: 'plex_update.j2'
-    dest: '{{ plex___opt_dir ~ "/plex_update" }}'
+    dest: '{{ plex___app._opt_dir ~ "/plex_update" }}'
     owner: 'root'
     group: 'root'
     mode: '0755'
@@ -131,7 +84,7 @@
   when: not (url_inject_enable | default(false))
   ansible.builtin.get_url:
     url: '{{ plex___repair_url }}'
-    dest: '{{ plex___opt_dir ~ "/DBRepair.sh" }}'
+    dest: '{{ plex___app._opt_dir ~ "/DBRepair.sh" }}'
     force: false
     owner: 'root'
     group: 'root'
@@ -141,8 +94,8 @@
 
 - name: 'Install | filesystem | add to search path'
   ansible.builtin.file:
-    src: '{{ plex___opt_dir ~ "/" ~ item }}'
-    path: '{{ plex___bin_dir ~ "/" ~ item }}'
+    src: '{{ plex___app._opt_dir ~ "/" ~ item }}'
+    path: '{{ plex___app._bin_dir ~ "/" ~ item }}'
     owner: 'root'
     group: 'root'
     mode: '0755'
@@ -167,7 +120,7 @@
     group: 'root'
     mode: '0644'
 
-- name: 'Install | install packages'
+- name: 'Install | packages'
   ansible.builtin.include_role:
     name: 'r_pufky.deb.apt'
   vars:
@@ -177,7 +130,7 @@
     apt_package_update_cache: true
 
 - name: 'Install | account | lock package user'
-  when: plex___user != 'plex'
+  when: plex__srv._user != 'plex'
   ansible.builtin.user:
     name: 'plex'
     password: '!'

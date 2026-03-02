@@ -1,0 +1,76 @@
+---
+###############################################################################
+# Start
+###############################################################################
+# Start Plex services and confirm they are active and running.
+
+# Plex typically takes ~10 seconds to report active.
+- name: 'Start | assert | plexmediaserver.service active'
+  ansible.builtin.service:
+    name: 'plexmediaserver.service'
+    state: 'started'
+  delay: 15
+  retries: 3
+  register: plex__service
+  until: plex__service.status.ActiveState == 'active'
+
+- name: 'Start | fact | query services'
+  ansible.builtin.service_facts:
+
+- name: 'Start | assert | plex_update.service enabled'
+  when: plex_flg_auto_update
+  ansible.builtin.assert:
+    quiet: true
+    that: ansible_facts.services[item].status == 'enabled'
+    fail_msg: |
+
+      ✘ Service should be enabled.
+      {{ item }}
+  loop:
+    - 'plex_update.service'
+
+- name: 'Start | systemd | query plex_update.timer'
+  when: plex_flg_auto_update
+  ansible.builtin.command: 'systemctl status plex_update.timer'
+  changed_when: false
+  register: plex__cmd
+
+- name: 'Start | assert | plex_update.timer active'
+  when: plex_flg_auto_update
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - plex__cmd.rc == 0
+      - '"Active: active" in plex__cmd.stdout'
+    fail_msg: |
+
+      ✘ plex_update.timer should be active.
+
+- name: 'Start | assert | plex_repair.service enabled'
+  when: plex_flg_db_repair
+  ansible.builtin.assert:
+    quiet: true
+    that: ansible_facts.services[item].status == 'enabled'
+    fail_msg: |
+
+      ✘ Service should be enabled.
+      {{ item }}
+  loop:
+    - 'plex_repair.service'
+
+- name: 'Start | systemd | query plex_repair.timer'
+  when: plex_flg_db_repair
+  ansible.builtin.command: 'systemctl status plex_repair.timer'
+  changed_when: false
+  register: plex__cmd
+
+- name: 'Start | assert | plex_repair.timer active'
+  when: plex_flg_db_repair
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - plex__cmd.rc == 0
+      - '"Active: active" in plex__cmd.stdout'
+    fail_msg: |
+
+      ✘ plex_repair.timer should be active.

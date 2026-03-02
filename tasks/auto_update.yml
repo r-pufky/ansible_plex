@@ -10,20 +10,14 @@
 # * https://github.com/mrworf/plexupdate
 # * https://github.com/linuxserver/docker-plex/blob/master/root/etc/
 
-- name: 'Auto update | processing entitlements 🗘'
+- name: 'Auto update | processing entitlements (~1 minute) 🗘'
   when: plex_flg_auto_update
   ansible.builtin.debug:
-    msg: |
+    msg: 'Processing entitlements (~4 minutes).'
 
-      ╭───────────────────────────────────────────────────────────────────╮
-      │                                                                   │
-      │       Processing entitlements. This may take a few minutes.       │
-      │                                                                   │
-      ╰───────────────────────────────────────────────────────────────────╯
-
-- name: 'Auto update | process entitlements'
+- name: 'Auto update | cmd | process entitlements'
   when: plex_flg_auto_update
-  ansible.builtin.shell: '{{ plex___opt_dir ~ "/plex_update" }}'
+  ansible.builtin.shell: '{{ plex___app._opt_dir ~ "/plex_update" }}'
   args:
     executable: '/bin/bash'
   changed_when: false

@@ -3,6 +3,12 @@
   hosts: 'localhost'
   gather_facts: false
   tasks:
+    - name: 'Prepare | import role variables'
+      ansible.builtin.include_vars:
+        file: '{{
+            lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~ "/vars/main.yml"
+          }}'
+
     - name: 'Prepare | create cache'
       ansible.builtin.include_role:
         name: 'r_pufky.lib.tests'
@@ -17,10 +23,7 @@
       vars:
         test_name: 'Prepare | cache DBRepair.sh'
         test_dest: 'DBRepair.sh'
-        test_url: '{{
-            "https://github.com/ChuckPa/DBRepair/releases/latest/download/" ~
-            "DBRepair.sh"
-          }}'
+        test_url: '{{ plex___repair_url }}'
         test_mode: '0640'
 
 - name: 'Prepare'
