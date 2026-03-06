@@ -1,0 +1,10 @@
+[Unit]
+Description=plex_repair.service timer
+Requires=plex_repair.service
+
+[Timer]
+OnCalendar=weekly
+Unit=plex_repair.service
+
+[Install]
+WantedBy=timers.target

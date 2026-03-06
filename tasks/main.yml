@@ -3,8 +3,12 @@
   ansible.builtin.import_tasks: 'prep.yml'
 
 - name: 'Backup'
-  when: plex_flg_backup_config or plex_flg_backup_db
+  when: plex_flg_backup
   ansible.builtin.import_tasks: 'backup.yml'
+
+- name: 'Restore'
+  when: plex_flg_restore
+  ansible.builtin.import_tasks: 'restore.yml'
 
 - name: 'Maintenance'
   when: plex_flg_maintenance

@@ -4,13 +4,30 @@
 ###############################################################################
 # Executed in numerical order.
 
-# 1. Backup config to plex_cfg_backup_dir?
+# 1. Backup SQLite, Preferences.xml to plex_cfg_backup_dir?
 #
-# Enabling will only process plex_flg_backup_* and exit role. Location created
-# if non-existent. Service stopped for backup and restarted.
+# Backup existing config, DB, and exit role. plex_cfg_backup_dir created if
+# non-existent. Services stopped for backup and restarted.
+#
+# Plex instances that generate indexed thumbnails (BIF options) may be 100GB+.
 #
 # Default: False.
-plex_flg_backup_config: false
+plex_flg_backup: false
+
+# 2. Restore SQLite, Preferences.xml?
+#
+# Restore existing config, DB, and exit role.
+#
+# Preferences.xml:
+# Configuration is applied via plex_cfg_preferences.
+#
+# Database (SQLite only):
+# Restored from latest backup in plex_cfg_backup_dir.
+#
+# Services are stopped, files restored, services restarted, then validated.
+#
+# Default: False.
+plex_flg_restore: false
 
 # 2. Backup DB to plex_cfg_backup_dir?
 #

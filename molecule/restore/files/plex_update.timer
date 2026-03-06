@@ -1,0 +1,10 @@
+[Unit]
+Description=plex_update.service timer
+Requires=plex_update.service
+
+[Timer]
+OnCalendar=weekly
+Unit=plex_update.service
+
+[Install]
+WantedBy=timers.target

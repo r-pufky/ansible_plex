@@ -1,0 +1,82 @@
+---
+###############################################################################
+# Restore
+###############################################################################
+# Apply configuration as normal from role. Find the latest set of SQLite DB
+# backups and copy to remote. Restart services and validate they are running
+# from role.
+#
+# Databases:
+#   com.plexapp.plugins.library.blobs.db
+#   com.plexapp.plugins.library.blobs.db-shm
+#   com.plexapp.plugins.library.blobs.db-wal
+#   com.plexapp.plugins.library.db
+#   com.plexapp.plugins.library.db-shm
+#   com.plexapp.plugins.library.db-wal
+
+- name: 'Restore | systemd | stop services'
+  ansible.builtin.systemd:
+    name: 'plexmediaserver.service'
+    state: 'stopped'
+  failed_when: false
+
+# Apply config per config.yml without restarting services.
+- name: 'Restore | filesystem | set Preferences.xml'
+  ansible.builtin.template:
+    src: '{{ plex__cfg._preferences }}'
+    dest: '{{ plex___app._cfg }}'
+    owner: '{{ plex__cfg._uid }}'
+    group: '{{ plex__cfg._gid }}'
+    mode: '0600'
+  become: true
+  become_user: '{{ plex__srv._user }}'
+
+- name: 'Restore | filesystem | enumerate backups'
+  delegate_to: 'localhost'
+  ansible.builtin.find:
+    paths: '{{ plex__cfg._backup_dir }}'
+    patterns: '*.library.db'
+    file_type: 'file'
+    recurse: false
+  register: plex__dbs
+
+# Grab datestamp from expected 'YYYY-MM-DDTHHMMSS_{FILE}' format.
+# Keep .library in file path to capture both blob and metadata DB's.
+- name: 'Restore | fact | parse latest backup'
+  when: plex__dbs.files | length > 0
+  ansible.builtin.set_fact:
+    plex__restore_base: '{{
+
+        (
+          plex__dbs.files |
+          sort(attribute="mtime", reverse=true) |
+          first
+        ).path | basename | split(".db") | first
+      }}'
+
+- name: 'Restore | filesystem | enumerate latest backup'
+  when: plex__dbs.files | length > 0
+  delegate_to: 'localhost'
+  ansible.builtin.find:
+    paths: '{{ plex__cfg._backup_dir }}'
+    patterns: '{{ plex__restore_base ~ ".*" }}'
+    file_type: 'file'
+    recurse: false
+  register: plex__dbs
+
+- name: 'Restore | copy | SQLite DB'
+  when: plex__dbs.matched > 0
+  ansible.builtin.copy:
+    src: '{{ item.path }}'
+    dest: '{{ plex___app._db_dir ~ "/" ~ item.path | basename }}'
+    owner: '{{ plex__cfg._uid }}'
+    group: '{{ plex__cfg._gid }}'
+    mode: '0644'
+    force: true
+  loop: '{{ plex__dbs.files }}'
+
+- name: 'Restore | include | validate.yml'
+  ansible.builtin.import_tasks: 'validate.yml'
+
+- name: 'Restore | success ✔'
+  ansible.builtin.meta: 'end_host'

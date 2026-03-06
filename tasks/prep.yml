@@ -32,7 +32,6 @@
         _options=plex_repair_options,
       ) }}"
 
-
 - name: 'Prep | assert | service user is not plex'
   ansible.builtin.assert:
     quiet: true
@@ -49,7 +48,7 @@
       plex___group: {{ plex__srv._group }}
 
 - name: 'Prep | assert | backup enabled and location defined'
-  when: plex_flg_backup_config or plex_flg_backup_db
+  when: plex_flg_backup
   ansible.builtin.assert:
     quiet: true
     that:
@@ -59,18 +58,22 @@
       ✘ Backup location not set.
       Backups enabled but no backup location defined.
 
-      plex_flg_backup_config: {{ plex_flg_backup_config }}
-      plex_flg_backup_db: {{ plex_flg_backup_db }}
+      plex_flg_backup: {{ plex_flg_backup }}
       plex_cfg_backup_dir: {{ plex__cfg._backup_dir }}
 
-- name: 'Prep | filesystem | set backup location'
-  when: plex__cfg._backup_dir | length > 0 and plex__cfg._backup_dir != '/tmp'
-  delegate_to: 'localhost'
-  run_once: true
-  ansible.builtin.file:
-    path: '{{ plex__cfg._backup_dir }}'
-    mode: '0750'
-    state: directory
+- name: 'Prep | assert | restore enabled and source defined'
+  when: plex_flg_restore
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - plex__cfg._preferences | length > 0
+    fail_msg: |
+
+      ✘ Config source not set.
+      Restore enabled but no config source defined.
+
+      plex_flg_restore: {{ plex_flg_restore }}
+      plex_cfg_preferences: {{ plex__cfg._preferences }}
 
 - name: '{{ "Prep | account | query user " ~ plex__srv._user }}'
   ansible.builtin.command: '{{ "id " ~ plex__srv._user }}'

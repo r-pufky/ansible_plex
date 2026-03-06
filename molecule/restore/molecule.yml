@@ -1,18 +1,14 @@
 ---
 ###############################################################################
-# Default
+# Restore
 ###############################################################################
-# Default configuration is deployed successfully.
+# Test a restore operation works correctly.
 #
 # Tests:
-# * override, plex_update, plex_repair unit files correct format.
-# * plex_update, plex_repair services are active (plexmediaserver verified by
-#   role).
-# * /opt/plex/{DBRepair.sh,plex_update} exist.
-# * Backup files are copied to local controller.
-# * Service is restarted after backup completion.
-# * Preferences.xml with templated variables work.
-# * Role finishes successfully without additional tasks.
+# * Backup tasks is successful (DB backed up locally).
+# * DB restored from backup successfully.
+# * Service is validated.
+# * Test only required when backup or restore is modified.
 
 dependency:
   name: 'galaxy'
@@ -36,8 +32,9 @@ provisioner:
             lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
             "/molecule/files/Preferences.xml"
           }}'
+        plex_cfg_backup_dir: '/tmp/ansible_plex_test'
 platforms:
-  - name: 'plex_default'
+  - name: 'plex_restore'
     image: 'ghcr.io/hifis-net/debian-systemd:13'
     systemd: 'always'
     volumes:

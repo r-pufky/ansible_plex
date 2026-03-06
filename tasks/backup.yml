@@ -9,8 +9,16 @@
     state: 'stopped'
   failed_when: false
 
+- name: 'Backup | filesystem | set backup location'
+  when: plex__cfg._backup_dir | length > 0 and plex__cfg._backup_dir != '/tmp'
+  delegate_to: 'localhost'
+  run_once: true
+  ansible.builtin.file:
+    path: '{{ plex__cfg._backup_dir }}'
+    mode: '0750'
+    state: directory
+
 - name: 'Backup | fetch | Preferences.xml'
-  when: plex_flg_backup_config
   ansible.builtin.fetch:
     src: '{{ plex___app._cfg }}'
     dest: '{{
@@ -20,7 +28,6 @@
     flat: true
 
 - name: 'Backup | fetch | databases'
-  when: plex_flg_backup_db
   ansible.builtin.fetch:
     src: '{{ plex___app._db_dir ~ "/" ~ item }}'
     dest: '{{ plex__cfg._backup_dir ~ "/" ~ plex__cfg._start ~ "_" ~ item }}'
@@ -35,7 +42,6 @@
     - 'com.plexapp.plugins.library.db-wal'
 
 - name: 'Backup | systemd | start services'
-  when: plex_flg_start
   ansible.builtin.systemd:
     name: 'plexmediaserver.service'
     state: 'started'

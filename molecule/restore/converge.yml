@@ -6,3 +6,5 @@
     - name: 'Converge | apply r_pufky.media.plex'
       ansible.builtin.include_role:
         name: 'r_pufky.media.plex'
+      vars:
+        plex_flg_restore: true

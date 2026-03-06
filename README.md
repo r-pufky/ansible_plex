@@ -29,8 +29,8 @@ Tasks are gated by feature flags and executed in the following order.
 
  Step | Flag                   | Notes
 ------|------------------------|-------
- 1    | plex_flg_backup_config | Backup existing config and exit.
- 2    | plex_flg_backup_db     | Backup existing databases and exit.
+ 1    | plex_flg_backup        | Backup existing config, DB's, and exit.
+ 2    | plex_flg_restore       | Restore existing config, DB's, and exit.
  3    | plex_flg_maintenance   | Preform role maintenance tasks.
  4    | plex_flg_install       | Install required packages, users, etc.
  5    | plex_flg_preferences   | Install user-defined config.
@@ -57,8 +57,7 @@ Once configured take a backup of Plex configuration.
   ansible.builtin.include_role:
     name: 'r_pufky.media.plex'
   vars:
-    plex_flg_backup_config: true
-    plex_flg_backup_db: true
+    plex_flg_backup: true
     plex_cfg_backup_dir: 'host_vars/plex/data'
 ```
 
@@ -99,6 +98,7 @@ inconsistent and rapid rolling release cycle.
 
  Release | Debian | Ansible | Plex          | Notes
 ---------|--------|---------|---------------|-------
+ 10.x.x  | 13     | 2.20    | 1.43.0.10492+ | Add restore feature flag.
  9.x.x   | 13     | 2.20    | 1.43.0.10467+ | Ansible 2.20, feature flags, and semantic versioning.
  8.x.x   | 13     | 2.18    | 1.43.0.10389  | Last 'fully managed' config.
  7.x.x   | 13     | 2.18    | 1.42.2.10156  | Data annotations V3.

@@ -16,7 +16,10 @@
       vars:
         test_name:
           '{{ "Verify | systemd units | /etc/systemd/system/" ~ item }}'
-        test_src: '{{ "files/" ~ item }}'
+        test_src: '{{
+            lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
+            "/molecule/files/" ~ item
+          }}'
         test_file: '{{ "/etc/systemd/system/" ~ item }}'
         test_owner: 'root'
         test_group: 'root'
@@ -65,54 +68,3 @@
 
           ✘ TestVariable should be 'TEST'.
           TestVariable: {{ _test_plex_xml.TestVariable }}
-
-- name: 'Verify'
-  hosts: 'localhost'
-  gather_facts: false
-  tasks:
-    - name: 'Verify | query backup Preferences.xml'
-      ansible.builtin.find:
-        path: '/tmp/ansible_plex_test'
-        patterns: '*_Preferences.xml'
-      register: plex__test
-
-    - name: 'Verify | assert backup Preferences.xml'
-      ansible.builtin.assert:
-        quiet: true
-        that:
-          - plex__test.matched >= 1
-        fail_msg: |
-
-          ✘ Preferences.xml not backed up.
-
-    - name: 'Verify | query backup com.plexapp.plugins.library.db'
-      ansible.builtin.find:
-        path: '/tmp/ansible_plex_test'
-        patterns: '*_com.plexapp.plugins.library.db'
-        file_type: 'file'
-      register: plex__test
-
-    - name: 'Verify | assert backup com.plexapp.plugins.library.db'
-      ansible.builtin.assert:
-        quiet: true
-        that:
-          - plex__test.matched >= 1
-        fail_msg: |
-
-          ✘ com.plexapp.plugins.library.db* not backed up.
-
-    - name: 'Verify | query backup com.plexapp.plugins.library.blobs'
-      ansible.builtin.find:
-        path: '/tmp/ansible_plex_test'
-        patterns: '*_com.plexapp.plugins.library.blobs.db'
-        file_type: 'file'
-      register: plex__test
-
-    - name: 'Verify | assert backup com.plexapp.plugins.library.blobs'
-      ansible.builtin.assert:
-        quiet: true
-        that:
-          - plex__test.matched >= 1
-        fail_msg: |
-
-          ✘ com.plexapp.plugins.library.blobs.* not backed up.
