@@ -18,17 +18,17 @@
 
     - name: 'Verify | parse Preferences.xml'
       ansible.builtin.set_fact:
-        _test_plex_xml: '{{ plex__test.matches[0].Preferences }}'
+        plex__test: '{{ plex__test.matches[0].Preferences }}'
 
     - name: 'Verify | assert Preferences.xml TestVariable'
       ansible.builtin.assert:
         quiet: true
         that:
-          - _test_plex_xml.TestVariable == 'TEST'
+          - plex__test.TestVariable == 'TEST'
         fail_msg: |
 
           ✘ TestVariable should be 'TEST'.
-          TestVariable: {{ _test_plex_xml.TestVariable }}
+          TestVariable: {{ plex__test.TestVariable }}
 
     - name: '{{ "Verify | " ~ plex___app._db_dir ~ "*.db" }}'
       ansible.builtin.include_role:
