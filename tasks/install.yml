@@ -46,6 +46,7 @@
 # Reference:
 # * https://repo.plex.tv/scripts/setupRepo.sh
 # * https://forums.plex.tv/t/issue-upgrading-to-pms-1-43-0-10467-on-debian-and-rhel-based-distributions/935847/189
+# yamllint enable rule:line-length
 
 - name: '{{ "Install | filesystem | set " ~ plex___app._root_dir }}'
   ansible.builtin.file:
@@ -72,27 +73,39 @@
     mode: '0755'
     state: 'directory'
 
-- name: 'Install | filesystem | set plex_update'
+- name: '{{  "Install | filesystem | set " ~ plex___update._dest_file }}'
   ansible.builtin.template:
     src: 'plex_update.j2'
-    dest: '{{ plex___app._opt_dir ~ "/plex_update" }}'
+    dest: '{{ plex___update._dest_file }}'
     owner: 'root'
     group: 'root'
     mode: '0755'
 
-- name: 'Install | filesystem | set DBRepair.sh'
+- name:
+    '{{ "Install | url | 🗘 " ~ plex___repair._package ~ "(~1 minute) 🗘" }}'
   when: not (url_inject_enable | default(false))
   ansible.builtin.get_url:
-    url: '{{ plex___repair_url }}'
-    dest: '{{ plex___app._opt_dir ~ "/DBRepair.sh" }}'
+    url: '{{ plex___repair._url }}'
+    dest: '{{ "/tmp/" ~ plex___repair._package }}'
     force: false
     owner: 'root'
     group: 'root'
-    mode: '0755'
-  register: plex__download
-  until: plex__download is succeeded
+    mode: '0644'
+    headers:
+      Authorization: '{{ plex__srv._token | default(omit) }}'
+  register: plex__cmd
+  until: plex__cmd is succeeded
 
-- name: 'Install | filesystem | add to search path'
+- name: '{{ "Install | filesystem | set " ~ plex___repair._dest_file }}'
+  ansible.builtin.copy:
+    remote_src: true
+    src: '{{ "/tmp/" ~ plex___repair._package }}'
+    dest: '{{ plex___repair._dest_file }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
+- name: 'Install | filesystem | add system paths'
   ansible.builtin.file:
     src: '{{ plex___app._opt_dir ~ "/" ~ item }}'
     path: '{{ plex___app._bin_dir ~ "/" ~ item }}'
@@ -101,21 +114,21 @@
     mode: '0755'
     state: 'link'
   loop:
-    - 'plex_update'
-    - 'DBRepair.sh'
+    - '{{ plex___update._package }}'
+    - '{{ plex___repair._package }}'
 
-- name: 'Install | systemd | create plex service drop-in'
+- name: '{{ "Install | filesystem | set " ~ plex___app._drop_in | dirname }}'
   ansible.builtin.file:
-    path: '/etc/systemd/system/plexmediaserver.service.d'
+    path: '{{ plex___app._drop_in | dirname }}'
     owner: 'root'
     group: 'root'
     mode: '0755'
     state: 'directory'
 
-- name: 'Install | systemd | set plex service drop-in'
+- name: '{{ "Install | filesystem | set " ~ plex___app._drop_in }}'
   ansible.builtin.template:
     src: 'systemd/override.conf.j2'
-    dest: '/etc/systemd/system/plexmediaserver.service.d/override.conf'
+    dest: '{{ plex___app._drop_in }}'
     owner: 'root'
     group: 'root'
     mode: '0644'
@@ -127,7 +140,7 @@
     apt_packages:
       - '{{ plex___packages }}'
     apt_sources: '{{ plex___apt_sources }}'
-    apt_package_update_cache: true
+    apt_srv_package_update_cache: true
 
 - name: 'Install | account | lock package user'
   when: plex__srv._user != 'plex'
@@ -144,7 +157,7 @@
     - 'plex.list'
     - 'plexmediaserver.list'
 
-- name: 'Install | systemd | stop services'
+- name: 'Install | systemd | stop plexmediaserver.service'
   ansible.builtin.systemd:
     name: 'plexmediaserver.service'
     state: 'stopped'

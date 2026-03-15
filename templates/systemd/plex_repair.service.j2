@@ -4,7 +4,8 @@ Requires=plex_repair.timer
 
 [Service]
 Type=oneshot
-ExecStart={{ plex___app._opt_dir ~ "/DBRepair.sh" ~ ' ' ~ plex__repair._options | join(' ') }}
+ExecStart={{ plex___app._bin_dir ~ '/' ~ plex___repair._package ~ ' ' ~ plex__repair._options | join(' ') }}
+WorkingDirectory={{ plex___app._db_dir }}
 User=root
 Group=root
 Environment="DBREPAIR_CACHEAGE={{ plex__repair._cache_age }}"

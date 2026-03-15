@@ -19,6 +19,7 @@
   ansible.builtin.import_tasks: 'install.yml'
 
 - name: 'Config'
+  when: plex_flg_config
   ansible.builtin.import_tasks: 'config.yml'
 
 - name: 'Auto update'
@@ -27,6 +28,5 @@
 - name: 'DB repair'
   ansible.builtin.import_tasks: 'db_repair.yml'
 
-- name: 'Validate'
-  when: plex_flg_validate
-  ansible.builtin.import_tasks: 'validate.yml'
+- name: 'Start'
+  ansible.builtin.import_tasks: 'start.yml'

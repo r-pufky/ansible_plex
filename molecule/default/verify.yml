@@ -9,13 +9,13 @@
             lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~ "/vars/main.yml"
           }}'
 
-    - name: 'Verify | systemd units'
+    - name: 'Verify | test | systemd units'
       ansible.builtin.include_role:
-        name: 'r_pufky.lib.tests'
+        name: 'r_pufky.data.test'
         tasks_from: 'copy.yml'
       vars:
         test_name:
-          '{{ "Verify | systemd units | /etc/systemd/system/" ~ item }}'
+          '{{ "Verify | test | /etc/systemd/system/" ~ item }}'
         test_src: '{{
             lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
             "/molecule/files/" ~ item
@@ -32,39 +32,40 @@
         - 'plex_repair.service'
         - 'plex_repair.timer'
 
-    - name: 'Verify | /opt/plex'
+    - name: '{{ "Verify | test | " ~ plex___app._opt_dir }}'
       ansible.builtin.include_role:
-        name: 'r_pufky.lib.tests'
+        name: 'r_pufky.data.test'
         tasks_from: 'file.yml'
       vars:
-        test_name: '{{ "Verify | /opt/plex/" ~ item }}'
-        test_file: '{{ "/opt/plex/" ~ item }}'
+        test_name:
+          '{{ "Verify | test | " ~ plex___app._opt_dir ~ "/" ~ item }}'
+        test_file: '{{ plex___app._opt_dir ~ "/" ~ item }}'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0755'
         test_state: 'file'
         test_diff: true
       loop:
-        - 'plex_update'
-        - 'DBRepair.sh'
+        - '{{ plex___update._package }}'
+        - '{{ plex___repair._package }}'
 
-    - name: 'Verify | query Preferences.xml'
+    - name: '{{ "Verify | xml | query " ~ plex___app._cfg }}'
       community.general.xml:
         path: '{{ plex___app._cfg }}'
         content: 'attribute'
         xpath: '/Preferences'
       register: plex__test
 
-    - name: 'Verify | parse Preferences.xml'
+    - name: 'Verify | fact | parse Preferences.xml'
       ansible.builtin.set_fact:
-        _test_plex_xml: '{{ plex__test.matches[0].Preferences }}'
+        plex__test_xml: '{{ plex__test.matches[0].Preferences }}'
 
-    - name: 'Verify | assert Preferences.xml TestVariable'
+    - name: 'Verify | assert | Preferences.xml TestVariable set'
       ansible.builtin.assert:
         quiet: true
         that:
-          - _test_plex_xml.TestVariable == 'TEST'
+          - plex__test_xml.TestVariable == 'TEST'
         fail_msg: |
 
           ✘ TestVariable should be 'TEST'.
-          TestVariable: {{ _test_plex_xml.TestVariable }}
+          TestVariable: {{ plex__test_xml.TestVariable }}

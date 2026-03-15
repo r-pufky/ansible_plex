@@ -14,14 +14,14 @@
 #   com.plexapp.plugins.library.db-shm
 #   com.plexapp.plugins.library.db-wal
 
-- name: 'Restore | systemd | stop services'
+- name: 'Restore | systemd | stop plexmediaserver.service'
   ansible.builtin.systemd:
     name: 'plexmediaserver.service'
     state: 'stopped'
   failed_when: false
 
 # Apply config per config.yml without restarting services.
-- name: 'Restore | filesystem | set Preferences.xml'
+- name: '{{ "Restore | filesystem | set " ~ plex___app._cfg }}'
   ansible.builtin.template:
     src: '{{ plex__cfg._preferences }}'
     dest: '{{ plex___app._cfg }}'
@@ -74,9 +74,11 @@
     mode: '0644'
     force: true
   loop: '{{ plex__dbs.files }}'
+  loop_control:
+    label: '{{ item.path | basename }}'
 
-- name: 'Restore | include | validate.yml'
-  ansible.builtin.import_tasks: 'validate.yml'
+- name: 'Restore | start'
+  ansible.builtin.import_tasks: 'start.yml'
 
 - name: 'Restore | success ✔'
   ansible.builtin.meta: 'end_host'

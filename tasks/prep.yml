@@ -2,25 +2,27 @@
 ###############################################################################
 # Pre Execution Tasks
 ###############################################################################
+# Only use data annotations in role after merging role, defaults, runtime data.
+# Stop services if existing. Resolve system UID/GID.
 
 - name: 'Prep | record start time'
   ansible.builtin.set_fact:
     plex__srv: "{{ {} | r_pufky.data.v3(
 
-      _user=plex_srv_user,
-      _group=plex_srv_group,
-      _max_plugin_processes=plex_srv_max_plugin_processes,
-      _max_stack_size=plex_srv_max_stack_size,
-      _tmpdir=plex_srv_tmpdir | regex_replace('\\/$', ''),
-      _use_syslog_enable=plex_srv_use_syslog_enable,
+        _start=now(utc=True, fmt='%Y-%m-%dT%H%M%S'),
+        _user=plex_srv_user,
+        _group=plex_srv_group,
+        _max_plugin_processes=plex_srv_max_plugin_processes,
+        _max_stack_size=plex_srv_max_stack_size,
+        _tmpdir=plex_srv_tmpdir | regex_replace('\\/$', ''),
+        _use_syslog_enable=plex_srv_use_syslog_enable,
       ) }}"
     plex__cfg: "{{ {} | r_pufky.data.v3(
 
-        _start=now(utc=True, fmt='%Y-%m-%dT%H%M%S'),
         _backup_dir=plex_cfg_backup_dir | regex_replace('\\/$', ''),
         _preferences=plex_cfg_preferences,
       ) }}"
-    plex__auto: "{{ {} | r_pufky.data.v3(
+    plex__update: "{{ {} | r_pufky.data.v3(
 
         _update_schedule=plex_update_schedule,
       ) }}"

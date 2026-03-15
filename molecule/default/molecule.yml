@@ -30,14 +30,14 @@ provisioner:
     group_vars:
       all:
         url_inject_enable: true
-        plex_flg_preferences: true
+        plex_flg_config: true
         test_variable: 'TEST'
         plex_cfg_preferences: '{{
             lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
             "/molecule/files/Preferences.xml"
           }}'
 platforms:
-  - name: 'plex_default'
+  - name: 'plex-default'
     image: 'ghcr.io/hifis-net/debian-systemd:13'
     systemd: 'always'
     volumes:
@@ -46,10 +46,6 @@ platforms:
     pre_build_image: true
 verifier:
   name: 'ansible'
-lint: |
-  set -e
-  yamllint .
-  ansible-lint .
 scenario:
   test_sequence:
     - 'destroy'

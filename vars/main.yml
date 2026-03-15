@@ -17,9 +17,9 @@
 
 plex___release: "{{ {} | r_pufky.data.v3(
 
-    _date='2026-02-27',
+    _date='2026-03-14',
     _debian='trixie',
-    _app='1.43.0.10467',
+    _app='1.43.0.10492',
   ) }}"
 
 ###############################################################################
@@ -56,6 +56,7 @@ plex___apt_sources:
 plex___app: "{{ {} | r_pufky.data.v3(
 
     _bin_dir='/usr/local/bin',
+    _drop_in='/etc/systemd/system/plexmediaserver.service.d/override.conf',
     _opt_dir='/opt/plex',
     _live_dir='/var/lib/plexmediaserver/Library/Application Support',
     _root_dir=(
@@ -73,6 +74,23 @@ plex___app: "{{ {} | r_pufky.data.v3(
   ) }}"
 
 ###############################################################################
+# plex_update
+###############################################################################
+# Configure entitlements if configured and check for/apply new updates. Role
+# uses a heavily inspired version from reference.
+#
+# Reference:
+# * https://github.com/mrworf/plexupdate
+
+plex___update_package: 'plex_update'
+
+plex___update: "{{ {} | r_pufky.data.v3(
+
+    _package=plex___repair_package,
+    _dest_file=plex___app._opt_dir ~ '/' ~ plex___update_package,
+  ) }}"
+
+###############################################################################
 # DBRepair.sh
 ###############################################################################
 # Database maintenance script.
@@ -80,10 +98,16 @@ plex___app: "{{ {} | r_pufky.data.v3(
 # Reference:
 # * https://github.com/ChuckPa/DBRepair
 
-plex___repair_url: '{{
-    "https://github.com/ChuckPa/PlexDBRepair/releases/latest/download/" ~
-    "DBRepair.sh"
-  }}'
+plex___repair_repo_url:
+  'https://github.com/ChuckPa/PlexDBRepair/releases/latest/download/'
+plex___repair_package: 'DBRepair.sh'
+
+plex___repair: "{{ {} | r_pufky.data.v3(
+
+    _package=plex___repair_package,
+    _dest_file=plex___app._opt_dir ~ '/' ~ plex___repair_package,
+    _url=plex___repair_repo_url ~ plex___repair_package,
+  ) }}"
 
 ###############################################################################
 # Default Plex User/Group

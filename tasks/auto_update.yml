@@ -4,26 +4,27 @@
 ###############################################################################
 # Execute auto-update script to configure entitlements if configured. Set
 # custom plex auto-update service to check and install new plex releases when
-# enabled.
+# enabled. Deferrable.
 #
 # Reference:
 # * https://github.com/mrworf/plexupdate
 # * https://github.com/linuxserver/docker-plex/blob/master/root/etc/
 
-- name: 'Auto update | processing entitlements (~1 minute) 🗘'
+- name: 'Auto update | 🗘 processing entitlements (~4 minutes) 🗘'
   when: plex_flg_auto_update
   ansible.builtin.debug:
     msg: 'Processing entitlements (~4 minutes).'
 
 - name: 'Auto update | cmd | process entitlements'
   when: plex_flg_auto_update
-  ansible.builtin.shell: '{{ plex___app._opt_dir ~ "/plex_update" }}'
+  ansible.builtin.shell: '{{ plex___update._dest_file }}'
   args:
     executable: '/bin/bash'
   changed_when: false
 
-- name: 'Auto update | systemd | set plex update timer'
+- name: 'Auto update | filesystem | set /etc/systemd/system/plex_update.*'
   when: plex_flg_auto_update
+  notify: 'Handlers | enable plex_update'
   ansible.builtin.template:
     src: '{{ "systemd/" ~ item ~ ".j2" }}'
     dest: '{{ "/etc/systemd/system/" ~ item }}'
@@ -34,28 +35,9 @@
     - 'plex_update.service'
     - 'plex_update.timer'
 
-- name: 'Auto update | systemd | restart plex update timer'
-  when: plex_flg_auto_update
-  ansible.builtin.service:
-    name: '{{ item }}'
-    enabled: true
-    state: 'restarted'
-  loop:
-    - 'plex_update.service'
-    - 'plex_update.timer'
-
-- name: 'Auto update | systemd | stop plex update timer'
+- name: 'Auto update | filesystem | remove /etc/systemd/system/plex_update.*'
   when: not plex_flg_auto_update
-  ansible.builtin.service:
-    name: '{{ item }}'
-    enabled: true
-    state: 'stopped'
-  loop:
-    - 'plex_update.service'
-    - 'plex_update.timer'
-
-- name: 'Auto update | systemd | remove plex update timer'
-  when: not plex_flg_auto_update
+  notify: 'Handlers | disable plex_update'
   ansible.builtin.file:
     path: '{{ "/etc/systemd/system/" ~ item }}'
     state: 'absent'

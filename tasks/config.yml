@@ -12,8 +12,7 @@
 # * ProcessedMachineIdentifier
 # * AnonymousMachineIdentifier
 
-- name: 'Config | filesystem | set Preferences.xml'
-  when: plex_flg_preferences
+- name: '{{ "Config | filesystem | set " ~ plex___app._cfg }}'
   ansible.builtin.template:
     src: '{{ plex__cfg._preferences }}'
     dest: '{{ plex___app._cfg }}'
@@ -22,14 +21,3 @@
     mode: '0600'
   become: true
   become_user: '{{ plex__srv._user }}'
-
-# Always enable and reload as this is the first time the service is touched
-# after install step.
-- name: 'Config | systemd | start plexmediaserver.service'
-  when: plex_flg_start
-  ansible.builtin.systemd:
-    name: 'plexmediaserver.service'
-    enabled: true
-    daemon_reload: true
-    state: 'started'
-  failed_when: false

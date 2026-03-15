@@ -3,7 +3,7 @@
 # Backup
 ###############################################################################
 
-- name: 'Backup | systemd | stop services'
+- name: 'Backup | systemd | stop plexmediaserver.service'
   ansible.builtin.systemd:
     name: 'plexmediaserver.service'
     state: 'stopped'
@@ -18,11 +18,11 @@
     mode: '0750'
     state: directory
 
-- name: 'Backup | fetch | Preferences.xml'
+- name: '{{ "Backup | fetch | " ~ plex___app._cfg }}'
   ansible.builtin.fetch:
     src: '{{ plex___app._cfg }}'
     dest: '{{
-        plex__cfg._backup_dir ~ "/" ~ plex__cfg._start ~ "_Preferences.xml"
+        plex__cfg._backup_dir ~ "/" ~ plex__srv._start ~ "_Preferences.xml"
       }}'
     fail_on_missing: false
     flat: true
@@ -30,7 +30,7 @@
 - name: 'Backup | fetch | databases'
   ansible.builtin.fetch:
     src: '{{ plex___app._db_dir ~ "/" ~ item }}'
-    dest: '{{ plex__cfg._backup_dir ~ "/" ~ plex__cfg._start ~ "_" ~ item }}'
+    dest: '{{ plex__cfg._backup_dir ~ "/" ~ plex__srv._start ~ "_" ~ item }}'
     fail_on_missing: false
     flat: true
   loop:
@@ -41,11 +41,8 @@
     - 'com.plexapp.plugins.library.db-shm'
     - 'com.plexapp.plugins.library.db-wal'
 
-- name: 'Backup | systemd | start services'
-  ansible.builtin.systemd:
-    name: 'plexmediaserver.service'
-    state: 'started'
-  failed_when: false
+- name: 'Backup | start'
+  ansible.builtin.import_tasks: 'start.yml'
 
 - name: 'Backup | success ✔'
   ansible.builtin.meta: 'end_host'

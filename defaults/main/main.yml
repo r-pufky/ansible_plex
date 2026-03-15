@@ -7,7 +7,7 @@
 # 1. Backup SQLite, Preferences.xml to plex_cfg_backup_dir?
 #
 # Backup existing config, DB, and exit role. plex_cfg_backup_dir created if
-# non-existent. Services stopped for backup and restarted.
+# non-existent. Services stopped, files backed up, services started.
 #
 # Plex instances that generate indexed thumbnails (BIF options) may be 100GB+.
 #
@@ -24,50 +24,36 @@ plex_flg_backup: false
 # Database (SQLite only):
 # Restored from latest backup in plex_cfg_backup_dir.
 #
-# Services are stopped, files restored, services restarted, then validated.
+# Services stopped, files restored, services updated and started.
 #
 # Default: False.
 plex_flg_restore: false
 
-# 2. Backup DB to plex_cfg_backup_dir?
-#
-# Enabling will only process plex_flg_backup_* and exit role. Location created
-# if non-existent. Service stopped for backup and restarted.
-#
-# Default: False.
-plex_flg_backup_db: false
-
 # 3. Run maintenance tasks?
 #
-# Prunes deprecated and old role files.
+# Preform role maintenance tasks including removal of old role versions.
 #
 # Default: True.
 plex_flg_maintenance: true
 
 # 4. Install application?
 #
-# Creates required directories, checks/creates users, installs packages,
-# scripts, and services. Stops existing service for re-configuration.
+# Creates required default directories, users, install packages, download
+# software, set minimal Preferences.xml if not specified, update and start
+# services.
 #
 # Default: True.
 plex_flg_install: true
 
 # 5. Set Preferences.xml?
 #
-# File set using plex_cfg_preferences.
+# File set using plex_cfg_preferences. Stops service and deploys user
+# configuration, updates and starts services.
 #
 # Default: False.
-plex_flg_preferences: false
+plex_flg_config: false
 
-# 6. Start Plex service after configuration?
-#
-# Started after configuration. Allows Plex to write or correct any invalid
-# configuration files.
-#
-# Default: True.
-plex_flg_start: true
-
-# 7. Enable scheduled auto updates?
+# 6. Enable scheduled auto updates?
 #
 # Schedule based on plex_update_schedule. Entitlement upgrades are done in
 # this step.
@@ -75,23 +61,42 @@ plex_flg_start: true
 # Default: True.
 plex_flg_auto_update: true
 
-# 8. Enable scheduled DB repairs?
+# 7. Enable scheduled DB repairs?
 #
 # Schedule based on plex_repair_schedule.
 #
 # Default: True.
 plex_flg_db_repair: true
 
-# 9. Verify service running?
-#
-# Start services after role application and verify running or fail.
-#
-# Default: True.
-plex_flg_validate: true
-
 ###############################################################################
 # Service
 ###############################################################################
+
+# Github access token.
+#
+# Unauthenticated (anonymous) API requests are heavily restricted to the sum
+# total of requests to github from a given IP. Use an access token if
+# receiving 403's.
+#
+# Classic Tokens:
+# * settings > developer settings > personal access tokens (classic)
+#   * notes: {LABEL APPROPRIATELY}
+#   * expiration: {CUSTOM}
+#   * scopes: NONE
+#
+# Fine-grained Tokens:
+# * settings > developer settings > personal access tokens (fine-grained)
+#   * token name: {LABEL APPROPRIATELY}
+#   * expiration: {CUSTOM}
+#   * description: {DESCRIPTIVE TEXT}
+#   * resource owner: {YOUR ACCOUNT}
+#   * repository access: Public Repositories (read-only)
+#
+# Default: '' (unauthenticated).
+#
+# Reference:
+# * https://docs.github.com/en/authentication
+plex_srv_token: ''
 
 # User that Plex will run under.
 #

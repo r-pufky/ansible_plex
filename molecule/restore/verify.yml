@@ -3,36 +3,36 @@
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Verify | import role variables'
+    - name: 'Verify | import | role variables'
       ansible.builtin.include_vars:
         file: '{{
             lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~ "/vars/main.yml"
           }}'
 
-    - name: 'Verify | query Preferences.xml'
+    - name: '{{ "Verify | xml | query " ~ plex___app._cfg }}'
       community.general.xml:
         path: '{{ plex___app._cfg }}'
         content: 'attribute'
         xpath: '/Preferences'
       register: plex__test
 
-    - name: 'Verify | parse Preferences.xml'
+    - name: 'Verify | fact | parse Preferences.xml'
       ansible.builtin.set_fact:
-        plex__test: '{{ plex__test.matches[0].Preferences }}'
+        plex__test_xml: '{{ plex__test.matches[0].Preferences }}'
 
-    - name: 'Verify | assert Preferences.xml TestVariable'
+    - name: 'Verify | assert | Preferences.xml TestVariable set'
       ansible.builtin.assert:
         quiet: true
         that:
-          - plex__test.TestVariable == 'TEST'
+          - plex__test_xml.TestVariable == 'TEST'
         fail_msg: |
 
           ✘ TestVariable should be 'TEST'.
-          TestVariable: {{ plex__test.TestVariable }}
+          TestVariable: {{ plex__test_xml.TestVariable }}
 
     - name: '{{ "Verify | " ~ plex___app._db_dir ~ "*.db" }}'
       ansible.builtin.include_role:
-        name: 'r_pufky.lib.tests'
+        name: 'r_pufky.data.test'
         tasks_from: 'file.yml'
       vars:
         test_name: '{{ plex_cfg_backup_dir ~ "/" ~ item }}'

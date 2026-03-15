@@ -3,53 +3,45 @@
   hosts: 'localhost'
   gather_facts: false
   tasks:
-    - name: 'Prepare | import role variables'
+    - name: 'Prepare | import | role variables'
       ansible.builtin.include_vars:
         file: '{{
             lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~ "/vars/main.yml"
           }}'
 
-    - name: 'Prepare | create cache'
+    - name: '{{ "Prepare | cache " ~ plex___repair._package }}'
       ansible.builtin.include_role:
-        name: 'r_pufky.lib.tests'
-        tasks_from: 'create_cache.yml'
-      vars:
-        test_name: 'Prepare cache'
-
-    - name: 'Prepare | cache DBRepair.sh'
-      ansible.builtin.include_role:
-        name: 'r_pufky.lib.tests'
+        name: 'r_pufky.data.test'
         tasks_from: 'cache_url.yml'
       vars:
-        test_name: 'Prepare | cache DBRepair.sh'
-        test_dest: 'DBRepair.sh'
-        test_url: '{{ plex___repair_url }}'
+        test_name: '{{ "Prepare | cache " ~ plex___repair._package }}'
+        test_dest: '{{ plex___repair._package }}'
+        test_url: '{{ plex___repair._url }}'
         test_mode: '0640'
 
 - name: 'Prepare'
   hosts: 'all'
   gather_facts: false
   tasks:
-    - name: 'Prepare | stage directories'
-      ansible.builtin.file:
-        path: '/opt/plex'
-        owner: 'root'
-        group: 'root'
-        mode: '0755'
-        state: 'directory'
+    - name: 'Prepare | import | role variables'
+      ansible.builtin.include_vars:
+        file: '{{
+            lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~ "/vars/main.yml"
+          }}'
 
-    - name: 'Prepare | stage DBRepair.sh'
+    - name: 'Prepare | inject | cached packages'
+      when: (url_inject_enable | default(false))
       ansible.builtin.copy:
         src: '{{
-            lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
-            "/molecule/cache/DBRepair.sh"
+            lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~ "/molecule/cache/" ~
+            plex___repair._package
           }}'
-        dest: '/opt/plex/DBRepair.sh'
+        dest: '{{ "/tmp/" ~ plex___repair._package }}'
         owner: 'root'
         group: 'root'
-        mode: '0755'
+        mode: '0644'
 
-    - name: 'Prepare | inject python3-lxml for community.general.xml testing'
+    - name: 'Prepare | inject | required testing packages'
       ansible.builtin.apt:
         name: 'python3-lxml'
         state: 'present'

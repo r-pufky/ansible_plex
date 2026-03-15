@@ -4,7 +4,7 @@ Requires=plex_update.timer
 
 [Service]
 Type=oneshot
-ExecStart="{{ plex___app._opt_dir ~ '/plex_update' }}"
+ExecStart="{{ plex___update._dest_file }}"
 SuccessExitStatus=0
 SuccessExitStatus=1
 User=root

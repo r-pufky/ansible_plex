@@ -4,11 +4,16 @@
 ###############################################################################
 # Start Plex services and confirm they are active and running.
 
+- name: 'Start | meta | 🗘 flush timers 🗘'
+  ansible.builtin.meta: flush_handlers
+
 # Plex typically takes ~10 seconds to report active.
-- name: 'Start | assert | plexmediaserver.service active'
-  ansible.builtin.service:
+- name: 'Start | systemd | plexmediaserver.service'
+  ansible.builtin.systemd:
     name: 'plexmediaserver.service'
     state: 'started'
+    enabled: true
+    daemon_reload: true
   delay: 15
   retries: 3
   register: plex__service

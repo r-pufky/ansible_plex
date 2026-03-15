@@ -3,7 +3,7 @@ Description=plex_update.service timer
 Requires=plex_update.service
 
 [Timer]
-OnCalendar={{ plex__auto._update_schedule }}
+OnCalendar={{ plex__update._update_schedule }}
 Unit=plex_update.service
 
 [Install]

@@ -1,0 +1,59 @@
+---
+###############################################################################
+# Plex Handlers
+###############################################################################
+
+- name: 'Handlers | load plex_repair'
+  listen:
+    - 'Handlers | enable plex_repair'
+  ansible.builtin.systemd:
+    name: '{{ item }}'
+    enabled: true
+    daemon_reload: true
+  loop:
+    - 'plex_repair.service'
+    - 'plex_repair.timer'
+
+- name: 'Handlers | plex_repair.timer (tick)'
+  listen:
+    - 'Handlers | enable plex_repair'
+  ansible.builtin.systemd:
+    name: 'plex_repair.timer'
+    state: 'started'
+
+- name: 'Handlers | disable plex_repair'
+  when: not plex_flg_db_repair
+  ansible.builtin.systemd:
+    name: '{{ item }}'
+    enabled: false
+    state: 'stopped'
+  loop:
+    - 'plex_repair.service'
+    - 'plex_repair.timer'
+
+- name: 'Handlers | load plex_update'
+  listen:
+    - 'Handlers | enable plex_update'
+  ansible.builtin.systemd:
+    name: '{{ item }}'
+    enabled: true
+    daemon_reload: true
+  loop:
+    - 'plex_update.service'
+    - 'plex_update.timer'
+
+- name: 'Handlers | plex_update.timer (tick)'
+  listen:
+    - 'Handlers | enable plex_update'
+  ansible.builtin.systemd:
+    name: 'plex_update.timer'
+    state: 'started'
+
+- name: 'Handlers | disable plex_update'
+  ansible.builtin.systemd:
+    name: '{{ item }}'
+    enabled: false
+    state: 'stopped'
+  loop:
+    - 'plex_update.service'
+    - 'plex_update.timer'
