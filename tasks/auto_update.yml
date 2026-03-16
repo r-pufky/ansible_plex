@@ -17,7 +17,7 @@
 
 - name: 'Auto update | cmd | process entitlements'
   when: plex_flg_auto_update
-  ansible.builtin.shell: '{{ plex___update._dest_file }}'
+  ansible.builtin.shell: '{{ plex__update._dest_file }}'
   args:
     executable: '/bin/bash'
   changed_when: false

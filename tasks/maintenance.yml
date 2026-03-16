@@ -15,7 +15,7 @@
   ansible.builtin.shell: >-
     rm -f /etc/systemd/system/plex-update.* &&
     rm -f /etc/systemd/system/plex-repair.* &&
-    rm -f {{ plex___app._root_dir ~ "/plexupdate" }} &&
+    rm -f {{ plex__cfg._root_dir ~ "/plexupdate" }} &&
     rm -f /usr/bin/DBRepair.sh &&
     rm -f /etc/systemd/system/plexmediaserver.service &&
     rm -f /etc/apt/sources.list.d/plex.list &&

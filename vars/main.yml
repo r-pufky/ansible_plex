@@ -58,7 +58,7 @@ plex___app: "{{ {} | r_pufky.data.v3(
     _bin_dir='/usr/local/bin',
     _drop_in='/etc/systemd/system/plexmediaserver.service.d/override.conf',
     _opt_dir='/opt/plex',
-    _live_dir='/var/lib/plexmediaserver/Library/Application Support',
+    _var_dir='/var/lib/plexmediaserver/Library/Application Support',
     _root_dir=(
       '/var/lib/plexmediaserver/Library/Application Support/' ~
       'Plex Media Server'

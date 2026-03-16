@@ -18,9 +18,9 @@
     mode: '0750'
     state: directory
 
-- name: '{{ "Backup | fetch | " ~ plex___app._cfg }}'
+- name: '{{ "Backup | fetch | " ~ plex__cfg._cfg }}'
   ansible.builtin.fetch:
-    src: '{{ plex___app._cfg }}'
+    src: '{{ plex__cfg._cfg }}'
     dest: '{{
         plex__cfg._backup_dir ~ "/" ~ plex__srv._start ~ "_Preferences.xml"
       }}'
@@ -29,7 +29,7 @@
 
 - name: 'Backup | fetch | databases'
   ansible.builtin.fetch:
-    src: '{{ plex___app._db_dir ~ "/" ~ item }}'
+    src: '{{ plex__cfg._db_dir ~ "/" ~ item }}'
     dest: '{{ plex__cfg._backup_dir ~ "/" ~ plex__srv._start ~ "_" ~ item }}'
     fail_on_missing: false
     flat: true

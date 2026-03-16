@@ -12,10 +12,10 @@
 # * ProcessedMachineIdentifier
 # * AnonymousMachineIdentifier
 
-- name: '{{ "Config | filesystem | set " ~ plex___app._cfg }}'
+- name: '{{ "Config | filesystem | set " ~ plex__cfg._cfg }}'
   ansible.builtin.template:
     src: '{{ plex__cfg._preferences }}'
-    dest: '{{ plex___app._cfg }}'
+    dest: '{{ plex__cfg._cfg }}'
     owner: '{{ plex__cfg._uid }}'
     group: '{{ plex__cfg._gid }}'
     mode: '0600'
