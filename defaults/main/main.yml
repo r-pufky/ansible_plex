@@ -72,7 +72,7 @@ plex_flg_db_repair: true
 # Service
 ###############################################################################
 
-# Github access token.
+# Github access token (DBRepair).
 #
 # Unauthenticated (anonymous) API requests are heavily restricted to the sum
 # total of requests to github from a given IP. Use an access token if

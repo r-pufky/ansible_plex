@@ -142,7 +142,7 @@
     apt_sources: '{{ plex___apt_sources }}'
     apt_srv_package_update_cache: true
 
-- name: 'Install | account | lock package user'
+- name: 'Install | account | lock plex'
   when: plex__srv._user != 'plex'
   ansible.builtin.user:
     name: 'plex'

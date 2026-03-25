@@ -5,7 +5,6 @@
 # Use Debian package for installation.
 #
 # Updates:
-# * Branch for new Debian releases.
 # * KEEP a separate change log as changes are made.
 # * Use bare-metal docs to validate package/process changes.
 # * Update defaults.

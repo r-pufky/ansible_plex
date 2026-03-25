@@ -46,8 +46,8 @@
       Create a custom user before executing this role or use 'media' to
       automatically create a service user for Plex.
 
-      plex___user: {{ plex__srv._user }}
-      plex___group: {{ plex__srv._group }}
+      plex_srv_user: {{ plex__srv._user }}
+      plex_srv_group: {{ plex__srv._group }}
 
 - name: 'Prep | assert | backup enabled and location defined'
   when: plex_flg_backup
