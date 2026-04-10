@@ -21,10 +21,10 @@
   failed_when: false
 
 # Apply config per config.yml without restarting services.
-- name: '{{ "Restore | filesystem | set " ~ plex__cfg._cfg }}'
+- name: '{{ "Restore | filesystem | set " ~ plex___app._cfg }}'
   ansible.builtin.template:
     src: '{{ plex__cfg._preferences }}'
-    dest: '{{ plex__cfg._cfg }}'
+    dest: '{{ plex___app._cfg }}'
     owner: '{{ plex__cfg._uid }}'
     group: '{{ plex__cfg._gid }}'
     mode: '0600'
@@ -34,7 +34,7 @@
 - name: 'Restore | filesystem | enumerate backups'
   delegate_to: 'localhost'
   ansible.builtin.find:
-    paths: '{{ plex__cfg._backup_dir }}'
+    paths: '{{ plex__cfg._backup_d }}'
     patterns: '*.library.db'
     file_type: 'file'
     recurse: false
@@ -58,7 +58,7 @@
   when: plex__dbs.files | length > 0
   delegate_to: 'localhost'
   ansible.builtin.find:
-    paths: '{{ plex__cfg._backup_dir }}'
+    paths: '{{ plex__cfg._backup_d }}'
     patterns: '{{ plex__restore_base ~ ".*" }}'
     file_type: 'file'
     recurse: false
@@ -68,7 +68,7 @@
   when: plex__dbs.matched > 0
   ansible.builtin.copy:
     src: '{{ item.path }}'
-    dest: '{{ plex__cfg._db_dir ~ "/" ~ item.path | basename }}'
+    dest: '{{ plex___app._db_d ~ "/" ~ item.path | basename }}'
     owner: '{{ plex__cfg._uid }}'
     group: '{{ plex__cfg._gid }}'
     mode: '0644'

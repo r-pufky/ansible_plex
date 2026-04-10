@@ -29,7 +29,7 @@ provisioner:
   inventory:
     group_vars:
       all:
-        url_inject_enable: true
+        molecule_flg_inject: true
         plex_flg_config: true
         test_variable: 'TEST'
         plex_cfg_preferences: '{{

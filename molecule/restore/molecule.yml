@@ -25,14 +25,14 @@ provisioner:
   inventory:
     group_vars:
       all:
-        url_inject_enable: true
+        molecule_flg_inject: true
         plex_flg_config: true
         test_variable: 'TEST'
         plex_cfg_preferences: '{{
             lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~
             "/molecule/files/Preferences.xml"
           }}'
-        plex_cfg_backup_dir: '/tmp/ansible_plex_test'
+        plex_cfg_backup_d: '/tmp/ansible_plex_test'
 platforms:
   - name: 'plex-restore'
     image: 'ghcr.io/hifis-net/debian-systemd:13'

@@ -32,14 +32,14 @@
         - 'plex_repair.service'
         - 'plex_repair.timer'
 
-    - name: '{{ "Verify | test | " ~ plex___app._opt_dir }}'
+    - name: '{{ "Verify | test | " ~ plex___app._opt_d }}'
       ansible.builtin.include_role:
         name: 'r_pufky.data.test'
         tasks_from: 'file.yml'
       vars:
         test_name:
-          '{{ "Verify | test | " ~ plex___app._opt_dir ~ "/" ~ item }}'
-        test_file: '{{ plex___app._opt_dir ~ "/" ~ item }}'
+          '{{ "Verify | test | " ~ plex___app._opt_d ~ "/" ~ item }}'
+        test_file: '{{ plex___app._opt_d ~ "/" ~ item }}'
         test_owner: 'root'
         test_group: 'root'
         test_mode: '0755'

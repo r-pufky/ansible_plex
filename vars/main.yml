@@ -18,7 +18,7 @@ plex___release: "{{ {} | r_pufky.data.v3(
 
     _date='2026-03-14',
     _debian='trixie',
-    _app='1.43.0.10492',
+    _app='1.43.1.10611',
   ) }}"
 
 ###############################################################################
@@ -54,15 +54,15 @@ plex___apt_sources:
 
 plex___app: "{{ {} | r_pufky.data.v3(
 
-    _bin_dir='/usr/local/bin',
+    _bin_d='/usr/local/bin',
     _drop_in='/etc/systemd/system/plexmediaserver.service.d/override.conf',
-    _opt_dir='/opt/plex',
-    _var_dir='/var/lib/plexmediaserver/Library/Application Support',
-    _root_dir=(
+    _opt_d='/opt/plex',
+    _var_d='/var/lib/plexmediaserver/Library/Application Support',
+    _root_d=(
       '/var/lib/plexmediaserver/Library/Application Support/' ~
       'Plex Media Server'
     ),
-    _db_dir=(
+    _db_d=(
       '/var/lib/plexmediaserver/Library/Application Support/' ~
       'Plex Media Server/Plug-in Support/Databases'
     ),
@@ -86,7 +86,7 @@ plex___update_package: 'plex_update'
 plex___update: "{{ {} | r_pufky.data.v3(
 
     _package=plex___repair_package,
-    _dest_file=plex___app._opt_dir ~ '/' ~ plex___update_package,
+    _bin=plex___app._opt_d ~ '/' ~ plex___update_package,
   ) }}"
 
 ###############################################################################
@@ -104,7 +104,7 @@ plex___repair_package: 'DBRepair.sh'
 plex___repair: "{{ {} | r_pufky.data.v3(
 
     _package=plex___repair_package,
-    _dest_file=plex___app._opt_dir ~ '/' ~ plex___repair_package,
+    _bin=plex___app._opt_d ~ '/' ~ plex___repair_package,
     _url=plex___repair_repo_url ~ plex___repair_package,
   ) }}"
 

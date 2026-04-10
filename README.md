@@ -48,7 +48,7 @@ Once configured take a backup of Plex configuration.
     name: 'r_pufky.media.plex'
   vars:
     plex_flg_backup: true
-    plex_cfg_backup_dir: 'host_vars/plex/data'
+    plex_cfg_backup_d: 'host_vars/plex/data'
 ```
 
 See [Existing Deployments](#existing-deployments) for reproducible
@@ -78,9 +78,9 @@ molecule test --all
 
 Testing variables:
 
-  Variable          | type | Description
- -------------------|------|-------------
-  url_inject_enable | bool | Disable **get_url** to inject files locally.
+  Variable            | Type | Description
+ ---------------------|------|-------------
+  molecule_flg_inject | bool | Disable **get_url** to inject files locally.
 
 ### [Releases][b]
 Focused on service deployment with templated configuration to minimize role
@@ -88,8 +88,8 @@ churn due to inconsistent and rapid rolling release cycle.
 
   Release | Debian | Ansible | Plex          | Notes
  ---------|--------|---------|---------------|-------
-  11.x.x  | 13     | 2.20    | 1.43.0.10492  | Update to Ansible 2.20 collection dependencies.
-  10.x.x  | 13     | 2.20    | 1.43.0.10492  | Add restore feature flag.
+  11.x.x  | 13     | 2.20    | 1.43.1.10611  | Update to Ansible 2.20 collection dependencies.
+  10.x.x  | 13     | 2.20    | 1.43.1.10611  | Add restore feature flag.
   9.x.x   | 13     | 2.20    | 1.43.0.10467  | Ansible 2.20, feature flags, and semantic versioning.
   8.x.x   | 13     | 2.18    | 1.43.0.10389  | Last 'fully managed' config.
   7.x.x   | 13     | 2.18    | 1.42.2.10156  | Data annotations V3.

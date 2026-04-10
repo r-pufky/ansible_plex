@@ -30,13 +30,13 @@
           ✘ TestVariable should be 'TEST'.
           TestVariable: {{ plex__test_xml.TestVariable }}
 
-    - name: '{{ "Verify | " ~ plex___app._db_dir ~ "*.db" }}'
+    - name: '{{ "Verify | " ~ plex___app._db_d ~ "*.db" }}'
       ansible.builtin.include_role:
         name: 'r_pufky.data.test'
         tasks_from: 'file.yml'
       vars:
-        test_name: '{{ plex_cfg_backup_dir ~ "/" ~ item }}'
-        test_file: '{{ plex___app._db_dir ~ "/" ~ item }}'
+        test_name: '{{ plex_cfg_backup_d ~ "/" ~ item }}'
+        test_file: '{{ plex___app._db_d ~ "/" ~ item }}'
         test_owner: 'media'
         test_group: 'media'
         test_mode: '0644'

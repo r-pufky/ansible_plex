@@ -48,17 +48,17 @@
 # * https://forums.plex.tv/t/issue-upgrading-to-pms-1-43-0-10467-on-debian-and-rhel-based-distributions/935847/189
 # yamllint enable rule:line-length
 
-- name: '{{ "Install | filesystem | set " ~ plex__cfg._root_dir }}'
+- name: '{{ "Install | filesystem | set " ~ plex___app._root_d }}'
   ansible.builtin.file:
-    path: '{{ plex__cfg._root_dir }}'
+    path: '{{ plex___app._root_d }}'
     owner: '{{ plex__cfg._uid }}'
     group: '{{ plex__cfg._gid }}'
     mode: '0755'
     state: 'directory'
 
-- name: '{{ "Install | filesystem | set " ~ plex__cfg._opt_dir }}'
+- name: '{{ "Install | filesystem | set " ~ plex___app._opt_d }}'
   ansible.builtin.file:
-    path: '{{ plex__cfg._opt_dir }}'
+    path: '{{ plex___app._opt_d }}'
     owner: 'root'
     group: 'root'
     mode: '0755'
@@ -73,20 +73,20 @@
     mode: '0755'
     state: 'directory'
 
-- name: '{{  "Install | filesystem | set " ~ plex__update._dest_file }}'
+- name: '{{  "Install | filesystem | set " ~ plex___update._bin }}'
   ansible.builtin.template:
     src: 'plex_update.j2'
-    dest: '{{ plex__update._dest_file }}'
+    dest: '{{ plex___update._bin }}'
     owner: 'root'
     group: 'root'
     mode: '0755'
 
 - name:
-    '{{ "Install | url | 🗘 " ~ plex__repair._package ~ "(~1 minute) 🗘" }}'
-  when: not (url_inject_enable | default(false))
+    '{{ "Install | url | 🗘 " ~ plex___repair._package ~ "(~1 minute) 🗘" }}'
+  when: not (molecule_flg_inject | default(false))
   ansible.builtin.get_url:
-    url: '{{ plex__repair._url }}'
-    dest: '{{ "/tmp/" ~ plex__repair._package }}'
+    url: '{{ plex___repair._url }}'
+    dest: '{{ "/tmp/" ~ plex___repair._package }}'
     force: false
     owner: 'root'
     group: 'root'
@@ -96,39 +96,39 @@
   register: plex__cmd
   until: plex__cmd is succeeded
 
-- name: '{{ "Install | filesystem | set " ~ plex__repair._dest_file }}'
+- name: '{{ "Install | filesystem | set " ~ plex___repair._bin }}'
   ansible.builtin.copy:
     remote_src: true
-    src: '{{ "/tmp/" ~ plex__repair._package }}'
-    dest: '{{ plex__repair._dest_file }}'
+    src: '{{ "/tmp/" ~ plex___repair._package }}'
+    dest: '{{ plex___repair._bin }}'
     owner: 'root'
     group: 'root'
     mode: '0644'
 
 - name: 'Install | filesystem | add system paths'
   ansible.builtin.file:
-    src: '{{ plex__cfg._opt_dir ~ "/" ~ item }}'
-    path: '{{ plex__cfg._bin_dir ~ "/" ~ item }}'
+    src: '{{ plex___app._opt_d ~ "/" ~ item }}'
+    path: '{{ plex___app._bin_d ~ "/" ~ item }}'
     owner: 'root'
     group: 'root'
     mode: '0755'
     state: 'link'
   loop:
-    - '{{ plex__update._package }}'
-    - '{{ plex__repair._package }}'
+    - '{{ plex___update._package }}'
+    - '{{ plex___repair._package }}'
 
-- name: '{{ "Install | filesystem | set " ~ plex__cfg._drop_in | dirname }}'
+- name: '{{ "Install | filesystem | set " ~ plex___app._drop_in | dirname }}'
   ansible.builtin.file:
-    path: '{{ plex__cfg._drop_in | dirname }}'
+    path: '{{ plex___app._drop_in | dirname }}'
     owner: 'root'
     group: 'root'
     mode: '0755'
     state: 'directory'
 
-- name: '{{ "Install | filesystem | set " ~ plex__cfg._drop_in }}'
+- name: '{{ "Install | filesystem | set " ~ plex___app._drop_in }}'
   ansible.builtin.template:
     src: 'systemd/override.conf.j2'
-    dest: '{{ plex__cfg._drop_in }}'
+    dest: '{{ plex___app._drop_in }}'
     owner: 'root'
     group: 'root'
     mode: '0644'

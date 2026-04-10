@@ -30,7 +30,7 @@
           }}'
 
     - name: 'Prepare | inject | cached packages'
-      when: (url_inject_enable | default(false))
+      when: (molecule_flg_inject | default(false))
       ansible.builtin.copy:
         src: '{{
             lookup("env", "MOLECULE_PROJECT_DIRECTORY") ~ "/molecule/cache/" ~
