@@ -11,6 +11,7 @@
 # * Services moved to plex_*.
 # * plexupdate, DBRepair moved to /etc/plex.
 # * Pre 1.43.0.10467 installed plexmediaserver.service to wrong location.
+# * Fix broken Plex apt signing keys (Plex release, not role related).
 - name: 'Maintenance | 9.0.0 | remove deprecated files'
   ansible.builtin.shell: >-
     rm -f /etc/systemd/system/plex-update.* &&
@@ -19,7 +20,9 @@
     rm -f /usr/bin/DBRepair.sh &&
     rm -f /etc/systemd/system/plexmediaserver.service &&
     rm -f /etc/apt/sources.list.d/plex.list &&
-    rm -f /etc/apt/sources.list.d/plexmediaserver.list
+    rm -f /etc/apt/sources.list.d/plexmediaserver.list &&
+    rm -f /etc/apt/keyrings/plexmediaserver.asc &&
+    rm -f /usr/share/keyrings/plexmediaserver.*
   args:
     executable: '/bin/bash'
     removes: '/etc/systemd/system/plex-update.service'

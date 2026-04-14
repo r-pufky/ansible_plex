@@ -148,7 +148,7 @@ plex_cfg_backup_d: ''
 # Plex Preferences.xml to set.
 #
 # Ansible controller path to source Preferences.xml (treated as a jinja2
-# template allowing for ansible variable interpretation). Overwrites existing
+# template allowing for ansible variable use). Overwrites existing
 # Preferences.xml.
 #
 # plex_cfg_preferences: 'host_vars/plex.example.com/Preferences.xml'
