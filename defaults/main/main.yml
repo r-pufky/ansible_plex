@@ -163,7 +163,7 @@ plex_cfg_preferences: ''
 # Plex token and update channel from Preferences.xml. When enabled entitlements
 # will be checked during role execution. Highly recommended.
 #
-# Script deployed to /etc/plex/plex_update and must be executed as root user.
+# Script deployed to /opt/plex/plex_update and must be executed as root user.
 
 # Update schedule (systemd TIME calendar format).
 #
@@ -179,7 +179,7 @@ plex_update_schedule: 'weekly'
 # Database repair utility script provided by Plex Linux engineers to automate
 # many of the DB maintenance tasks. Highly recommended.
 #
-# Script deployed to /etc/plex/DBRepair.sh and must be executed as root user.
+# Script deployed to /opt/plex/DBRepair.sh and must be executed as root user.
 #
 # Squashed NFS mounted application directories cannot enable automatic DB
 # repair without modifying and manually running the script itself.
