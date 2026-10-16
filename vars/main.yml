@@ -19,6 +19,7 @@ plex___release: "{{ {} | r_pufky.data.v3(
     _date='2026-09-17',
     _debian='trixie',
     _app='1.43.4.10903',
+    _db_repair='v26.10.00',
   ) }}"
 
 ###############################################################################
@@ -33,7 +34,8 @@ plex___release: "{{ {} | r_pufky.data.v3(
 # * https://support.plex.tv/articles/200288586-installation/
 
 plex___packages:
-  - 'curl'  # plexupdate, dbrepair script.
+  - 'curl'  # plexupdate.
+  - 'unzip'  # DBRepair.
   - 'plexmediaserver'
   - 'xmlstarlet'  # Bash XML parsing for auto update.
 
@@ -85,27 +87,39 @@ plex___update_package: 'plex_update'
 
 plex___update: "{{ {} | r_pufky.data.v3(
 
-    _package=plex___repair_package,
+    _package=plex___update_package,
     _bin=plex___app._opt_d ~ '/' ~ plex___update_package,
   ) }}"
 
 ###############################################################################
-# DBRepair.sh
+# DBRepair
 ###############################################################################
-# Database maintenance script.
+# Database maintenance binary. Recent release migrated from bash script to full
+# binary for maintenance.
 #
 # Reference:
 # * https://github.com/ChuckPa/DBRepair
 
-plex___repair_repo_url:
-  'https://github.com/ChuckPa/PlexDBRepair/releases/latest/download/'
-plex___repair_package: 'DBRepair.sh'
+plex___repair_repo_url: 'https://github.com/ChuckPa/DBRepair/releases/download'
+plex___repair_package:
+  '{{ "DBRepair-" ~ plex___release._db_repair[1:] ~ "-Linux-x86_64.zip" }}'
+plex___repair_bin: 'DBRepair'
 
 plex___repair: "{{ {} | r_pufky.data.v3(
 
+    _version=plex___release._db_repair,
     _package=plex___repair_package,
-    _bin=plex___app._opt_d ~ '/' ~ plex___repair_package,
-    _url=plex___repair_repo_url ~ plex___repair_package,
+    _base_url=plex___repair_repo_url,
+    _bin=plex___repair_bin,
+    _url=(
+      plex___repair_repo_url ~ '/' ~
+      plex___release._db_repair ~ '/' ~
+      plex___repair_package
+    ),
+    _app=plex___app._opt_d ~ '/' ~ plex___repair_bin,
+    _opt_d='/opt/dbrepair',
+    _src_d='/opt/dbrepair/src',
+    _app_d='/opt/dbrepair/src/' ~ plex___release._db_repair,
   ) }}"
 
 ###############################################################################

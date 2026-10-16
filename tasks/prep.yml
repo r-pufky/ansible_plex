@@ -28,10 +28,17 @@
       ) }}"
     plex__repair: "{{ {} | r_pufky.data.v3(
 
+        _version=plex_repair_version,
         _schedule=plex_repair_schedule,
         _cache_age=plex_repair_cache_age,
-        _page_size=plex_repair_page_size,
         _options=plex_repair_options,
+        _package='DBRepair-' ~ plex_repair_version[1:] ~ '-Linux-x86_64.zip',
+        _url=(
+          plex___repair._base_url ~ '/' ~
+          plex_repair_version ~ '/' ~
+          'DBRepair-' ~ plex_repair_version[1:] ~ '-Linux-x86_64.zip'
+        ),
+        _app_d='/opt/dbrepair/src/' ~ plex_repair_version,
       ) }}"
 
 - name: 'Prep | assert | service user is not plex'

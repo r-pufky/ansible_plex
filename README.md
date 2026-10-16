@@ -88,6 +88,7 @@ churn due to inconsistent and rapid rolling release cycle.
 
   Release | Debian | Ansible | Plex          | Notes
  ---------|--------|---------|---------------|-------
+  12.x.x  | 13     | 2.20    | 1.43.4.10903  | Migrate to binary DBRepair release.
   11.x.x  | 13     | 2.20    | 1.43.1.10611  | Update to Ansible 2.20 collection dependencies.
   10.x.x  | 13     | 2.20    | 1.43.1.10611  | Add restore feature flag.
   9.x.x   | 13     | 2.20    | 1.43.0.10467  | Ansible 2.20, feature flags, and semantic versioning.

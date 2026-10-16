@@ -56,13 +56,16 @@
     mode: '0755'
     state: 'directory'
 
-- name: '{{ "Install | filesystem | set " ~ plex___app._opt_d }}'
+- name: 'Install | filesystem | set /opt'
   ansible.builtin.file:
-    path: '{{ plex___app._opt_d }}'
+    path: '{{ item }}'
     owner: 'root'
     group: 'root'
     mode: '0755'
     state: 'directory'
+  loop:
+    - '{{ plex___app._opt_d }}'
+    - '{{ plex___repair._app_d }}'  # Includes opt, src.
 
 - name: '{{ "Install | filesystem | set " ~ plex__srv._tmpdir }}'
   when: plex__srv._tmpdir != '/tmp'
@@ -81,41 +84,6 @@
     group: 'root'
     mode: '0755'
 
-- name:
-    '{{ "Install | url | 🗘 " ~ plex___repair._package ~ "(~1 minute) 🗘" }}'
-  when: not (molecule_flg_inject | default(false))
-  ansible.builtin.get_url:
-    url: '{{ plex___repair._url }}'
-    dest: '{{ "/tmp/" ~ plex___repair._package }}'
-    force: false
-    owner: 'root'
-    group: 'root'
-    mode: '0644'
-    headers:
-      Authorization: '{{ plex__srv._token | default(omit) }}'
-  register: plex__cmd
-  until: plex__cmd is succeeded
-
-- name: '{{ "Install | filesystem | set " ~ plex___repair._bin }}'
-  ansible.builtin.copy:
-    remote_src: true
-    src: '{{ "/tmp/" ~ plex___repair._package }}'
-    dest: '{{ plex___repair._bin }}'
-    owner: 'root'
-    group: 'root'
-    mode: '0644'
-
-- name: 'Install | filesystem | add system paths'
-  ansible.builtin.file:
-    src: '{{ plex___app._opt_d ~ "/" ~ item }}'
-    path: '{{ plex___app._bin_d ~ "/" ~ item }}'
-    owner: 'root'
-    group: 'root'
-    mode: '0755'
-    state: 'link'
-  loop:
-    - '{{ plex___update._package }}'
-    - '{{ plex___repair._package }}'
 
 - name: '{{ "Install | filesystem | set " ~ plex___app._drop_in | dirname }}'
   ansible.builtin.file:
@@ -162,3 +130,82 @@
     name: 'plexmediaserver.service'
     state: 'stopped'
   failed_when: false
+
+###############################################################################
+# DBRepair
+###############################################################################
+
+- name: 'Install | filesystem | find previous installations'
+  ansible.builtin.find:
+    paths: '{{ plex___repair._src_d }}'
+    file_type: 'directory'
+    recurse: false
+    excludes:
+      - '{{ plex___repair._version }}'
+  register: plex__cmd
+
+- name: 'Install | filesystem | remove previous installations'
+  ansible.builtin.file:
+    path: '{{ item.path }}'
+    state: 'absent'
+  loop: '{{ plex__cmd.files }}'
+  loop_control:
+    label: '{{ item.path }}'
+
+- name: 'Install | url | 🗘 DBRepair (~1 minute) 🗘'
+  when: not (molecule_flg_inject | default(false))
+  ansible.builtin.get_url:
+    url: '{{ plex___repair._url }}'
+    dest: '{{ "/tmp/" ~ plex___repair._package }}'
+    force: false
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    headers:
+      Authorization: '{{ plex__srv._token | default(omit) }}'
+  register: plex__cmd
+  until: plex__cmd is succeeded
+
+- name: '{{ "Install | filesystem | set " ~ plex___repair._app_d }}'
+  ansible.builtin.file:
+    path: '{{ plex___repair._app_d }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+    state: 'directory'
+
+- name: 'Install | filesystem | unpack DBRepair'
+  ansible.builtin.unarchive:
+    creates: '{{ plex___repair._app_d ~ "/" ~ plex___repair._bin }}'
+    src: '{{ "/tmp/" ~ plex___repair._package }}'
+    remote_src: true
+    dest: '{{ plex___repair._app_d }}'
+    owner: 'root'
+    group: 'root'
+    mode: 'a-st'
+    exclude:
+      - 'DBRepair User Guide.html'
+      - 'LICENSE.txt'
+      - 'README.md'
+      - 'ReleaseNotes.txt'
+
+- name: '{{ "Install | filesystem | set " ~ plex___repair._app }}'
+  ansible.builtin.copy:
+    remote_src: true
+    src: '{{ plex___repair._app_d ~ "/" ~ plex___repair._bin }}'
+    dest: '{{ plex___repair._app }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+
+- name: 'Install | filesystem | add system paths'
+  ansible.builtin.file:
+    src: '{{ plex___app._opt_d ~ "/" ~ item }}'
+    path: '{{ plex___app._bin_d ~ "/" ~ item }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+    state: 'link'
+  loop:
+    - '{{ plex___update._package }}'
+    - '{{ plex___repair._bin }}'

@@ -176,16 +176,27 @@ plex_update_schedule: 'weekly'
 ###############################################################################
 # Plex DB Repair
 ###############################################################################
-# Database repair utility script provided by Plex Linux engineers to automate
-# many of the DB maintenance tasks. Highly recommended.
+# Database repair utility provided by Plex Linux engineers to automate many of
+# the DB maintenance tasks. Highly recommended.
 #
-# Script deployed to /opt/plex/DBRepair.sh and must be executed as root user.
+# Binary deployed to /opt/plex/DBRepair and must be executed as root user.
 #
 # Squashed NFS mounted application directories cannot enable automatic DB
 # repair without modifying and manually running the script itself.
 #
 # Reference:
 # * https://github.com/ChuckPa/DBRepair
+
+# DBRepair release.
+#
+# Submit an issue if future versions break role deployment. Only compiled
+# binary releases are supported (after 2026-10-16).
+#
+# Default: 'v26.10.00'.
+#
+# Reference:
+# * https://github.com/ChuckPa/DBRepair/releases
+plex_repair_version: 'v26.10.00'
 
 # Repair schedule (systemd TIME calendar format).
 #
@@ -202,79 +213,57 @@ plex_repair_schedule: 'weekly'
 # Default: 30.
 plex_repair_cache_age: 30
 
-# Set Plex SQLite binary page_size.
-#
-# Set Plex SQLite 'page_size' for both Main and Blobs databases. If not
-# present, default page size for host OS is used (typically 4096 to match OS
-# page size).
-#
-# Normal Linux (ext4, xfs) filesystems do not need this customization because
-# filesystem block size = 4096. ZFS users sometimes need to customize their
-# datasets to improve I/O performance (HDDs vs SSDs). This capability allows
-# them to compensate for some of those losses.
-#
-# Special Case:
-# * Must be a power of 2, with 1024 (2^10) as Plex default.  (per SQLite 3.12.0
-#   documentation). Any invalid value provided will be rounded up to next
-#   integral value (1024, 2048, 4096 ... 65536) This may or may not be the
-#   value you intended. Caution is advised.
-# * May not exceed 65536 (per SQLite 3.12.0 documentation). Any value exceeding
-#   65536 will be truncated to 65536.
-#
-# Default: 4096.
-plex_repair_page_size: 4096
-
 # DB repair options.
 #
 # Special Case:
 # * Always be sure to use 'exit' for script to end during scheduled tasks.
 # * Interactive commands are not recommended to use in scheduled tasks.
+# * Always update via role. Interactive updates require manual extraction and
+#   binary placements.
 #
 # Values:
 #        stop: Stop Plex Media Server before operations.
 #   automatic: Check, Repair/Optimize, and Reindex Database in one step.
-#       check: Perform integrity check of database.
+#       check: Perform integrity check of database and FTS indexes.
 #      vacuum: Remove empty space from database without optimizing.
 #      repair: Repair/Optimize databases.
 #     reindex: Rebuild database indexes.
 #       start: Start Plex Media Server after operations.
-#      import: Import watch history from another database independent of Plex.
-#     replace: Replace current databases with newest usable backup copy
+#      import: Import watch history from another DB (risky).
+#     replace: Replace current databases with newest usable backup copy.
 #        show: Show log file.
 #      status: Report status of PMS (run-state and databases).
-#        undo: Undo last successful command.
-#       prune: Prune (remove) old image files (jpeg,jpg,png) from
-#              PhotoTranscoder cache.
-#       purge: Purge (delete) all temporary files left behind by PMS &
-#              transcoder.
+#     history: Show command history of this session.
+#      revert: Revert DBs to immediately before history index.
+#     expunge: Remove view history of non-existent or expired accounts.
+#       prune: Remove old PhotoTranscoder cache & temp files.
 #     deflate: Deflate a bloated PMS main database.
+#     orphans: Search for and report any orphaned media items.
 #      ignore: Ignore duplicate/constraint errors.
-#      update: Check for updates.
+#      update: Check for and offer to download updates (Do not use
+#              non-interactively).
+#      config: Show current Host configuration (debugging/verification).
 #        quit: Quit immediately. Keep all temporary files.
 #        exit: Exit with cleanup options.
 #
 # Default:
-#   - 'update'
 #   - 'stop'
 #   - 'check'
 #   - 'repair'
 #   - 'reindex'
 #   - 'prune'
-#   - 'purge'
 #   - 'deflate'
 #   - 'start'
 #   - 'exit'
 #
 # Reference:
-# * https://github.com/ChuckPa/DBRepair
+# * https://github.com/ChuckPa/DBRepair/wiki/Using
 plex_repair_options:
-  - 'update'
   - 'stop'
   - 'check'
   - 'repair'
   - 'reindex'
   - 'prune'
-  - 'purge'
   - 'deflate'
   - 'start'
   - 'exit'

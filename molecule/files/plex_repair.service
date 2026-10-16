@@ -4,12 +4,11 @@ Requires=plex_repair.timer
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/DBRepair.sh update stop check repair reindex prune purge deflate start exit
+ExecStart=/usr/local/bin/DBRepair stop check repair reindex prune deflate start exit
 WorkingDirectory=/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Plug-in Support/Databases
 User=root
 Group=root
 Environment="DBREPAIR_CACHEAGE=30"
-Environment="DBREPAIR_PAGESIZE=4096"
 
 [Install]
 WantedBy=multi-user.target

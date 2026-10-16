@@ -47,7 +47,7 @@
         test_diff: true
       loop:
         - '{{ plex___update._package }}'
-        - '{{ plex___repair._package }}'
+        - '{{ plex___repair._bin }}'
 
     - name: '{{ "Verify | xml | query " ~ plex___app._cfg }}'
       community.general.xml:
