@@ -18,7 +18,7 @@ plex___release: "{{ {} | r_pufky.data.v3(
 
     _date='2026-09-17',
     _debian='trixie',
-    _app='1.43.4.10903',
+    _app='1.43.5.11079',
     _db_repair='v26.10.00',
   ) }}"
 
